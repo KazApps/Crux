@@ -1,0 +1,23 @@
+[workspace.package]
+authors = ["KazApps", "m5t0"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/KazApps/Crux"
+rust-version = "1.89.0"
+edition = "2024"
+
+[workspace]
+resolver = "3"
+members = [
+    "crux",
+    "crux-lib",
+    "crux-trainer"
+]
+
+[workspace.dependencies]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"

@@ -1,0 +1,9 @@
+# JetBrains
+/.idea
+
+# Cargo cache
+/target
+
+# Networks
+*.nnue
+*.bin
