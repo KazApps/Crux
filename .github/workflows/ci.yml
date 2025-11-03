@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # Check code formatting
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      # Run Clippy linter
+      - name: Lint code
+        run: cargo clippy -- -D warnings
+
+      # Build the entire workspace
+      - name: Build workspace
+        run: cargo build --workspace --all-targets
+
+      # Run all unit tests
+      - name: Run tests
+        run: cargo test --workspace --all-targets

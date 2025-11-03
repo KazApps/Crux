@@ -119,15 +119,15 @@ impl PieceType {
     /// Returns `true` if this piece type is promoted.
     #[must_use]
     pub const fn is_promoted(self) -> bool {
-        match self {
+        matches!(
+            self,
             PieceType::ProPawn
-            | PieceType::ProLance
-            | PieceType::ProKnight
-            | PieceType::ProSilver
-            | PieceType::Horse
-            | PieceType::Dragon => true,
-            _ => false,
-        }
+                | PieceType::ProLance
+                | PieceType::ProKnight
+                | PieceType::ProSilver
+                | PieceType::Horse
+                | PieceType::Dragon
+        )
     }
 }
 
