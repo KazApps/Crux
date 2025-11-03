@@ -21,8 +21,8 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
-      # Run code linter
-      - name: Run linter
+      # Run Clippy linter
+      - name: Lint code
         run: cargo clippy -- -D warnings
 
       # Build the entire workspace
