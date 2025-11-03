@@ -966,7 +966,7 @@ mod tests {
         ];
 
         for (square, rotated) in cases.iter() {
-            assert_eq!(square.rotate(), *rotated);
+            assert_eq!(square.rotate180(), *rotated);
         }
     }
 
