@@ -226,7 +226,6 @@ mod tests {
         let _ = File::File9.relative_east(Color::White);
     }
 
-
     #[test]
     fn file_relative_west() {
         let cases = [
@@ -340,7 +339,6 @@ mod tests {
         let _ = Rank::Rank9.relative_north(Color::White);
     }
 
-
     #[test]
     fn rank_relative_south() {
         let cases = [
@@ -436,7 +434,7 @@ mod tests {
         let cases = [
             (Square::new(File::File1, Rank::Rank9), File::File1),
             (Square::new(File::File5, Rank::Rank1), File::File5),
-             (Square::new(File::File9, Rank::Rank5), File::File9),
+            (Square::new(File::File9, Rank::Rank5), File::File9),
         ];
 
         for (square, file) in cases.iter() {
@@ -460,9 +458,18 @@ mod tests {
     #[test]
     pub fn square_north() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Square::new(File::File5, Rank::Rank2), Square::new(File::File5, Rank::Rank1)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File5, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
         ];
 
         for (square, north) in cases.iter() {
@@ -479,9 +486,18 @@ mod tests {
     #[test]
     pub fn square_south() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank2)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
+            (
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank2),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
         ];
 
         for (square, south) in cases.iter() {
@@ -498,9 +514,18 @@ mod tests {
     #[test]
     pub fn square_east() {
         let cases = [
-            (Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank1)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank5)),
+            (
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank5),
+            ),
         ];
 
         for (square, east) in cases.iter() {
@@ -517,9 +542,18 @@ mod tests {
     #[test]
     pub fn square_west() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank1)),
-            (Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank5)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank5),
+            ),
         ];
 
         for (square, west) in cases.iter() {
@@ -536,9 +570,18 @@ mod tests {
     #[test]
     pub fn square_north_east() {
         let cases = [
-            (Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Square::new(File::File5, Rank::Rank2), Square::new(File::File4, Rank::Rank1)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank4)),
+            (
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank4),
+            ),
         ];
 
         for (square, north_east) in cases.iter() {
@@ -561,9 +604,18 @@ mod tests {
     #[test]
     pub fn square_north_west() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank8)),
-            (Square::new(File::File5, Rank::Rank2), Square::new(File::File6, Rank::Rank1)),
-            (Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank8),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
         ];
 
         for (square, north_west) in cases.iter() {
@@ -586,9 +638,18 @@ mod tests {
     #[test]
     pub fn square_south_east() {
         let cases = [
-            (Square::new(File::File2, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank2)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank6)),
+            (
+                Square::new(File::File2, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank2),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank6),
+            ),
         ];
 
         for (square, south_east) in cases.iter() {
@@ -611,9 +672,18 @@ mod tests {
     #[test]
     pub fn square_south_west() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank8), Square::new(File::File2, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank2)),
-            (Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
+            (
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank2),
+            ),
+            (
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
         ];
 
         for (square, south_west) in cases.iter() {
@@ -636,12 +706,36 @@ mod tests {
     #[test]
     pub fn square_relative_north() {
         let cases = [
-            (Color::Black, Square::new(File::File1, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Color::Black, Square::new(File::File5, Rank::Rank2), Square::new(File::File5, Rank::Rank1)),
-            (Color::Black, Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
-            (Color::White, Square::new(File::File1, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Color::White, Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank2)),
-            (Color::White, Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
+            (
+                Color::Black,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File5, Rank::Rank1),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
+            (
+                Color::White,
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank2),
+            ),
+            (
+                Color::White,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
         ];
 
         for (color, square, relative_north) in cases.iter() {
@@ -664,12 +758,36 @@ mod tests {
     #[test]
     pub fn square_relative_south() {
         let cases = [
-            (Color::Black, Square::new(File::File1, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Color::Black, Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank2)),
-            (Color::Black, Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
-            (Color::White, Square::new(File::File1, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Color::White, Square::new(File::File5, Rank::Rank2), Square::new(File::File5, Rank::Rank1)),
-            (Color::White, Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
+            (
+                Color::Black,
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank2),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
+            (
+                Color::White,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File5, Rank::Rank1),
+            ),
+            (
+                Color::White,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
         ];
 
         for (color, square, relative_south) in cases.iter() {
@@ -692,12 +810,36 @@ mod tests {
     #[test]
     pub fn square_relative_east() {
         let cases = [
-            (Color::Black, Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank9)),
-            (Color::Black, Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank1)),
-            (Color::Black, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank5)),
-            (Color::White, Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank9)),
-            (Color::White, Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank1)),
-            (Color::White, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank5)),
+            (
+                Color::Black,
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank5),
+            ),
+            (
+                Color::White,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Color::White,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank5),
+            ),
         ];
 
         for (color, square, relative_east) in cases.iter() {
@@ -720,12 +862,36 @@ mod tests {
     #[test]
     pub fn square_relative_west() {
         let cases = [
-            (Color::Black, Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank9)),
-            (Color::Black, Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank1)),
-            (Color::Black, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank5)),
-            (Color::White, Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank9)),
-            (Color::White, Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank1)),
-            (Color::White, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank5)),
+            (
+                Color::Black,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank5),
+            ),
+            (
+                Color::White,
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Color::White,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank5),
+            ),
         ];
 
         for (color, square, relative_west) in cases.iter() {
@@ -748,12 +914,36 @@ mod tests {
     #[test]
     pub fn square_relative_north_east() {
         let cases = [
-            (Color::Black, Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Color::Black, Square::new(File::File5, Rank::Rank2), Square::new(File::File4, Rank::Rank1)),
-            (Color::Black, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank4)),
-            (Color::White, Square::new(File::File1, Rank::Rank8), Square::new(File::File2, Rank::Rank9)),
-            (Color::White, Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank2)),
-            (Color::White, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
+            (
+                Color::Black,
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank4),
+            ),
+            (
+                Color::White,
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank2),
+            ),
+            (
+                Color::White,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
         ];
 
         for (color, square, relative_north_east) in cases.iter() {
@@ -788,12 +978,36 @@ mod tests {
     #[test]
     pub fn square_relative_north_west() {
         let cases = [
-            (Color::Black, Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank8)),
-            (Color::Black, Square::new(File::File5, Rank::Rank2), Square::new(File::File6, Rank::Rank1)),
-            (Color::Black, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
-            (Color::White, Square::new(File::File2, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Color::White, Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank2)),
-            (Color::White, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank6)),
+            (
+                Color::Black,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank8),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
+            (
+                Color::White,
+                Square::new(File::File2, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank2),
+            ),
+            (
+                Color::White,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank6),
+            ),
         ];
 
         for (color, square, relative_north_west) in cases.iter() {
@@ -828,12 +1042,36 @@ mod tests {
     #[test]
     pub fn square_relative_south_east() {
         let cases = [
-            (Color::Black, Square::new(File::File2, Rank::Rank8), Square::new(File::File1, Rank::Rank9)),
-            (Color::Black, Square::new(File::File5, Rank::Rank1), Square::new(File::File4, Rank::Rank2)),
-            (Color::Black, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank6)),
-            (Color::White, Square::new(File::File1, Rank::Rank9), Square::new(File::File2, Rank::Rank8)),
-            (Color::White, Square::new(File::File5, Rank::Rank2), Square::new(File::File6, Rank::Rank1)),
-            (Color::White, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank4)),
+            (
+                Color::Black,
+                Square::new(File::File2, Rank::Rank8),
+                Square::new(File::File1, Rank::Rank9),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File4, Rank::Rank2),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank6),
+            ),
+            (
+                Color::White,
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File2, Rank::Rank8),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File6, Rank::Rank1),
+            ),
+            (
+                Color::White,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank4),
+            ),
         ];
 
         for (color, square, relative_south_east) in cases.iter() {
@@ -868,12 +1106,36 @@ mod tests {
     #[test]
     pub fn square_relative_south_west() {
         let cases = [
-            (Color::Black, Square::new(File::File1, Rank::Rank8), Square::new(File::File2, Rank::Rank9)),
-            (Color::Black, Square::new(File::File5, Rank::Rank1), Square::new(File::File6, Rank::Rank2)),
-            (Color::Black, Square::new(File::File8, Rank::Rank5), Square::new(File::File9, Rank::Rank6)),
-            (Color::White, Square::new(File::File2, Rank::Rank9), Square::new(File::File1, Rank::Rank8)),
-            (Color::White, Square::new(File::File5, Rank::Rank2), Square::new(File::File4, Rank::Rank1)),
-            (Color::White, Square::new(File::File9, Rank::Rank5), Square::new(File::File8, Rank::Rank4)),
+            (
+                Color::Black,
+                Square::new(File::File1, Rank::Rank8),
+                Square::new(File::File2, Rank::Rank9),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File6, Rank::Rank2),
+            ),
+            (
+                Color::Black,
+                Square::new(File::File8, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank6),
+            ),
+            (
+                Color::White,
+                Square::new(File::File2, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank8),
+            ),
+            (
+                Color::White,
+                Square::new(File::File5, Rank::Rank2),
+                Square::new(File::File4, Rank::Rank1),
+            ),
+            (
+                Color::White,
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File8, Rank::Rank4),
+            ),
         ];
 
         for (color, square, relative_south_west) in cases.iter() {
@@ -908,9 +1170,21 @@ mod tests {
     #[test]
     pub fn square_with_file() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), File::File5, Square::new(File::File5, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), File::File9, Square::new(File::File9, Rank::Rank1)),
-            (Square::new(File::File9, Rank::Rank5), File::File1, Square::new(File::File1, Rank::Rank5)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                File::File5,
+                Square::new(File::File5, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                File::File9,
+                Square::new(File::File9, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                File::File1,
+                Square::new(File::File1, Rank::Rank5),
+            ),
         ];
 
         for (square, file, flipped) in cases.iter() {
@@ -921,9 +1195,21 @@ mod tests {
     #[test]
     pub fn square_with_rank() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Rank::Rank1, Square::new(File::File1, Rank::Rank1)),
-            (Square::new(File::File5, Rank::Rank1), Rank::Rank5, Square::new(File::File5, Rank::Rank5)),
-            (Square::new(File::File9, Rank::Rank5), Rank::Rank9, Square::new(File::File9, Rank::Rank9)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Rank::Rank1,
+                Square::new(File::File1, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Rank::Rank5,
+                Square::new(File::File5, Rank::Rank5),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Rank::Rank9,
+                Square::new(File::File9, Rank::Rank9),
+            ),
         ];
 
         for (square, rank, flipped) in cases.iter() {
@@ -934,9 +1220,18 @@ mod tests {
     #[test]
     pub fn square_flip_file() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File9, Rank::Rank9)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank1)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File1, Rank::Rank5)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File9, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File1, Rank::Rank5),
+            ),
         ];
 
         for (square, flipped) in cases.iter() {
@@ -947,9 +1242,18 @@ mod tests {
     #[test]
     pub fn square_flip_rank() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File1, Rank::Rank1)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank9)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File9, Rank::Rank5)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File1, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File9, Rank::Rank5),
+            ),
         ];
 
         for (square, flipped) in cases.iter() {
@@ -960,9 +1264,18 @@ mod tests {
     #[test]
     pub fn square_rotate() {
         let cases = [
-            (Square::new(File::File1, Rank::Rank9), Square::new(File::File9, Rank::Rank1)),
-            (Square::new(File::File5, Rank::Rank1), Square::new(File::File5, Rank::Rank9)),
-            (Square::new(File::File9, Rank::Rank5), Square::new(File::File1, Rank::Rank5)),
+            (
+                Square::new(File::File1, Rank::Rank9),
+                Square::new(File::File9, Rank::Rank1),
+            ),
+            (
+                Square::new(File::File5, Rank::Rank1),
+                Square::new(File::File5, Rank::Rank9),
+            ),
+            (
+                Square::new(File::File9, Rank::Rank5),
+                Square::new(File::File1, Rank::Rank5),
+            ),
         ];
 
         for (square, rotated) in cases.iter() {

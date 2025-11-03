@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # Build the entire workspace
+      - name: Build workspace
+        run: cargo build --workspace --all-targets
+
+      # Run all unit tests
+      - name: Run tests
+        run: cargo test --workspace --all-targets
+
+      # Check code formatting
+      - name: Check formatting
+        run: cargo fmt --all -- --check
