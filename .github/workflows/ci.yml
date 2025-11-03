@@ -17,6 +17,14 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Check code formatting
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      # Run code linter
+      - name: Run linter
+        run: cargo clippy -- -D warnings
+
       # Build the entire workspace
       - name: Build workspace
         run: cargo build --workspace --all-targets
@@ -24,7 +32,3 @@ jobs:
       # Run all unit tests
       - name: Run tests
         run: cargo test --workspace --all-targets
-
-      # Check code formatting
-      - name: Check formatting
-        run: cargo fmt --all -- --check
