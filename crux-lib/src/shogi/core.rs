@@ -745,7 +745,7 @@ impl Square {
     /// Returns the square flipped horizontally and vertically (mirrored across the center of the board).
     /// For example, `Square::S11` becomes `Square::S99` on the board.
     #[must_use]
-    pub const fn rotate(self) -> Self {
+    pub const fn rotate180(self) -> Self {
         self.flip_file().flip_rank()
     }
 
