@@ -1,0 +1,32 @@
+# Pre-commit configuration for Rust workspace
+
+repos:
+  - repo: local
+    hooks:
+      # 1. Check code formatting
+      - id: cargo-fmt-check
+        name: 📝 Check Rust formatting
+        entry: cargo fmt --all -- --check
+        language: system
+        pass_filenames: false
+
+      # 2. Run Clippy linter (treat warnings as errors)
+      - id: cargo-clippy
+        name: 🧹 Run Clippy lints
+        entry: cargo clippy --workspace --all-targets -- -D warnings
+        language: system
+        pass_filenames: false
+
+      # 3. Build the entire workspace
+      - id: cargo-build
+        name: 🏗️ Build Rust workspace
+        entry: cargo build --workspace --all-targets
+        language: system
+        pass_filenames: false
+
+      # 4. Run all unit tests
+      - id: cargo-test
+        name: ✅ Run Rust tests
+        entry: cargo test --workspace --all-targets
+        language: system
+        pass_filenames: false
