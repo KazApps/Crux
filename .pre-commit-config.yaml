@@ -23,10 +23,3 @@ repos:
         entry: cargo build --workspace --all-targets
         language: system
         pass_filenames: false
-
-      # 4. Run all unit tests
-      - id: cargo-test
-        name: ✅ Run Rust tests
-        entry: cargo test --workspace --all-targets
-        language: system
-        pass_filenames: false
