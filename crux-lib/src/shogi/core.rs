@@ -510,7 +510,7 @@ impl Square {
     ///
     /// # Panics
     ///
-    /// Panics if the rank of this square is `Rank9`, since there is no square blow it.
+    /// Panics if the rank of this square is `Rank9`, since there is no square below it.
     #[must_use]
     pub const fn south(self) -> Self {
         Self::new(self.file(), self.rank().south())
@@ -563,7 +563,7 @@ impl Square {
     /// # Panics
     ///
     /// Panics if the square is on the bottom rank (`Rank9`) or the rightmost file (`File1`),
-    /// since there is no square blow or to the right.
+    /// since there is no square below or to the right.
     #[must_use]
     pub const fn south_east(self) -> Self {
         Self::new(self.file().east(), self.rank().south())
@@ -580,7 +580,7 @@ impl Square {
         Self::new(self.file().west(), self.rank().south())
     }
 
-    /// Returns the square dorectly above from the perspective of the given color.
+    /// Returns the square directly above from the perspective of the given color.
     /// For black, this is the same as `north()`. For white, it's `south()`.
     ///
     /// # Panics
@@ -597,7 +597,7 @@ impl Square {
         }
     }
 
-    /// Returns the square dorectly below from the perspective of the given color.
+    /// Returns the square directly below from the perspective of the given color.
     /// For black, this is the same as `south()`. For white, it's `north()`.
     ///
     /// # Panics
@@ -739,7 +739,7 @@ impl Square {
     pub const fn flip_rank(self) -> Self {
         self.with_rank(self.rank().flip())
     }
-    
+
     /// Returns the square flipped horizontally and vertically (mirrored across the center of the board).
     /// For example, `Square::S11` becomes `Square::S99` on the board.
     #[must_use]
