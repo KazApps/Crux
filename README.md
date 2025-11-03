@@ -27,7 +27,7 @@ Crux is a USI shogi engine.
 - `crux-trainer`: Crux Trainer
 
 [license-badge]: https://img.shields.io/github/license/KazApps/Crux?style=for-the-badge
-[ci-badge]: https://github.com/KazApps/Crux/actions/workflows/ci.yml/badge.svg?style=for-the-badge
+[ci-badge]:https://img.shields.io/github/actions/workflow/status/KazApps/Crux/ci.yml?branch=main&logo=github&style=for-the-badge
 [release-badge]: https://img.shields.io/github/v/release/KazApps/Crux?style=for-the-badge
 [commits-badge]: https://img.shields.io/github/commits-since/KazApps/Crux/latest?style=for-the-badge
 
