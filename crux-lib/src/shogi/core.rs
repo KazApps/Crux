@@ -1,3 +1,5 @@
+use std::mem::transmute;
+
 /// Represents the color of a player or piece in the game.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -19,7 +21,7 @@ impl Color {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns `true` if the color is black.
@@ -77,7 +79,7 @@ impl PieceType {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns a `Piece` of this type with the specified color.
@@ -178,7 +180,7 @@ impl Piece {
 
         debug_assert!(raw <= Self::WhiteKing as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Creates a `Piece` from the given raw `u8` value.
@@ -190,19 +192,19 @@ impl Piece {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns the color of this piece.
     #[must_use]
     pub const fn color(self) -> Color {
-        unsafe { std::mem::transmute(self as u8 & 1) }
+        unsafe { transmute(self as u8 & 1) }
     }
 
     /// Returns the type of this piece.
     #[must_use]
     pub const fn piece_type(self) -> PieceType {
-        unsafe { std::mem::transmute(self as u8 >> 1) }
+        unsafe { transmute(self as u8 >> 1) }
     }
 
     /// Returns the promoted version of this piece.
@@ -252,7 +254,7 @@ impl File {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns the file to the right of this file.
@@ -264,7 +266,7 @@ impl File {
     pub const fn east(self) -> Self {
         debug_assert!(!matches!(self, File::File1));
 
-        unsafe { std::mem::transmute(self as u8 - 1) }
+        unsafe { transmute(self as u8 - 1) }
     }
 
     /// Returns the file to the left of this file.
@@ -276,7 +278,7 @@ impl File {
     pub const fn west(self) -> Self {
         debug_assert!(!matches!(self, File::File9));
 
-        unsafe { std::mem::transmute(self as u8 + 1) }
+        unsafe { transmute(self as u8 + 1) }
     }
 
     /// Returns the file to the right from the perspective of the given color.
@@ -315,7 +317,7 @@ impl File {
     /// For example, `File1` becomes `File9` on the board.
     #[must_use]
     pub const fn flip(self) -> Self {
-        unsafe { std::mem::transmute(8 - self as u8) }
+        unsafe { transmute(8 - self as u8) }
     }
 }
 
@@ -347,7 +349,7 @@ impl Rank {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns the rank above this rank.
@@ -359,7 +361,7 @@ impl Rank {
     pub const fn north(self) -> Self {
         debug_assert!(!matches!(self, Rank::Rank1));
 
-        unsafe { std::mem::transmute(self as u8 - 1) }
+        unsafe { transmute(self as u8 - 1) }
     }
 
     /// Returns the rank below this rank.
@@ -371,7 +373,7 @@ impl Rank {
     pub const fn south(self) -> Self {
         debug_assert!(!matches!(self, Rank::Rank9));
 
-        unsafe { std::mem::transmute(self as u8 + 1) }
+        unsafe { transmute(self as u8 + 1) }
     }
 
     /// Returns the rank above from the perspective of the given color.
@@ -410,7 +412,7 @@ impl Rank {
     /// For example, `Rank1` becomes `Rank9` on the board.
     #[must_use]
     pub const fn flip(self) -> Self {
-        unsafe { std::mem::transmute(8 - self as u8) }
+        unsafe { transmute(8 - self as u8) }
     }
 
     /// Returns `true` if a piece on this rank can promote for the given color.
@@ -469,7 +471,7 @@ impl Square {
     /// Returns a `Square` from the given `File` and `Rank`.
     #[must_use]
     pub const fn new(file: File, rank: Rank) -> Self {
-        unsafe { std::mem::transmute(file as u8 * 9 + rank as u8) }
+        unsafe { transmute(file as u8 * 9 + rank as u8) }
     }
 
     /// Creates a `Square` from the given raw `u8` value.
@@ -481,19 +483,19 @@ impl Square {
     pub const fn from_raw(raw: u8) -> Self {
         debug_assert!(raw < Self::COUNT as u8);
 
-        unsafe { std::mem::transmute(raw) }
+        unsafe { transmute(raw) }
     }
 
     /// Returns the `File` of this square.
     #[must_use]
     pub const fn file(self) -> File {
-        unsafe { std::mem::transmute(self as u8 / 9) }
+        unsafe { transmute(self as u8 / 9) }
     }
 
     /// Returns the `Rank` of this square.
     #[must_use]
     pub const fn rank(self) -> Rank {
-        unsafe { std::mem::transmute(self as u8 % 9) }
+        unsafe { transmute(self as u8 % 9) }
     }
 
     /// Returns the square directly above.
