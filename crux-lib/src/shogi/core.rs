@@ -12,18 +12,6 @@ impl Color {
     /// The number of colors.
     pub const COUNT: usize = 2;
 
-    /// Creates a `Color` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
-
-        unsafe { transmute(raw) }
-    }
-
     /// Returns `true` if the color is black.
     #[must_use]
     pub const fn is_black(self) -> bool {
@@ -43,6 +31,44 @@ impl Color {
             Color::Black => Color::White,
             Color::White => Color::Black,
         }
+    }
+
+    /// Returns the `Color` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `Color` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for Color {
+    /// Creates a `Color` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for Color {
+    /// Creates a `Color` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
     }
 }
 
@@ -69,18 +95,6 @@ pub enum PieceType {
 impl PieceType {
     /// The number of piece types.
     pub const COUNT: usize = 14;
-
-    /// Creates a `PieceType` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
-
-        unsafe { transmute(raw) }
-    }
 
     /// Returns a `Piece` of this type with the specified color.
     #[must_use]
@@ -129,6 +143,44 @@ impl PieceType {
                 | PieceType::Dragon
         )
     }
+
+    /// Returns the `PieceType` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `PieceType` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for PieceType {
+    /// Creates a `PieceType` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for PieceType {
+    /// Creates a `PieceType` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
+    }
 }
 
 /// Represents a piece in the game.
@@ -176,21 +228,9 @@ impl Piece {
     /// Returns `Piece` with the given color and type.
     #[must_use]
     pub const fn new(color: Color, piece_type: PieceType) -> Self {
-        let raw = (piece_type as u8) << 1 | (color as u8);
+        let raw = (piece_type.as_u8()) << 1 | (color.as_u8());
 
-        debug_assert!(raw <= Self::WhiteKing as u8);
-
-        unsafe { transmute(raw) }
-    }
-
-    /// Creates a `Piece` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
+        debug_assert!(raw <= Self::WhiteKing.as_u8());
 
         unsafe { transmute(raw) }
     }
@@ -198,13 +238,13 @@ impl Piece {
     /// Returns the color of this piece.
     #[must_use]
     pub const fn color(self) -> Color {
-        unsafe { transmute(self as u8 & 1) }
+        unsafe { transmute(self.as_u8() & 1) }
     }
 
     /// Returns the type of this piece.
     #[must_use]
     pub const fn piece_type(self) -> PieceType {
-        unsafe { transmute(self as u8 >> 1) }
+        unsafe { transmute(self.as_u8() >> 1) }
     }
 
     /// Returns the promoted version of this piece.
@@ -223,6 +263,44 @@ impl Piece {
     #[must_use]
     pub const fn is_promoted(self) -> bool {
         self.piece_type().is_promoted()
+    }
+
+    /// Returns the `Piece` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `Piece` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for Piece {
+    /// Creates a `Piece` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for Piece {
+    /// Creates a `Piece` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
     }
 }
 
@@ -245,18 +323,6 @@ impl File {
     /// The number of files.
     pub const COUNT: usize = 9;
 
-    /// Creates a `File` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
-
-        unsafe { transmute(raw) }
-    }
-
     /// Returns the file to the right of this file.
     ///
     /// # Panics
@@ -266,7 +332,7 @@ impl File {
     pub const fn east(self) -> Self {
         debug_assert!(!matches!(self, File::File1));
 
-        unsafe { transmute(self as u8 - 1) }
+        unsafe { transmute(self.as_u8() - 1) }
     }
 
     /// Returns the file to the left of this file.
@@ -278,7 +344,7 @@ impl File {
     pub const fn west(self) -> Self {
         debug_assert!(!matches!(self, File::File9));
 
-        unsafe { transmute(self as u8 + 1) }
+        unsafe { transmute(self.as_u8() + 1) }
     }
 
     /// Returns the file to the right from the perspective of the given color.
@@ -317,7 +383,45 @@ impl File {
     /// For example, `File1` becomes `File9` on the board.
     #[must_use]
     pub const fn flip(self) -> Self {
-        unsafe { transmute(8 - self as u8) }
+        unsafe { transmute(8 - self.as_u8()) }
+    }
+
+    /// Returns the `File` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `File` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for File {
+    /// Creates a `File` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for File {
+    /// Creates a `File` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
     }
 }
 
@@ -340,18 +444,6 @@ impl Rank {
     /// The number of ranks.
     pub const COUNT: usize = 9;
 
-    /// Creates a `Rank` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
-
-        unsafe { transmute(raw) }
-    }
-
     /// Returns the rank above this rank.
     ///
     /// # Panics
@@ -361,7 +453,7 @@ impl Rank {
     pub const fn north(self) -> Self {
         debug_assert!(!matches!(self, Rank::Rank1));
 
-        unsafe { transmute(self as u8 - 1) }
+        unsafe { transmute(self.as_u8() - 1) }
     }
 
     /// Returns the rank below this rank.
@@ -373,7 +465,7 @@ impl Rank {
     pub const fn south(self) -> Self {
         debug_assert!(!matches!(self, Rank::Rank9));
 
-        unsafe { transmute(self as u8 + 1) }
+        unsafe { transmute(self.as_u8() + 1) }
     }
 
     /// Returns the rank above from the perspective of the given color.
@@ -412,14 +504,52 @@ impl Rank {
     /// For example, `Rank1` becomes `Rank9` on the board.
     #[must_use]
     pub const fn flip(self) -> Self {
-        unsafe { transmute(8 - self as u8) }
+        unsafe { transmute(8 - self.as_u8()) }
     }
 
     /// Returns `true` if a piece on this rank can promote for the given color.
     #[must_use]
     pub const fn can_promote(self, color: Color) -> bool {
-        (color.is_black() && self as u8 <= Self::Rank3 as u8)
-            || (color.is_white() && self as u8 >= Self::Rank7 as u8)
+        (color.is_black() && self.as_u8() <= Self::Rank3.as_u8())
+            || (color.is_white() && self.as_u8() >= Self::Rank7.as_u8())
+    }
+
+    /// Returns the `Rank` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `Rank` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for Rank {
+    /// Creates a `Rank` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for Rank {
+    /// Creates a `Rank` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
     }
 }
 
@@ -471,31 +601,19 @@ impl Square {
     /// Returns a `Square` from the given `File` and `Rank`.
     #[must_use]
     pub const fn new(file: File, rank: Rank) -> Self {
-        unsafe { transmute(file as u8 * 9 + rank as u8) }
-    }
-
-    /// Creates a `Square` from the given raw `u8` value.
-    ///
-    /// # Panics
-    ///
-    /// Panic if `raw` is greater than or equal to `COUNT`.
-    #[must_use]
-    pub const fn from_raw(raw: u8) -> Self {
-        debug_assert!(raw < Self::COUNT as u8);
-
-        unsafe { transmute(raw) }
+        unsafe { transmute(file.as_u8() * 9 + rank.as_u8()) }
     }
 
     /// Returns the `File` of this square.
     #[must_use]
     pub const fn file(self) -> File {
-        unsafe { transmute(self as u8 / 9) }
+        unsafe { transmute(self.as_u8() / 9) }
     }
 
     /// Returns the `Rank` of this square.
     #[must_use]
     pub const fn rank(self) -> Rank {
-        unsafe { transmute(self as u8 % 9) }
+        unsafe { transmute(self.as_u8() % 9) }
     }
 
     /// Returns the square directly above.
@@ -753,5 +871,43 @@ impl Square {
     #[must_use]
     pub const fn can_promote(self, color: Color) -> bool {
         self.rank().can_promote(color)
+    }
+
+    /// Returns the `Square` as a `u8`.
+    #[must_use]
+    pub const fn as_u8(self) -> u8 {
+        self as u8
+    }
+
+    /// Returns the `Square` as a `usize`.
+    #[must_use]
+    pub const fn as_usize(self) -> usize {
+        self as usize
+    }
+}
+
+impl const From<u8> for Square {
+    /// Creates a `Square` from the given raw `u8` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: u8) -> Self {
+        debug_assert!(value < Self::COUNT as u8);
+
+        unsafe { transmute(value) }
+    }
+}
+
+impl const From<usize> for Square {
+    /// Creates a `Square` from the given raw `usize` value.
+    ///
+    /// # Panics
+    ///
+    /// Panic if `value` is greater than or equal to `COUNT`.
+    fn from(value: usize) -> Self {
+        debug_assert!(value < Self::COUNT);
+
+        unsafe { transmute(value as u8) }
     }
 }

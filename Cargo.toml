@@ -3,7 +3,6 @@ authors = ["KazApps", "m5t0"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/KazApps/Crux"
-rust-version = "1.89.0"
 edition = "2024"
 
 [workspace]
