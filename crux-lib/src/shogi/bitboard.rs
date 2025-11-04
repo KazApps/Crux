@@ -253,37 +253,16 @@ impl const From<Square> for Bitboard {
     }
 }
 
-/// Bitboards with all squares in the corresponding file set.
-/// FILE1 has all squares in the first file set, FILE2 in the second, and so on up to FILE9.
-pub const FILE1: Bitboard = Bitboard::from(File::File1);
-pub const FILE2: Bitboard = Bitboard::from(File::File2);
-pub const FILE3: Bitboard = Bitboard::from(File::File3);
-pub const FILE4: Bitboard = Bitboard::from(File::File4);
-pub const FILE5: Bitboard = Bitboard::from(File::File5);
-pub const FILE6: Bitboard = Bitboard::from(File::File6);
-pub const FILE7: Bitboard = Bitboard::from(File::File7);
-pub const FILE8: Bitboard = Bitboard::from(File::File8);
-pub const FILE9: Bitboard = Bitboard::from(File::File9);
-
-/// Bitboards with all squares in the corresponding rank set.
-/// RANK1 has all squares in the first rank set, RANK2 in the second, and so on up to RANK9.
-pub const RANK1: Bitboard = Bitboard::from(Rank::Rank1);
-pub const RANK2: Bitboard = Bitboard::from(Rank::Rank2);
-pub const RANK3: Bitboard = Bitboard::from(Rank::Rank3);
-pub const RANK4: Bitboard = Bitboard::from(Rank::Rank4);
-pub const RANK5: Bitboard = Bitboard::from(Rank::Rank5);
-pub const RANK6: Bitboard = Bitboard::from(Rank::Rank6);
-pub const RANK7: Bitboard = Bitboard::from(Rank::Rank7);
-pub const RANK8: Bitboard = Bitboard::from(Rank::Rank8);
-pub const RANK9: Bitboard = Bitboard::from(Rank::Rank9);
-
 /// Returns the promotion area for the given color as a `Bitboard`.
 ///
 /// For black, this is the first three ranks (RANK1..=RANK3),
 /// and for white, the last three ranks (RANK7..=RANK9).
 #[must_use]
 pub const fn promotion_area(color: Color) -> Bitboard {
-    [RANK1 | RANK2 | RANK3, RANK7 | RANK8 | RANK9][color.as_usize()]
+    [
+        Rank::Rank1.bit() | Rank::Rank2.bit() | Rank::Rank3.bit(),
+        Rank::Rank7.bit() | Rank::Rank8.bit() | Rank::Rank9.bit(),
+    ][color.as_usize()]
 }
 
 /// Returns a `Bitboard` representing squares where a pawn can be dropped for the given color.
@@ -298,6 +277,8 @@ pub const fn promotion_area(color: Color) -> Bitboard {
 /// If `pawns_bb` contains a state that would result in doubled pawns, this function may panic.
 #[must_use]
 pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
+    const RANK9: Bitboard = Rank::Rank9.bit();
+
     let mut bb = RANK9.0 - pawns_bb.0;
 
     if color.is_black() {
@@ -306,6 +287,27 @@ pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
     } else {
         bb = (bb & RANK9.0) >> 8;
         Bitboard((!RANK9).0 & (RANK9.0 - bb))
+    }
+}
+
+impl File {
+    /// Returns a `Bitboard` representing this file.
+    pub const fn bit(self) -> Bitboard {
+        Bitboard::from(self)
+    }
+}
+
+impl Rank {
+    /// Returns a `Bitboard` representing this rank.
+    pub const fn bit(self) -> Bitboard {
+        Bitboard::from(self)
+    }
+}
+
+impl Square {
+    /// Returns a `Bitboard` representing this square.
+    pub const fn bit(self) -> Bitboard {
+        Bitboard::from(self)
     }
 }
 
