@@ -1,8 +1,6 @@
-use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
 
     #[test]
     fn color_is_black() {
