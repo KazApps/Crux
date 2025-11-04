@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn file_east_file1() {
+    fn file_east_panics_on_file1() {
         let _ = File::File1.east();
     }
 
@@ -192,7 +192,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn file_west_file9() {
+    fn file_west_panics_on_file9() {
         let _ = File::File9.west();
     }
 
@@ -286,7 +286,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn rank_north_rank1() {
+    fn rank_north_panics_on_rank1() {
         let _ = Rank::Rank1.north();
     }
 
@@ -305,7 +305,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn rank_south_rank9() {
+    fn rank_south_panics_on_rank9() {
         let _ = Rank::Rank9.south();
     }
 
@@ -589,13 +589,13 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn square_north_east_panic_on_rank1() {
+    fn square_north_east_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_east();
     }
 
     #[test]
     #[should_panic]
-    fn square_north_east_panic_on_file1() {
+    fn square_north_east_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).north_east();
     }
 
@@ -623,13 +623,13 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn square_north_west_panic_on_rank1() {
+    fn square_north_west_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_west();
     }
 
     #[test]
     #[should_panic]
-    fn square_north_west_panic_on_file9() {
+    fn square_north_west_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).north_west();
     }
 
@@ -657,13 +657,13 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn square_south_east_panic_on_rank9() {
+    fn square_south_east_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_east();
     }
 
     #[test]
     #[should_panic]
-    fn square_south_east_panic_on_file1() {
+    fn square_south_east_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).south_east();
     }
 
@@ -691,13 +691,13 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn square_south_west_panic_on_rank9() {
+    fn square_south_west_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_west();
     }
 
     #[test]
     #[should_panic]
-    fn square_south_west_panic_on_file9() {
+    fn square_south_west_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).south_west();
     }
 
