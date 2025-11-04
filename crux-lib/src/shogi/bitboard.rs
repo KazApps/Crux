@@ -1,5 +1,8 @@
 use const_for::const_for;
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
+use std::{
+    fmt::{Display, Formatter, Result},
+    ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not},
+};
 
 use crate::shogi::core::{Color, File, Rank, Square};
 
@@ -250,8 +253,8 @@ pub const fn pawn_drop_mask(color: Color, pawn_bb: Bitboard) -> Bitboard {
     }
 }
 
-impl std::fmt::Display for Bitboard {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for Bitboard {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         const RANK_TO_CHAR: [char; Rank::COUNT] =
             ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
         const RANK_SEPARATOR: &str = "+---+---+---+---+---+---+---+---+---+";
