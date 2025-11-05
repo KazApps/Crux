@@ -16,11 +16,13 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly-2025-10-31
 
       - name: Install rustfmt and clippy
         run: |
-          rustup component add rustfmt --toolchain nightly
-          rustup component add clippy --toolchain nightly
+          rustup component add rustfmt --toolchain nightly-2025-10-31
+          rustup component add clippy --toolchain nightly-2025-10-31
 
       # Check code formatting
       - name: Check formatting
