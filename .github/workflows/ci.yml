@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
 
       # Check code formatting
       - name: Check formatting
