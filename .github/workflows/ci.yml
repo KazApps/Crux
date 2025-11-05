@@ -30,7 +30,7 @@ jobs:
 
       # Run Clippy linter
       - name: Lint code
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       # Build the entire workspace
       - name: Build workspace
