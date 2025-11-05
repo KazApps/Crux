@@ -1,8 +1,6 @@
-use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
 
     #[test]
     fn color_is_black() {
@@ -175,7 +173,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn file_east_file1() {
+    fn file_east_panics_on_file1() {
         let _ = File::File1.east();
     }
 
@@ -194,7 +192,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn file_west_file9() {
+    fn file_west_panics_on_file9() {
         let _ = File::File9.west();
     }
 
@@ -288,7 +286,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn rank_north_rank1() {
+    fn rank_north_panics_on_rank1() {
         let _ = Rank::Rank1.north();
     }
 
@@ -307,7 +305,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn rank_south_rank9() {
+    fn rank_south_panics_on_rank9() {
         let _ = Rank::Rank9.south();
     }
 
@@ -418,8 +416,8 @@ mod tests {
     fn square_from_file_rank() {
         for file in 0..File::COUNT {
             for rank in 0..Rank::COUNT {
-                let file: File = File::from_raw(file as u8);
-                let rank: Rank = Rank::from_raw(rank as u8);
+                let file: File = File::from(file as u8);
+                let rank: Rank = Rank::from(rank as u8);
 
                 let square = Square::new(file, rank);
 
@@ -430,7 +428,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_file() {
+    fn square_file() {
         let cases = [
             (Square::new(File::File1, Rank::Rank9), File::File1),
             (Square::new(File::File5, Rank::Rank1), File::File5),
@@ -443,7 +441,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_rank() {
+    fn square_rank() {
         let cases = [
             (Square::new(File::File1, Rank::Rank9), Rank::Rank9),
             (Square::new(File::File5, Rank::Rank1), Rank::Rank1),
@@ -456,7 +454,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_north() {
+    fn square_north() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -479,12 +477,12 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_north_panics_on_rank1() {
+    fn square_north_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north();
     }
 
     #[test]
-    pub fn square_south() {
+    fn square_south() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank8),
@@ -507,12 +505,12 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_south_panics_on_rank9() {
+    fn square_south_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south();
     }
 
     #[test]
-    pub fn square_east() {
+    fn square_east() {
         let cases = [
             (
                 Square::new(File::File2, Rank::Rank9),
@@ -535,12 +533,12 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_east_panics_on_file1() {
+    fn square_east_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).east();
     }
 
     #[test]
-    pub fn square_west() {
+    fn square_west() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -563,12 +561,12 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_west_panics_on_file9() {
+    fn square_west_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).west();
     }
 
     #[test]
-    pub fn square_north_east() {
+    fn square_north_east() {
         let cases = [
             (
                 Square::new(File::File2, Rank::Rank9),
@@ -591,18 +589,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_north_east_panic_on_rank1() {
+    fn square_north_east_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_east();
     }
 
     #[test]
     #[should_panic]
-    pub fn square_north_east_panic_on_file1() {
+    fn square_north_east_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).north_east();
     }
 
     #[test]
-    pub fn square_north_west() {
+    fn square_north_west() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -625,18 +623,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_north_west_panic_on_rank1() {
+    fn square_north_west_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_west();
     }
 
     #[test]
     #[should_panic]
-    pub fn square_north_west_panic_on_file9() {
+    fn square_north_west_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).north_west();
     }
 
     #[test]
-    pub fn square_south_east() {
+    fn square_south_east() {
         let cases = [
             (
                 Square::new(File::File2, Rank::Rank8),
@@ -659,18 +657,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_south_east_panic_on_rank9() {
+    fn square_south_east_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_east();
     }
 
     #[test]
     #[should_panic]
-    pub fn square_south_east_panic_on_file1() {
+    fn square_south_east_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).south_east();
     }
 
     #[test]
-    pub fn square_south_west() {
+    fn square_south_west() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank8),
@@ -693,18 +691,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_south_west_panic_on_rank9() {
+    fn square_south_west_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_west();
     }
 
     #[test]
     #[should_panic]
-    pub fn square_south_west_panic_on_file9() {
+    fn square_south_west_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).south_west();
     }
 
     #[test]
-    pub fn square_relative_north() {
+    fn square_relative_north() {
         let cases = [
             (
                 Color::Black,
@@ -745,18 +743,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_black_panics_on_rank1() {
+    fn square_relative_north_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_white_panics_on_rank9() {
+    fn square_relative_north_white_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_north(Color::White);
     }
 
     #[test]
-    pub fn square_relative_south() {
+    fn square_relative_south() {
         let cases = [
             (
                 Color::Black,
@@ -797,18 +795,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_black_panics_on_rank9() {
+    fn square_relative_south_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_white_panics_on_rank1() {
+    fn square_relative_south_white_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_south(Color::White);
     }
 
     #[test]
-    pub fn square_relative_east() {
+    fn square_relative_east() {
         let cases = [
             (
                 Color::Black,
@@ -849,18 +847,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_east_black_panics_on_file1() {
+    fn square_relative_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_east(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_east_white_panics_on_file9() {
+    fn square_relative_east_white_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_east(Color::White);
     }
 
     #[test]
-    pub fn square_relative_west() {
+    fn square_relative_west() {
         let cases = [
             (
                 Color::Black,
@@ -901,18 +899,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_west_black_panics_on_file9() {
+    fn square_relative_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_west(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_west_white_panics_on_file1() {
+    fn square_relative_west_white_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_west(Color::White);
     }
 
     #[test]
-    pub fn square_relative_north_east() {
+    fn square_relative_north_east() {
         let cases = [
             (
                 Color::Black,
@@ -953,30 +951,30 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_east_black_panics_on_rank1() {
+    fn square_relative_north_east_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north_east(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_east_black_panics_on_file1() {
+    fn square_relative_north_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_north_east(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_east_white_panics_on_rank9() {
+    fn square_relative_north_east_white_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_north_east(Color::White);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_east_white_panics_on_file9() {
+    fn square_relative_north_east_white_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_north_east(Color::White);
     }
 
     #[test]
-    pub fn square_relative_north_west() {
+    fn square_relative_north_west() {
         let cases = [
             (
                 Color::Black,
@@ -1017,30 +1015,30 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_west_black_panics_on_rank1() {
+    fn square_relative_north_west_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north_west(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_west_black_panics_on_file9() {
+    fn square_relative_north_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_north_west(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_west_white_panics_on_rank9() {
+    fn square_relative_north_west_white_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_north_west(Color::White);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_north_west_white_panics_on_file1() {
+    fn square_relative_north_west_white_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_north_west(Color::White);
     }
 
     #[test]
-    pub fn square_relative_south_east() {
+    fn square_relative_south_east() {
         let cases = [
             (
                 Color::Black,
@@ -1081,30 +1079,30 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_east_black_panics_on_rank9() {
+    fn square_relative_south_east_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south_east(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_east_black_panics_on_file1() {
+    fn square_relative_south_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_south_east(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_east_white_panics_on_rank1() {
+    fn square_relative_south_east_white_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_south_east(Color::White);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_east_white_panics_on_file9() {
+    fn square_relative_south_east_white_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_south_east(Color::White);
     }
 
     #[test]
-    pub fn square_relative_south_west() {
+    fn square_relative_south_west() {
         let cases = [
             (
                 Color::Black,
@@ -1145,30 +1143,30 @@ mod tests {
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_west_black_panics_on_rank9() {
+    fn square_relative_south_west_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south_west(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_west_black_panics_on_file9() {
+    fn square_relative_south_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_south_west(Color::Black);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_west_white_panics_on_rank1() {
+    fn square_relative_south_west_white_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_south_west(Color::White);
     }
 
     #[test]
     #[should_panic]
-    pub fn square_relative_south_west_white_panics_on_file1() {
+    fn square_relative_south_west_white_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_south_west(Color::White);
     }
 
     #[test]
-    pub fn square_with_file() {
+    fn square_with_file() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -1193,7 +1191,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_with_rank() {
+    fn square_with_rank() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -1218,7 +1216,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_flip_file() {
+    fn square_flip_file() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -1240,7 +1238,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_flip_rank() {
+    fn square_flip_rank() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -1262,7 +1260,7 @@ mod tests {
     }
 
     #[test]
-    pub fn square_rotate() {
+    fn square_rotate() {
         let cases = [
             (
                 Square::new(File::File1, Rank::Rank9),
@@ -1284,7 +1282,7 @@ mod tests {
     }
 
     #[test]
-    pub fn can_promote() {
+    fn can_promote() {
         let cases = [
             (Color::Black, Square::new(File::File1, Rank::Rank9), false),
             (Color::Black, Square::new(File::File5, Rank::Rank1), true),
