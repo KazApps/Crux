@@ -277,6 +277,9 @@ pub const fn promotion_area(color: Color) -> Bitboard {
 /// If `pawns_bb` contains a state that would result in doubled pawns, this function may panic.
 #[must_use]
 pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
+    debug_assert!(pawns_bb.count_ones() <= 9);
+    debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
+
     const RANK9: Bitboard = Rank::Rank9.bit();
 
     let mut bb = RANK9.0 - pawns_bb.0;

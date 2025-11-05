@@ -386,6 +386,19 @@ impl File {
         unsafe { transmute(8 - self.as_u8()) }
     }
 
+    /// Returns the `File` relative to the given color.
+    /// For black, this returns `self`.
+    /// For white, this returns the `File` flipped horizontally (so that from white's
+    /// perspective, `File1` corresponds to `File9`, `File2` to `File8`, and so on).
+    #[must_use]
+    pub const fn relative(self, color: Color) -> Self {
+        if color.is_black() {
+            self
+        } else {
+            self.flip()
+        }
+    }
+
     /// Returns the `File` as a `u8`.
     #[must_use]
     pub const fn as_u8(self) -> u8 {
@@ -505,6 +518,19 @@ impl Rank {
     #[must_use]
     pub const fn flip(self) -> Self {
         unsafe { transmute(8 - self.as_u8()) }
+    }
+
+    /// Returns the `Rank` relative to the given color.
+    /// For black, this returns `self`.
+    /// For white, this returns the `Rank` flipped vertically (so that from white's
+    /// perspective, `Rank1` corresponds to `Rank9`, `Rank2` to `Rank8`, and so on).
+    #[must_use]
+    pub const fn relative(self, color: Color) -> Self {
+        if color.is_black() {
+            self
+        } else {
+            self.flip()
+        }
     }
 
     /// Returns `true` if a piece on this rank can promote for the given color.

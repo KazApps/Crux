@@ -293,11 +293,6 @@ mod tests {
 
         for color in 0..Color::COUNT {
             let color = Color::from(color);
-            let first_rank = if color == Color::Black {
-                Rank::Rank1
-            } else {
-                Rank::Rank9
-            };
 
             for _ in 0..sample_count {
                 let ranks: [u8; 9] = [
@@ -318,14 +313,14 @@ mod tests {
                 for (i, rank) in ranks.iter().enumerate() {
                     let file = File::from(i);
 
-                    if Rank::from(*rank) != first_rank {
+                    if Rank::from(*rank) != Rank::Rank1.relative(color) {
                         bb |= Square::new(file, Rank::from(*rank)).bit();
                     } else {
                         expected |= file.bit();
                     }
                 }
 
-                expected &= !first_rank.bit();
+                expected &= !Rank::Rank1.relative(color).bit();
 
                 assert_eq!(pawn_drop_mask_fn(color, bb), expected);
             }
