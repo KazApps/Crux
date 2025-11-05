@@ -76,7 +76,7 @@ impl Bitboard {
     /// Returns `true` if more than one bit in the bitboard is set.
     #[must_use]
     pub const fn is_multiple(self) -> bool {
-        self.0 & (self.0 - 1) != 0
+        self.0 & (self.0.wrapping_sub(1)) != 0
     }
 
     /// Returns the number of bits set in the bitboard.
