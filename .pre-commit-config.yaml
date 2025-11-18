@@ -11,15 +11,16 @@ repos:
         pass_filenames: false
 
       # 2. Run Clippy linter (treat warnings as errors)
-      - id: cargo-clippy
-        name: 🧹 Run Clippy lints
-        entry: cargo clippy --workspace --all-targets -- -D warnings
+      - id: cargo-clippy-debug
+        name: 🧹 Run Clippy lints for debug build
+        entry: |
+          cargo clippy --workspace --all-targets -- -D warnings
         language: system
         pass_filenames: false
 
-      # 3. Build the entire workspace
-      - id: cargo-build
-        name: 🏗️ Build Rust workspace
-        entry: cargo build --workspace --all-targets
+      - id: cargo-clippy-release
+        name: 🧹 Run Clippy lints for release build
+        entry: |
+          cargo clippy --workspace --all-targets --release -- -D warnings
         language: system
         pass_filenames: false

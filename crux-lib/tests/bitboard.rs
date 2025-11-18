@@ -143,6 +143,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn lsb_panics_on_empty() {
@@ -167,6 +168,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn isolate_lsb_panics_on_empty() {
@@ -185,6 +187,7 @@ mod tests {
         assert_eq!(bb, Bitboard::empty());
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn pop_panics_on_empty() {
@@ -327,12 +330,57 @@ mod tests {
         }
     }
 
+    #[cfg_attr(debug_assertions, ignore)]
+    #[test]
+    fn pawn_drop_mask_all() {
+        fn recurse(color: Color, first_rank: Rank, depth: usize, current: &mut [u8; 9]) {
+            if depth == 9 {
+                let mut bb = Bitboard::empty();
+                let mut expected = Bitboard::empty();
+
+                for (i, rank) in current.iter().enumerate() {
+                    let file = File::from(i);
+                    let rank = Rank::from(*rank);
+
+                    if rank != first_rank {
+                        bb |= Square::new(file, rank).bit();
+                    } else {
+                        expected |= file.bit();
+                    }
+                }
+
+                expected &= !first_rank.bit();
+                assert_eq!(pawn_drop_mask_fn(color, bb), expected);
+                return;
+            }
+
+            for rank in 0..9 {
+                current[depth] = rank;
+                recurse(color, first_rank, depth + 1, current);
+            }
+        }
+
+        for color_idx in 0..Color::COUNT {
+            let color = Color::from(color_idx);
+            let first_rank = if color == Color::Black {
+                Rank::Rank1
+            } else {
+                Rank::Rank9
+            };
+
+            let mut current = [0u8; 9];
+            recurse(color, first_rank, 0, &mut current);
+        }
+    }
+
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn pawn_drop_mask_black_panics_on_doubled_pawns() {
         let _ = pawn_drop_mask_fn(Color::Black, Rank::Rank9.bit() | Square::S55.bit());
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn pawn_drop_mask_white_panics_on_doubled_pawns() {
