@@ -171,6 +171,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn file_east_panics_on_file1() {
@@ -190,6 +191,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn file_west_panics_on_file9() {
@@ -212,12 +214,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_east_black_panics_on_file1() {
         let _ = File::File1.relative_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_east_white_panics_on_file9() {
@@ -240,12 +244,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_west_black_panics_on_file9() {
         let _ = File::File9.relative_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_west_white_panics_on_file1() {
@@ -284,6 +290,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn rank_north_panics_on_rank1() {
@@ -303,6 +310,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn rank_south_panics_on_rank9() {
@@ -325,12 +333,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_north_black_panics_on_rank1() {
         let _ = Rank::Rank1.relative_north(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_north_white_panics_on_rank9() {
@@ -353,12 +363,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_south_black_panics_on_rank9() {
         let _ = Rank::Rank9.relative_south(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn relative_south_white_panics_on_rank1() {
@@ -475,6 +487,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_north_panics_on_rank1() {
@@ -503,6 +516,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_south_panics_on_rank9() {
@@ -531,6 +545,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_east_panics_on_file1() {
@@ -559,6 +574,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_west_panics_on_file9() {
@@ -587,12 +603,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_north_east_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_east();
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_north_east_panics_on_file1() {
@@ -621,12 +639,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_north_west_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).north_west();
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_north_west_panics_on_file9() {
@@ -655,12 +675,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_south_east_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_east();
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_south_east_panics_on_file1() {
@@ -689,12 +711,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_south_west_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).south_west();
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_south_west_panics_on_file9() {
@@ -741,12 +765,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_white_panics_on_rank9() {
@@ -793,12 +819,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_white_panics_on_rank1() {
@@ -845,12 +873,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_east_white_panics_on_file9() {
@@ -897,12 +927,14 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_west_white_panics_on_file1() {
@@ -949,24 +981,28 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_east_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_north_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_east_white_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_north_east(Color::White);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_east_white_panics_on_file9() {
@@ -1013,24 +1049,28 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_west_black_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_north_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_north_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_west_white_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_north_west(Color::White);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_north_west_white_panics_on_file1() {
@@ -1077,24 +1117,28 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_east_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_east_black_panics_on_file1() {
         let _ = Square::new(File::File1, Rank::Rank5).relative_south_east(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_east_white_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_south_east(Color::White);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_east_white_panics_on_file9() {
@@ -1141,24 +1185,28 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_west_black_panics_on_rank9() {
         let _ = Square::new(File::File5, Rank::Rank9).relative_south_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_west_black_panics_on_file9() {
         let _ = Square::new(File::File9, Rank::Rank5).relative_south_west(Color::Black);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_west_white_panics_on_rank1() {
         let _ = Square::new(File::File5, Rank::Rank1).relative_south_west(Color::White);
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn square_relative_south_west_white_panics_on_file1() {
