@@ -515,7 +515,7 @@ impl Display for Bitboard {
     /// Files are labeled 9..1 from left to right, and ranks are labeled 一..九 on the right.
     ///
     /// Example output:
-    /// ```
+    /// ```text
     ///   9   8   7   6   5   4   3   2   1
     /// +---+---+---+---+---+---+---+---+---+
     /// | X |   |   |   |   |   |   |   |   | 一

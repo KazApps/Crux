@@ -40,12 +40,22 @@ macro_rules! generate_sided_attacks {
     }};
 }
 
+/// Returns pawn attacks from the square.
+///
+/// # Panics
+///
+/// Panics if the square is on the relative rank 1 for the given color.
 pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(square.rank().as_u8() != Rank::Rank1.relative(color).as_u8());
 
     square.relative_north(color).bit()
 }
 
+/// Returns pawn attacks from all squares set in the bitboard.
+///
+/// # Panics
+///
+/// Panics if any square lies on relative rank 1 for the given color.
 pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
 
@@ -56,6 +66,12 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     }
 }
 
+/// Returns lance attacks from the square.
+///
+/// # Panics
+///
+/// Panics if any square lies on relative rank 1 for the given color
+/// or if the square is set in the occupied bitboard.
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!(square.rank().as_u8() != Rank::Rank1.relative(color).as_u8());
     debug_assert!((square.bit() & occupied).is_empty());
@@ -88,17 +104,21 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
             results
         };
 
-        Bitboard(
-            (TABLE[occupied.shr(square.file().as_usize() * Rank::COUNT + 1).0 as usize
-                & ((1 << square.rank().as_u8()) - 1)] as u128)
-                << (square.file().as_usize() * Rank::COUNT),
-        )
+        let idx = ((occupied.0 >> (square.file().as_usize() * Rank::COUNT + 1))
+            & ((1 << square.rank().as_u8()) - 1)) as usize;
+
+        Bitboard((TABLE[idx] as u128) << (square.file().as_usize() * Rank::COUNT))
     } else {
         let x = Rank::Rank9.bit() | occupied;
         x.sub(square.bit()).sub(square.bit()) ^ x
     }
 }
 
+/// Returns knight attacks from the square.
+///
+/// # Panics
+///
+/// Panics if the square lies on relative ranks 1 or 2 for the given color.
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!((square.rank().bit()
         & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
@@ -117,6 +137,11 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
     KNIGHT_ATTACKS[color.as_usize()][square.as_usize()]
 }
 
+/// Returns knight attacks from all squares set in the bitboard.
+///
+/// # Panics
+///
+/// Panics if any square lies on relative ranks 1 or 2 for the given color.
 pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboard {
     debug_assert!((knights_bb
         & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
@@ -129,6 +154,7 @@ pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboar
     }
 }
 
+/// Returns silver attacks from all squares set in the bitboard.
 pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
     const SILVER_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
         let bb = square.bit();
@@ -143,6 +169,7 @@ pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
     SILVER_ATTACKS[color.as_usize()][square.as_usize()]
 }
 
+/// Returns silver attacks from all squares set in the bitboard.
 pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboard {
     let without_rank1 = silvers_bb & !Rank::Rank1.bit();
     let without_rank9 = silvers_bb & !Rank::Rank9.bit();
@@ -164,6 +191,7 @@ pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboar
     }
 }
 
+/// Returns gold attacks from the square.
 pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
     const GOLD_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
         let bb = square.bit();
@@ -179,6 +207,7 @@ pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
     GOLD_ATTACKS[color.as_usize()][square.as_usize()]
 }
 
+/// Returns gold attacks from all squares set in the bitboard.
 pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
     let without_rank1 = golds_bb & !Rank::Rank1.bit();
     let without_rank9 = golds_bb & !Rank::Rank9.bit();
@@ -202,6 +231,11 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
     }
 }
 
+/// Returns line attacks from all squares set in the bitboard, constrained by the given pseudo-attack mask.
+///
+/// # Panics
+///
+/// Panics if any square is set in the occupied bitboard.
 const fn line_attacks(square: Square, occupied: Bitboard, mask: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
@@ -209,14 +243,20 @@ const fn line_attacks(square: Square, occupied: Bitboard, mask: Bitboard) -> Bit
 
     let forward = ((occupied & mask | Square::new(File::File9, Rank::Rank9).bit())
         & Bitboard(!((1u128 << (square.as_u8() + 1)) - 1)))
-    .isolate_lsb()
-    .shl(1);
+    .isolate_lsb();
+
     let backward = ((occupied & mask | Square::new(File::File1, Rank::Rank1).bit())
         & Bitboard((1u128 << square.as_u8()) - 1))
     .isolate_msb();
-    (forward.sub(backward) & mask) & !square.bit()
+
+    Bitboard((forward.0 << 1) - backward.0) & mask & !square.bit()
 }
 
+/// Returns bishop attacks from the square.
+///
+/// # Panics
+///
+/// Panics if the square is set in the occupied bitboard.
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
@@ -255,6 +295,11 @@ pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
         | line_attacks(square, occupied, BISHOP_MASK2[square.as_usize()])
 }
 
+/// Returns rook attacks from the square.
+///
+/// # Panics
+///
+/// Panics if the square is set in the occupied bitboard.
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
@@ -263,18 +308,29 @@ pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
         | line_attacks(square, occupied, square.rank().bit())
 }
 
+/// Returns horse attacks from the square.
+/// ///
+/// # Panics
+///
+/// Panics if the square is set in the occupied bitboard.
 pub const fn horse_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
     king_attacks(square) | bishop_attacks(square, occupied)
 }
 
+/// Returns dragon attacks from the square.
+///
+/// # Panics
+///
+/// Panics if the square is set in the occupied bitboard.
 pub const fn dragon_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
     king_attacks(square) | rook_attacks(square, occupied)
 }
 
+/// Returns king attacks from the square.
 pub const fn king_attacks(square: Square) -> Bitboard {
     const KING_ATTACKS: Attacks = generate_attacks!(|square| {
         let bb = square.bit();
@@ -292,6 +348,11 @@ pub const fn king_attacks(square: Square) -> Bitboard {
     KING_ATTACKS[square.as_usize()]
 }
 
+/// Returns the attacks of the given piece type from the square.
+///
+/// # Panics
+///
+/// Panics if the square is set in the occupied bitboard.
 pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!((square.bit() & occupied).is_empty());
 
