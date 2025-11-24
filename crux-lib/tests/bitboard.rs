@@ -373,6 +373,7 @@ mod tests {
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
     #[should_panic]
     fn pawn_drop_mask_black_panics_on_doubled_pawns() {
