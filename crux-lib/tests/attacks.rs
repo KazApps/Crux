@@ -34,7 +34,11 @@ mod tests {
 
     fn relative_steps(square: Square, color: Color, offsets: &[(i8, i8)]) -> Bitboard {
         offsets.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
-            let (df, dr) = if color.is_black() { (df, dr) } else { (-df, -dr) };
+            let (df, dr) = if color.is_black() {
+                (df, dr)
+            } else {
+                (-df, -dr)
+            };
 
             if let Some(target) = offset_square(square, df, dr) {
                 bb | target.bit()
@@ -196,18 +200,13 @@ mod tests {
             });
 
             let actual = multi_knight_attacks(color, bb);
-            assert_eq!(
-                actual, expected,
-                "color {:?} knights {:?}",
-                color, knights
-            );
+            assert_eq!(actual, expected, "color {:?} knights {:?}", color, knights);
         }
     }
 
     #[test]
     fn silver_attacks_match_reference() {
-        const SILVER_OFFSETS: [(i8, i8); 5] =
-            [(0, -1), (-1, -1), (1, -1), (-1, 1), (1, 1)];
+        const SILVER_OFFSETS: [(i8, i8); 5] = [(0, -1), (-1, -1), (1, -1), (-1, 1), (1, 1)];
         let cases = [
             (Color::Black, Square::S55),
             (Color::Black, Square::S21),
@@ -248,8 +247,7 @@ mod tests {
 
     #[test]
     fn gold_attacks_match_reference() {
-        const GOLD_OFFSETS: [(i8, i8); 6] =
-            [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (1, -1)];
+        const GOLD_OFFSETS: [(i8, i8); 6] = [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (1, -1)];
 
         let cases = [
             (Color::Black, Square::S55),

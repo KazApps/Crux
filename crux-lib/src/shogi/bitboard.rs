@@ -110,7 +110,7 @@ impl Bitboard {
     pub const fn isolate_msb(self) -> Self {
         debug_assert!(self.is_any());
 
-        Self(1u128<<(127-self.0.leading_zeros()))
+        Self(1u128 << (127 - self.0.leading_zeros()))
     }
 
     /// Returns a bitboard with only the least significant bit set.
