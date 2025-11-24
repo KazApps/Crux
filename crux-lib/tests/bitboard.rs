@@ -375,6 +375,50 @@ mod tests {
 
     #[cfg(debug_assertions)]
     #[test]
+    #[ignore]
+    fn pawn_drop_mask_all() {
+        fn recurse(
+            color: Color,
+            first_rank: Rank,
+            depth: usize,
+            current: &mut [Rank; Rank::COUNT],
+        ) {
+            if depth == 9 {
+                let mut bb = Bitboard::empty();
+                let mut expected = Bitboard::empty();
+
+                for (i, rank) in current.iter().enumerate() {
+                    let file = File::from(i);
+
+                    if *rank != first_rank {
+                        bb |= Square::new(file, *rank).bit();
+                    } else {
+                        expected |= file.bit();
+                    }
+                }
+
+                expected &= !first_rank.bit();
+
+                assert_eq!(pawn_drop_mask_fn(color, bb), expected);
+
+                return;
+            }
+
+            for rank in (0..Rank::COUNT).map(Rank::from) {
+                current[depth] = rank;
+                recurse(color, first_rank, depth + 1, current);
+            }
+        }
+
+        for color in (0..Color::COUNT).map(Color::from) {
+            let first_rank = Rank::Rank1.relative(color);
+            let mut current = [first_rank; Rank::COUNT];
+
+            recurse(color, first_rank, 0, &mut current);
+        }
+    }
+
+    #[test]
     #[should_panic]
     fn pawn_drop_mask_black_panics_on_doubled_pawns() {
         let _ = pawn_drop_mask_fn(Color::Black, Rank::Rank9.bit() | Square::S55.bit());

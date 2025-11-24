@@ -12,37 +12,41 @@ use crate::shogi::core::{Color, File, Rank, Square};
 ///                    Mapping
 /// ==============================================
 ///
-///    upper                  lower
-/// |---------|----------------------------------|
 ///    9    8    7    6    5    4    3    2    1
 /// +----+----+----+----+----+----+----+----+----+
-/// |  9 |  0 | 54 | 45 | 36 | 27 | 18 |  9 |  0 | 一
+/// | 72 | 63 | 54 | 45 | 36 | 27 | 18 |  9 |  0 | 一
 /// +----+----+----+----+----+----+----+----+----+
-/// | 10 |  1 | 55 | 46 | 37 | 28 | 19 | 10 |  1 | 二
+/// | 73 | 64 | 55 | 46 | 37 | 28 | 19 | 10 |  1 | 二
 /// +----+----+----+----+----+----+----+----+----+
-/// | 11 |  2 | 56 | 47 | 38 | 29 | 20 | 11 |  2 | 三
+/// | 74 | 65 | 56 | 47 | 38 | 29 | 20 | 11 |  2 | 三
 /// +----+----+----+----+----+----+----+----+----+
-/// | 12 |  3 | 57 | 48 | 39 | 30 | 21 | 12 |  3 | 四
+/// | 75 | 66 | 57 | 48 | 39 | 30 | 21 | 12 |  3 | 四
 /// +----+----+----+----+----+----+----+----+----+
-/// | 13 |  4 | 58 | 49 | 40 | 31 | 22 | 13 |  4 | 五
+/// | 76 | 67 | 58 | 49 | 40 | 31 | 22 | 13 |  4 | 五
 /// +----+----+----+----+----+----+----+----+----+
-/// | 14 |  5 | 59 | 50 | 41 | 32 | 23 | 14 |  5 | 六
+/// | 77 | 68 | 59 | 50 | 41 | 32 | 23 | 14 |  5 | 六
 /// +----+----+----+----+----+----+----+----+----+
-/// | 15 |  6 | 60 | 51 | 42 | 33 | 24 | 15 |  6 | 七
+/// | 78 | 69 | 60 | 51 | 42 | 33 | 24 | 15 |  6 | 七
 /// +----+----+----+----+----+----+----+----+----+
-/// | 16 |  7 | 61 | 52 | 43 | 34 | 25 | 16 |  7 | 八
+/// | 79 | 70 | 61 | 52 | 43 | 34 | 25 | 16 |  7 | 八
 /// +----+----+----+----+----+----+----+----+----+
-/// | 17 |  8 | 62 | 53 | 44 | 35 | 26 | 17 |  8 | 九
+/// | 80 | 71 | 62 | 53 | 44 | 35 | 26 | 17 |  8 | 九
 /// +----+----+----+----+----+----+----+----+----+
-///
-/// Note:
-/// The 64th bit (bit index 63 in 0-based counting) is intentionally left unused.
-/// This allows certain bitboard operations to be optimized.
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Bitboard(u128);
 
 impl Bitboard {
+    #[must_use]
+    pub(crate) const fn as_u128(self) -> u128 {
+        self.0
+    }
+
+    #[must_use]
+    pub(crate) const fn from_u128(b: u128) -> Self {
+        Self(b)
+    }
+
     /// Returns a bitboard with all bits set.
     #[must_use]
     pub const fn all() -> Self {
@@ -94,8 +98,19 @@ impl Bitboard {
     pub const fn lsb(self) -> Square {
         debug_assert!(self.is_any());
 
-        let bit_pos = self.0.trailing_zeros() as u8;
-        Square::from(if bit_pos < 64 { bit_pos } else { bit_pos - 1 })
+        Square::from(self.0.trailing_zeros() as u8)
+    }
+
+    /// Returns a bitboard with only the most significant bit set.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the bitboard has no bits set.
+    #[must_use]
+    pub const fn isolate_msb(self) -> Self {
+        debug_assert!(self.is_any());
+
+        Self(1u128<<(127-self.0.leading_zeros()))
     }
 
     /// Returns a bitboard with only the least significant bit set.
@@ -125,8 +140,238 @@ impl Bitboard {
         lsb
     }
 
-    // Leave the 63rd bit empty to make some operations faster.
-    const MASK: u128 = ((1u128 << (Square::COUNT + 1)) - 1) ^ (1u128 << 63);
+    #[must_use]
+    pub(crate) const fn north(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank1.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().north().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn south(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank9.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().south().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn east(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & File::File1.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().east().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn west(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & File::File9.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().west().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn north_east(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank1.bit()).is_any() || (self & File::File1.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().north_east().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn north_west(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank1.bit()).is_any() || (self & File::File9.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().north_west().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn south_east(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank9.bit()).is_any() || (self & File::File1.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().south_east().bit()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn south_west(self) -> Self {
+        debug_assert!(self.is_single());
+
+        if (self & Rank::Rank9.bit()).is_any() || (self & File::File9.bit()).is_any() {
+            Self::empty()
+        } else {
+            self.lsb().south_west().bit()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_north(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.north()
+        } else {
+            self.south()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_south(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.south()
+        } else {
+            self.north()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_east(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.east()
+        } else {
+            self.west()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_west(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.west()
+        } else {
+            self.east()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_north_east(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.north_east()
+        } else {
+            self.south_west()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_north_west(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.north_west()
+        } else {
+            self.south_east()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_south_east(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.south_east()
+        } else {
+            self.north_west()
+        }
+    }
+
+    #[must_use]
+    pub const fn relative_south_west(self, color: Color) -> Self {
+        debug_assert!(self.is_single());
+
+        if color.is_black() {
+            self.south_west()
+        } else {
+            self.north_east()
+        }
+    }
+
+    #[must_use]
+    pub(crate) const fn add(self, other: Self) -> Self {
+        Self(self.0 + other.0)
+    }
+
+    #[must_use]
+    pub(crate) const fn wrapping_add(self, other: Self) -> Self {
+        Self(self.0.wrapping_add(other.0))
+    }
+
+    #[must_use]
+    pub(crate) const fn add_u128(self, value: u128) -> Self {
+        Self(self.0 + value)
+    }
+
+    #[must_use]
+    pub(crate) const fn wrapping_add_u128(self, value: u128) -> Self {
+        Self(self.0.wrapping_add(value))
+    }
+
+    #[must_use]
+    pub(crate) const fn sub(self, other: Self) -> Self {
+        Self(self.0 - other.0)
+    }
+
+    #[must_use]
+    pub(crate) const fn wrapping_sub(self, other: Self) -> Self {
+        Self(self.0.wrapping_sub(other.0))
+    }
+
+    #[must_use]
+    pub(crate) const fn sub_u128(self, value: u128) -> Self {
+        Self(self.0 - value)
+    }
+
+    #[must_use]
+    pub(crate) const fn wrapping_sub_u128(self, value: u128) -> Self {
+        Self(self.0.wrapping_sub(value))
+    }
+
+    #[must_use]
+    pub(crate) const fn shr(self, n: usize) -> Self {
+        Self(self.0 >> n)
+    }
+
+    #[must_use]
+    pub(crate) const fn shl(self, n: usize) -> Self {
+        Self(self.0 << n)
+    }
+
+    #[must_use]
+    pub(crate) const fn wrapping_neg(self) -> Self {
+        Self(self.0.wrapping_neg())
+    }
+
+    const MASK: u128 = (1u128 << Square::COUNT) - 1;
 }
 
 impl const BitAnd for Bitboard {
@@ -235,21 +480,7 @@ impl const From<Rank> for Bitboard {
 impl const From<Square> for Bitboard {
     /// Returns a bitboard with only the given square set.
     fn from(value: Square) -> Self {
-        const TABLE: [Bitboard; Square::COUNT] = {
-            let mut table = [Bitboard::empty(); Square::COUNT];
-
-            const_for!(square in 0..Square::COUNT => {
-                if square < Square::S81.as_usize() {
-                    table[square] = Bitboard(1 << square);
-                } else {
-                    table[square] = Bitboard(1 << (square + 1));
-                }
-            });
-
-            table
-        };
-
-        TABLE[value.as_usize()]
+        Bitboard(1 << value.as_usize())
     }
 }
 
@@ -268,9 +499,13 @@ pub const fn promotion_area(color: Color) -> Bitboard {
 /// Returns a `Bitboard` representing squares where a pawn can be dropped for the given color.
 ///
 /// This function takes a bitboard of existing pawns (`pawns_bb`) and computes
-/// all valid drop squares, ensuring:
+/// all valid pawn drop squares, ensuring:
 /// - No doubled pawns occur.
 /// - Pawns are not dropped on the first rank (1st rank for black, 9th rank for white).
+///
+/// # Note
+/// This implementation is inspired by the approach described in:
+/// https://www.apply.computer-shogi.org/wcsc31/appeal/Qugiy/appeal.pdf
 ///
 /// # Panics
 ///
@@ -282,14 +517,23 @@ pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
 
     const RANK9: Bitboard = Rank::Rank9.bit();
 
-    let mut bb = RANK9.0 - pawns_bb.0;
+    // Think in terms of each file.
+    // If a file has no pawn, only the 9th rank bit for that file is set in `bb`.
+    // If a file has a pawn, no bits are set in `bb` for that file.
+    let bb = RANK9.sub(pawns_bb) & RANK9;
 
     if color.is_black() {
-        bb = (bb & RANK9.0) >> 7;
-        RANK9 ^ Bitboard(RANK9.0 - bb)
+        // If a file has no pawn:
+        //     `RANK9.sub(bb.shr(7))` sets bits on ranks 2–8 for that file.
+        // If a file has a pawn:
+        //     `RANK9.sub(bb.shr(7))` sets the bit on the 9th rank for that file.
+        RANK9 ^ RANK9.sub(bb.shr(7))
     } else {
-        bb = (bb & RANK9.0) >> 8;
-        Bitboard((!RANK9).0 & (RANK9.0 - bb))
+        // If a file has no pawn:
+        //     `RANK9.sub(bb.shr(8))` sets bits on ranks 1–8 for that file.
+        // If a file has a pawn:
+        //     `RANK9.sub(bb.shr(8))` sets the bit on the 9th rank for that file.
+        !RANK9 & RANK9.sub(bb.shr(8))
     }
 }
 
