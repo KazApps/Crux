@@ -317,43 +317,8 @@ impl Bitboard {
     }
 
     #[must_use]
-    pub(crate) const fn add(self, other: Self) -> Self {
-        Self(self.0 + other.0)
-    }
-
-    #[must_use]
-    pub(crate) const fn wrapping_add(self, other: Self) -> Self {
-        Self(self.0.wrapping_add(other.0))
-    }
-
-    #[must_use]
-    pub(crate) const fn add_u128(self, value: u128) -> Self {
-        Self(self.0 + value)
-    }
-
-    #[must_use]
-    pub(crate) const fn wrapping_add_u128(self, value: u128) -> Self {
-        Self(self.0.wrapping_add(value))
-    }
-
-    #[must_use]
     pub(crate) const fn sub(self, other: Self) -> Self {
         Self(self.0 - other.0)
-    }
-
-    #[must_use]
-    pub(crate) const fn wrapping_sub(self, other: Self) -> Self {
-        Self(self.0.wrapping_sub(other.0))
-    }
-
-    #[must_use]
-    pub(crate) const fn sub_u128(self, value: u128) -> Self {
-        Self(self.0 - value)
-    }
-
-    #[must_use]
-    pub(crate) const fn wrapping_sub_u128(self, value: u128) -> Self {
-        Self(self.0.wrapping_sub(value))
     }
 
     #[must_use]
@@ -364,11 +329,6 @@ impl Bitboard {
     #[must_use]
     pub(crate) const fn shl(self, n: usize) -> Self {
         Self(self.0 << n)
-    }
-
-    #[must_use]
-    pub(crate) const fn wrapping_neg(self) -> Self {
-        Self(self.0.wrapping_neg())
     }
 
     const MASK: u128 = (1u128 << Square::COUNT) - 1;
