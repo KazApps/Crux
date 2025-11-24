@@ -58,37 +58,39 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
 
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!(square.rank().as_u8() != Rank::Rank1.relative(color).as_u8());
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
+
+    let occupied = occupied | square.bit();
 
     if color.is_black() {
-        const TABLE_SIZE: usize = 2usize.pow((Rank::COUNT - 1) as u32);
+        const TABLE_SIZE: usize = 1 << (Rank::COUNT - 1);
         const TABLE: [u16; TABLE_SIZE] = {
             let mut results = [0u16; TABLE_SIZE];
+
             const_for!(idx in 1..TABLE_SIZE => {
-                let mut b:i32 = (63-(idx.leading_zeros()as i32)) - 1;
-                let mut result=0u16;
+                let mut b = 63 - idx.leading_zeros() as i32 - 1;
+                let mut result = 0u16;
 
-                while b>=0 {
-                    result |= 1u16<<b;
+                while b >= 0 {
+                    result |= 1u16 << b;
 
-                    if (idx>>b)&1==1{
+                    if (idx >> b) & 1 == 1 {
                         break;
                     }
-                    b-=1;
+
+                    b -= 1;
                 }
 
-                result=(result<<1)+((b<0)as u16);
-                results[idx]=result;
+                result = (result << 1) | u16::from(b < 0);
+                results[idx] = result;
             });
 
             results
         };
 
-        Bitboard::from_u128(
-            (TABLE[(occupied
-                .shr(square.file().as_usize() * Rank::COUNT + 1)
-                .as_u128() as usize)
-                & ((1usize << square.rank().as_u8()) - 1)] as u128)
+        Bitboard(
+            (TABLE[occupied.shr(square.file().as_usize() * Rank::COUNT + 1).0 as usize
+                & ((1 << square.rank().as_u8()) - 1)] as u128)
                 << (square.file().as_usize() * Rank::COUNT),
         )
     } else {
@@ -98,6 +100,10 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
 }
 
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
+    debug_assert!((square.rank().bit()
+        & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
+    .is_empty());
+
     const KNIGHT_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
         let north = square.bit().relative_north(color);
 
@@ -112,6 +118,10 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
 }
 
 pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboard {
+    debug_assert!((knights_bb
+        & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
+    .is_empty());
+
     if color.is_black() {
         knights_bb.shr(11) | knights_bb.shl(7) & Bitboard::all()
     } else {
@@ -193,51 +203,60 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
 }
 
 const fn line_attacks(square: Square, occupied: Bitboard, mask: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
+
+    let occupied = occupied | square.bit();
 
     let forward = ((occupied & mask | Square::new(File::File9, Rank::Rank9).bit())
-        & Bitboard::from_u128(!((1u128 << (square.as_u8() + 1)) - 1)))
+        & Bitboard(!((1u128 << (square.as_u8() + 1)) - 1)))
     .isolate_lsb()
     .shl(1);
     let backward = ((occupied & mask | Square::new(File::File1, Rank::Rank1).bit())
-        & Bitboard::from_u128((1u128 << square.as_u8()) - 1))
+        & Bitboard((1u128 << square.as_u8()) - 1))
     .isolate_msb();
     (forward.sub(backward) & mask) & !square.bit()
 }
 
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
 
     const BISHOP_MASK1: [Bitboard; Square::COUNT] = {
         let mut results = [Bitboard::empty(); Square::COUNT];
+
         const_for!(idx in 0..Square::COUNT => {
-            const_for!(idx2 in 0..Square::COUNT=>{
-                if idx/Rank::COUNT+idx%Rank::COUNT==idx2/Rank::COUNT+idx2%Rank::COUNT{
-                    results[idx]|=Square::from(idx2).bit();
+            const_for!(idx2 in 0..Square::COUNT => {
+                if idx / Rank::COUNT + idx % Rank::COUNT == idx2 / Rank::COUNT + idx2 % Rank::COUNT
+                {
+                    results[idx] |= Square::from(idx2).bit();
                 }
             });
         });
 
         results
     };
+
     const BISHOP_MASK2: [Bitboard; Square::COUNT] = {
         let mut results = [Bitboard::empty(); Square::COUNT];
+
         const_for!(idx in 0..Square::COUNT => {
-            const_for!(idx2 in 0..Square::COUNT=>{
-                if ((idx/Rank::COUNT) as i32)-((idx%Rank::COUNT) as i32)==((idx2/Rank::COUNT) as i32)-((idx2%Rank::COUNT) as i32){
-                    results[idx]|=Square::from(idx2).bit();
+            const_for!(idx2 in 0..Square::COUNT => {
+                if (idx / Rank::COUNT) as i32 - (idx % Rank::COUNT) as i32
+                    == (idx2 / Rank::COUNT) as i32 - (idx2 % Rank::COUNT) as i32
+                {
+                    results[idx] |= Square::from(idx2).bit();
                 }
             });
         });
 
         results
     };
+
     line_attacks(square, occupied, BISHOP_MASK1[square.as_usize()])
         | line_attacks(square, occupied, BISHOP_MASK2[square.as_usize()])
 }
 
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
 
     lance_attacks(Color::Black, square, occupied)
         | lance_attacks(Color::White, square, occupied)
@@ -245,13 +264,13 @@ pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 }
 
 pub const fn horse_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
 
     king_attacks(square) | bishop_attacks(square, occupied)
 }
 
 pub const fn dragon_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
 
     king_attacks(square) | rook_attacks(square, occupied)
 }
@@ -274,7 +293,7 @@ pub const fn king_attacks(square: Square) -> Bitboard {
 }
 
 pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!((square.bit() & occupied).is_any());
+    debug_assert!((square.bit() & occupied).is_empty());
 
     match piece.piece_type() {
         PieceType::Pawn => pawn_attacks(piece.color(), square),

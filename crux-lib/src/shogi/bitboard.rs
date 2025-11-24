@@ -34,19 +34,9 @@ use crate::shogi::core::{Color, File, Rank, Square};
 /// +----+----+----+----+----+----+----+----+----+
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Bitboard(u128);
+pub struct Bitboard(pub(crate) u128);
 
 impl Bitboard {
-    #[must_use]
-    pub(crate) const fn as_u128(self) -> u128 {
-        self.0
-    }
-
-    #[must_use]
-    pub(crate) const fn from_u128(b: u128) -> Self {
-        Self(b)
-    }
-
     /// Returns a bitboard with all bits set.
     #[must_use]
     pub const fn all() -> Self {

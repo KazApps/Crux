@@ -1,121 +1,15 @@
 #[cfg(test)]
 mod tests {
-    use crux_lib::shogi::attacks::{
-        bishop_attacks, dragon_attacks, gold_attacks, horse_attacks, king_attacks, knight_attacks,
-        lance_attacks, multi_gold_attacks, multi_knight_attacks, multi_pawn_attacks,
-        multi_silver_attacks, pawn_attacks, piece_attacks, rook_attacks, silver_attacks,
+    use crux_lib::shogi::{
+        attacks::{
+            bishop_attacks, dragon_attacks, gold_attacks, horse_attacks, king_attacks,
+            knight_attacks, lance_attacks, multi_gold_attacks, multi_knight_attacks,
+            multi_pawn_attacks, multi_silver_attacks, pawn_attacks, piece_attacks, rook_attacks,
+            silver_attacks,
+        },
+        bitboard::Bitboard,
+        core::{Color, File, Piece, PieceType, Rank, Square},
     };
-    use crux_lib::shogi::bitboard::Bitboard;
-    use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
-
-    fn bb_from_squares(squares: &[Square]) -> Bitboard {
-        squares
-            .iter()
-            .fold(Bitboard::empty(), |bb, &square| bb | square.bit())
-    }
-
-    fn offset_square(square: Square, file_delta: i8, rank_delta: i8) -> Option<Square> {
-        let file_idx = square.file().as_u8() as i8 + file_delta;
-        let rank_idx = square.rank().as_u8() as i8 + rank_delta;
-
-        if file_idx < 0
-            || file_idx >= File::COUNT as i8
-            || rank_idx < 0
-            || rank_idx >= Rank::COUNT as i8
-        {
-            None
-        } else {
-            Some(Square::new(
-                File::from(file_idx as u8),
-                Rank::from(rank_idx as u8),
-            ))
-        }
-    }
-
-    fn relative_steps(square: Square, color: Color, offsets: &[(i8, i8)]) -> Bitboard {
-        offsets.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
-            let (df, dr) = if color.is_black() {
-                (df, dr)
-            } else {
-                (-df, -dr)
-            };
-
-            if let Some(target) = offset_square(square, df, dr) {
-                bb | target.bit()
-            } else {
-                bb
-            }
-        })
-    }
-
-    fn slider_ray(square: Square, file_delta: i8, rank_delta: i8, occupied: Bitboard) -> Bitboard {
-        let mut bb = Bitboard::empty();
-        let mut file_idx = square.file().as_u8() as i8;
-        let mut rank_idx = square.rank().as_u8() as i8;
-
-        loop {
-            file_idx += file_delta;
-            rank_idx += rank_delta;
-
-            if file_idx < 0
-                || file_idx >= File::COUNT as i8
-                || rank_idx < 0
-                || rank_idx >= Rank::COUNT as i8
-            {
-                break;
-            }
-
-            let next = Square::new(File::from(file_idx as u8), Rank::from(rank_idx as u8));
-            let bit = next.bit();
-            bb |= bit;
-
-            if (occupied & bit).is_any() {
-                break;
-            }
-        }
-
-        bb
-    }
-
-    fn reference_lance(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
-        let rank_delta = if color.is_black() { -1 } else { 1 };
-        slider_ray(square, 0, rank_delta, occupied)
-    }
-
-    fn reference_bishop(square: Square, occupied: Bitboard) -> Bitboard {
-        slider_ray(square, -1, -1, occupied)
-            | slider_ray(square, -1, 1, occupied)
-            | slider_ray(square, 1, -1, occupied)
-            | slider_ray(square, 1, 1, occupied)
-    }
-
-    fn reference_rook(square: Square, occupied: Bitboard) -> Bitboard {
-        slider_ray(square, 0, -1, occupied)
-            | slider_ray(square, 0, 1, occupied)
-            | slider_ray(square, -1, 0, occupied)
-            | slider_ray(square, 1, 0, occupied)
-    }
-
-    fn reference_king(square: Square) -> Bitboard {
-        let deltas = [
-            (0, -1),
-            (0, 1),
-            (-1, 0),
-            (1, 0),
-            (-1, -1),
-            (-1, 1),
-            (1, -1),
-            (1, 1),
-        ];
-
-        deltas.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
-            if let Some(target) = offset_square(square, df, dr) {
-                bb | target.bit()
-            } else {
-                bb
-            }
-        })
-    }
 
     #[test]
     fn pawn_attacks_respect_color_orientation() {
@@ -168,9 +62,9 @@ mod tests {
         const KNIGHT_OFFSETS: [(i8, i8); 2] = [(-1, -2), (1, -2)];
         let cases = [
             (Color::Black, Square::S55),
-            (Color::Black, Square::S21),
+            (Color::Black, Square::S24),
             (Color::White, Square::S77),
-            (Color::White, Square::S48),
+            (Color::White, Square::S46),
         ];
 
         for (color, square) in cases {
@@ -289,8 +183,7 @@ mod tests {
     #[test]
     fn lance_attacks_stop_at_blockers() {
         let black_square = Square::S55;
-        let black_occupied =
-            bb_from_squares(&[black_square, Square::S54, Square::S53, Square::S72]);
+        let black_occupied = bb_from_squares(&[Square::S54, Square::S53, Square::S72]);
 
         assert_eq!(
             lance_attacks(Color::Black, black_square, black_occupied),
@@ -298,8 +191,7 @@ mod tests {
         );
 
         let white_square = Square::S45;
-        let white_occupied =
-            bb_from_squares(&[white_square, Square::S46, Square::S48, Square::S54]);
+        let white_occupied = bb_from_squares(&[Square::S46, Square::S48, Square::S54]);
 
         assert_eq!(
             lance_attacks(Color::White, white_square, white_occupied),
@@ -307,8 +199,7 @@ mod tests {
         );
 
         let cramped_square = Square::S43;
-        let cramped_occupied =
-            bb_from_squares(&[cramped_square, Square::S42, Square::S49, Square::S31]);
+        let cramped_occupied = bb_from_squares(&[Square::S42, Square::S49, Square::S31]);
 
         assert_eq!(
             lance_attacks(Color::Black, cramped_square, cramped_occupied),
@@ -321,19 +212,13 @@ mod tests {
         let cases = [
             (
                 Square::S55,
-                bb_from_squares(&[
-                    Square::S55,
-                    Square::S33,
-                    Square::S73,
-                    Square::S37,
-                    Square::S77,
-                ]),
+                bb_from_squares(&[Square::S33, Square::S73, Square::S37, Square::S77]),
             ),
             (
                 Square::S22,
-                bb_from_squares(&[Square::S22, Square::S11, Square::S44, Square::S64]),
+                bb_from_squares(&[Square::S11, Square::S44, Square::S64]),
             ),
-            (Square::S88, Square::S88.bit()),
+            (Square::S88, Bitboard::empty()),
         ];
 
         for (square, occupied) in cases {
@@ -349,19 +234,13 @@ mod tests {
         let cases = [
             (
                 Square::S55,
-                bb_from_squares(&[
-                    Square::S55,
-                    Square::S53,
-                    Square::S57,
-                    Square::S45,
-                    Square::S65,
-                ]),
+                bb_from_squares(&[Square::S53, Square::S57, Square::S45, Square::S65]),
             ),
             (
                 Square::S22,
-                bb_from_squares(&[Square::S22, Square::S23, Square::S24, Square::S62]),
+                bb_from_squares(&[Square::S23, Square::S24, Square::S62]),
             ),
-            (Square::S77, Square::S77.bit()),
+            (Square::S77, Bitboard::empty()),
         ];
 
         for (square, occupied) in cases {
@@ -378,7 +257,6 @@ mod tests {
             (
                 Square::S55,
                 bb_from_squares(&[
-                    Square::S55,
                     Square::S33,
                     Square::S73,
                     Square::S37,
@@ -391,9 +269,9 @@ mod tests {
             ),
             (
                 Square::S22,
-                bb_from_squares(&[Square::S22, Square::S23, Square::S24, Square::S44]),
+                bb_from_squares(&[Square::S23, Square::S24, Square::S44]),
             ),
-            (Square::S88, Square::S88.bit()),
+            (Square::S88, Bitboard::empty()),
         ];
 
         for (square, occupied) in cases {
@@ -421,7 +299,6 @@ mod tests {
     fn piece_attacks_dispatches_to_specialized_implementation() {
         let square = Square::S55;
         let occupied = bb_from_squares(&[
-            square,
             Square::S54,
             Square::S57,
             Square::S45,
@@ -436,6 +313,7 @@ mod tests {
             piece_attacks(Piece::new(Color::Black, PieceType::Pawn), square, occupied),
             pawn_attacks(Color::Black, square)
         );
+
         assert_eq!(
             piece_attacks(Piece::new(Color::White, PieceType::Pawn), square, occupied),
             pawn_attacks(Color::White, square)
@@ -445,6 +323,7 @@ mod tests {
             piece_attacks(Piece::new(Color::Black, PieceType::Lance), square, occupied),
             lance_attacks(Color::Black, square, occupied)
         );
+
         assert_eq!(
             piece_attacks(Piece::new(Color::White, PieceType::Lance), square, occupied),
             lance_attacks(Color::White, square, occupied)
@@ -458,6 +337,7 @@ mod tests {
             ),
             knight_attacks(Color::Black, square)
         );
+
         assert_eq!(
             piece_attacks(
                 Piece::new(Color::White, PieceType::Knight),
@@ -475,6 +355,7 @@ mod tests {
             ),
             silver_attacks(Color::Black, square)
         );
+
         assert_eq!(
             piece_attacks(
                 Piece::new(Color::White, PieceType::Silver),
@@ -491,6 +372,7 @@ mod tests {
             PieceType::ProKnight,
             PieceType::ProSilver,
         ];
+
         for piece_type in gold_like {
             let piece = Piece::new(Color::White, piece_type);
             assert_eq!(
@@ -507,14 +389,17 @@ mod tests {
             ),
             bishop_attacks(square, occupied)
         );
+
         assert_eq!(
             piece_attacks(Piece::new(Color::Black, PieceType::Rook), square, occupied),
             rook_attacks(square, occupied)
         );
+
         assert_eq!(
             piece_attacks(Piece::new(Color::Black, PieceType::Horse), square, occupied),
             horse_attacks(square, occupied)
         );
+
         assert_eq!(
             piece_attacks(
                 Piece::new(Color::Black, PieceType::Dragon),
@@ -523,9 +408,119 @@ mod tests {
             ),
             dragon_attacks(square, occupied)
         );
+
         assert_eq!(
             piece_attacks(Piece::new(Color::Black, PieceType::King), square, occupied),
             king_attacks(square)
         );
+    }
+
+    fn bb_from_squares(squares: &[Square]) -> Bitboard {
+        squares
+            .iter()
+            .fold(Bitboard::empty(), |bb, &square| bb | square.bit())
+    }
+
+    fn offset_square(square: Square, file_delta: i8, rank_delta: i8) -> Option<Square> {
+        let file_idx = square.file().as_u8() as i8 + file_delta;
+        let rank_idx = square.rank().as_u8() as i8 + rank_delta;
+
+        if file_idx < 0
+            || file_idx >= File::COUNT as i8
+            || rank_idx < 0
+            || rank_idx >= Rank::COUNT as i8
+        {
+            None
+        } else {
+            Some(Square::new(
+                File::from(file_idx as u8),
+                Rank::from(rank_idx as u8),
+            ))
+        }
+    }
+
+    fn relative_steps(square: Square, color: Color, offsets: &[(i8, i8)]) -> Bitboard {
+        offsets.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
+            let (df, dr) = if color.is_black() {
+                (df, dr)
+            } else {
+                (-df, -dr)
+            };
+
+            if let Some(target) = offset_square(square, df, dr) {
+                bb | target.bit()
+            } else {
+                bb
+            }
+        })
+    }
+
+    fn slider_ray(square: Square, file_delta: i8, rank_delta: i8, occupied: Bitboard) -> Bitboard {
+        let mut bb = Bitboard::empty();
+        let mut file_idx = square.file().as_u8() as i8;
+        let mut rank_idx = square.rank().as_u8() as i8;
+
+        loop {
+            file_idx += file_delta;
+            rank_idx += rank_delta;
+
+            if file_idx < 0
+                || file_idx >= File::COUNT as i8
+                || rank_idx < 0
+                || rank_idx >= Rank::COUNT as i8
+            {
+                break;
+            }
+
+            let next = Square::new(File::from(file_idx as u8), Rank::from(rank_idx as u8));
+            let bit = next.bit();
+            bb |= bit;
+
+            if (occupied & bit).is_any() {
+                break;
+            }
+        }
+
+        bb
+    }
+
+    fn reference_lance(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
+        let rank_delta = if color.is_black() { -1 } else { 1 };
+        slider_ray(square, 0, rank_delta, occupied)
+    }
+
+    fn reference_bishop(square: Square, occupied: Bitboard) -> Bitboard {
+        slider_ray(square, -1, -1, occupied)
+            | slider_ray(square, -1, 1, occupied)
+            | slider_ray(square, 1, -1, occupied)
+            | slider_ray(square, 1, 1, occupied)
+    }
+
+    fn reference_rook(square: Square, occupied: Bitboard) -> Bitboard {
+        slider_ray(square, 0, -1, occupied)
+            | slider_ray(square, 0, 1, occupied)
+            | slider_ray(square, -1, 0, occupied)
+            | slider_ray(square, 1, 0, occupied)
+    }
+
+    fn reference_king(square: Square) -> Bitboard {
+        let deltas = [
+            (0, -1),
+            (0, 1),
+            (-1, 0),
+            (1, 0),
+            (-1, -1),
+            (-1, 1),
+            (1, -1),
+            (1, 1),
+        ];
+
+        deltas.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
+            if let Some(target) = offset_square(square, df, dr) {
+                bb | target.bit()
+            } else {
+                bb
+            }
+        })
     }
 }
