@@ -309,7 +309,7 @@ pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 }
 
 /// Returns horse attacks from the square.
-/// ///
+///
 /// # Panics
 ///
 /// Panics if the square is set in the occupied bitboard.
