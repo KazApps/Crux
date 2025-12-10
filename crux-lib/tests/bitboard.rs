@@ -9,7 +9,7 @@ mod tests {
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
     #[test]
-    fn test_all() {
+    fn all() {
         let mut bb = Bitboard::all();
 
         assert_eq!(bb.count_ones(), 81);
@@ -26,7 +26,7 @@ mod tests {
     }
 
     #[test]
-    fn test_empty() {
+    fn empty() {
         let empty_bb = Bitboard::empty();
 
         assert_eq!(empty_bb.count_ones(), 0);

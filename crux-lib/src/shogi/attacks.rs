@@ -60,6 +60,7 @@ macro_rules! generate_masks {
 }
 
 /// Returns pawn attacks from the given color and square.
+/// Always a single bit is set in the returned bitboard.
 ///
 /// # Panics
 ///
@@ -179,7 +180,7 @@ pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboar
     } else {
         without_rank9.shl(10)
             | without_rank9.shl(1)
-            | without_rank1.shr(8)
+            | without_rank9.shr(8)
             | without_rank1.shl(8)
             | without_rank1.shr(10)
     }

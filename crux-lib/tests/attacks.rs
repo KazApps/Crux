@@ -1,526 +1,897 @@
 #[cfg(test)]
 mod tests {
     use crux_lib::shogi::{
-        attacks::{
-            bishop_attacks, dragon_attacks, gold_attacks, horse_attacks, king_attacks,
-            knight_attacks, lance_attacks, multi_gold_attacks, multi_knight_attacks,
-            multi_pawn_attacks, multi_silver_attacks, pawn_attacks, piece_attacks, rook_attacks,
-            silver_attacks,
-        },
+        attacks,
         bitboard::Bitboard,
-        core::{Color, File, Piece, PieceType, Rank, Square},
+        core::{Color, File, Rank, Square},
     };
 
     #[test]
-    fn pawn_attacks_respect_color_orientation() {
+    fn pawn_attacks() {
         let cases = [
-            (Color::Black, Square::S55, Square::S54),
-            (Color::White, Square::S55, Square::S56),
-            (Color::Black, Square::S23, Square::S22),
-            (Color::White, Square::S78, Square::S79),
+            (Color::Black, Square::S12, Square::S11.bit()),
+            (Color::Black, Square::S55, Square::S54.bit()),
+            (Color::Black, Square::S99, Square::S98.bit()),
+            (Color::White, Square::S11, Square::S12.bit()),
+            (Color::White, Square::S55, Square::S56.bit()),
+            (Color::White, Square::S98, Square::S99.bit()),
         ];
 
-        for (color, square, target) in cases {
-            assert_eq!(pawn_attacks(color, square), target.bit());
+        for (color, square, pawn_attacks) in cases.iter() {
+            assert_eq!(attacks::pawn_attacks(*color, *square), *pawn_attacks);
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn multi_pawn_attacks_matches_individual_pawns() {
-        let black_pawns = [Square::S44, Square::S65, Square::S23];
-        let black_bb = bb_from_squares(&black_pawns);
-        let expected_black = black_pawns.iter().fold(Bitboard::empty(), |bb, &sq| {
-            bb | pawn_attacks(Color::Black, sq)
-        });
+    #[should_panic]
+    fn pawn_attacks_black_panics_on_rank1() {
+        let _ = attacks::pawn_attacks(Color::Black, Square::S51);
+    }
 
-        let white_pawns = [Square::S55, Square::S47, Square::S68];
-        let white_bb = bb_from_squares(&white_pawns);
-        let expected_white = white_pawns.iter().fold(Bitboard::empty(), |bb, &sq| {
-            bb | pawn_attacks(Color::White, sq)
-        });
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn pawn_attacks_white_panics_on_rank9() {
+        let _ = attacks::pawn_attacks(Color::White, Square::S59);
+    }
 
-        let single_white = Square::S45.bit();
-
+    #[test]
+    fn multi_pawn_attacks() {
         let cases = [
-            (Color::Black, black_bb, expected_black),
-            (Color::White, white_bb, expected_white),
-            (Color::Black, Bitboard::empty(), Bitboard::empty()),
+            (
+                Color::Black,
+                Square::S12.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S11.bit() | Square::S54.bit() | Square::S98.bit(),
+            ),
             (
                 Color::White,
-                single_white,
-                pawn_attacks(Color::White, Square::S45),
+                Square::S11.bit() | Square::S55.bit() | Square::S98.bit(),
+                Square::S12.bit() | Square::S56.bit() | Square::S99.bit(),
             ),
         ];
 
-        for (color, pawns_bb, expected) in cases {
-            assert_eq!(multi_pawn_attacks(color, pawns_bb), expected);
+        for (color, pawns_bb, pawns_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::multi_pawn_attacks(*color, *pawns_bb),
+                *pawns_attacks
+            );
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn knight_attacks_match_reference() {
-        const KNIGHT_OFFSETS: [(i8, i8); 2] = [(-1, -2), (1, -2)];
+    #[should_panic]
+    fn multi_pawn_attacks_black_panics_if_contains_rank1() {
+        let _ = attacks::multi_pawn_attacks(Color::Black, Square::S51.bit());
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn multi_pawn_attacks_white_panics_if_contains_rank9() {
+        let _ = attacks::multi_pawn_attacks(Color::White, Square::S59.bit());
+    }
+
+    #[test]
+    fn lance_pseudo_attacks() {
         let cases = [
-            (Color::Black, Square::S55),
-            (Color::Black, Square::S24),
-            (Color::White, Square::S77),
-            (Color::White, Square::S46),
+            (Color::Black, Square::S12, Square::S11.bit()),
+            (
+                Color::Black,
+                Square::S55,
+                Square::S54.bit() | Square::S53.bit() | Square::S52.bit() | Square::S51.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S99,
+                File::File9.bit() & !Square::S99.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11,
+                File::File1.bit() & !Square::S11.bit(),
+            ),
+            (
+                Color::White,
+                Square::S55,
+                Square::S56.bit() | Square::S57.bit() | Square::S58.bit() | Square::S59.bit(),
+            ),
+            (Color::White, Square::S98, Square::S99.bit()),
         ];
 
-        for (color, square) in cases {
-            let expected = relative_steps(square, color, &KNIGHT_OFFSETS);
-            assert_eq!(knight_attacks(color, square), expected);
+        for (color, square, lance_pseudo_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::lance_pseudo_attacks(*color, *square),
+                *lance_pseudo_attacks
+            );
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn multi_knight_attacks_matches_individual_knights() {
-        let black_knights = [Square::S55, Square::S64, Square::S73];
-        let white_knights = [Square::S55, Square::S46, Square::S37];
-        let lone_black = [Square::S33];
-        let white_edge = [Square::S64];
+    #[should_panic]
+    fn lance_pseudo_attacks_black_panics_on_rank1() {
+        let _ = attacks::lance_pseudo_attacks(Color::Black, Square::S51);
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn lance_pseudo_attacks_white_panics_on_rank9() {
+        let _ = attacks::lance_pseudo_attacks(Color::White, Square::S59);
+    }
+
+    #[test]
+    fn lance_attacks() {
+        for color in 0..Color::COUNT {
+            for square in 0..Square::COUNT {
+                let color = Color::from(color);
+                let square = Square::from(square);
+
+                if matches!(square.rank().relative(color), Rank::Rank1) {
+                    continue;
+                }
+
+                assert_eq!(
+                    attacks::lance_attacks(color, square, Bitboard::empty()),
+                    attacks::lance_pseudo_attacks(color, square)
+                );
+
+                assert_eq!(
+                    attacks::lance_attacks(color, square, Bitboard::all()),
+                    attacks::pawn_attacks(color, square)
+                );
+            }
+        }
 
         let cases = [
-            (Color::Black, &black_knights[..]),
-            (Color::White, &white_knights[..]),
-            (Color::Black, &lone_black[..]),
-            (Color::White, &white_edge[..]),
+            (
+                Color::Black,
+                Square::S19,
+                Square::S15.bit(),
+                Square::S18.bit() | Square::S17.bit() | Square::S16.bit() | Square::S15.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S59,
+                Square::S57.bit() | Square::S53.bit(),
+                Square::S58.bit() | Square::S57.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S99,
+                Square::S91.bit(),
+                File::File9.bit() & !Square::S99.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11,
+                Square::S15.bit(),
+                Square::S12.bit() | Square::S13.bit() | Square::S14.bit() | Square::S15.bit(),
+            ),
+            (
+                Color::White,
+                Square::S51,
+                Square::S53.bit() | Square::S57.bit(),
+                Square::S52.bit() | Square::S53.bit(),
+            ),
+            (
+                Color::White,
+                Square::S91,
+                Square::S99.bit(),
+                File::File9.bit() & !Square::S91.bit(),
+            ),
         ];
 
-        for (color, knights) in cases {
-            let bb = bb_from_squares(knights);
-            let expected = knights.iter().fold(Bitboard::empty(), |attacks, &sq| {
-                attacks | knight_attacks(color, sq)
-            });
-
-            let actual = multi_knight_attacks(color, bb);
-            assert_eq!(actual, expected, "color {:?} knights {:?}", color, knights);
+        for (color, square, occupied, lance_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::lance_attacks(*color, *square, *occupied),
+                *lance_attacks
+            );
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn silver_attacks_match_reference() {
-        const SILVER_OFFSETS: [(i8, i8); 5] = [(0, -1), (-1, -1), (1, -1), (-1, 1), (1, 1)];
+    #[should_panic]
+    fn lance_attacks_black_panics_on_rank1() {
+        let _ = attacks::lance_attacks(Color::Black, Square::S51, Bitboard::empty());
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn lance_attacks_white_panics_on_rank9() {
+        let _ = attacks::lance_attacks(Color::White, Square::S59, Bitboard::empty());
+    }
+
+    #[test]
+    fn knight_attacks() {
         let cases = [
-            (Color::Black, Square::S55),
-            (Color::Black, Square::S21),
-            (Color::White, Square::S87),
-            (Color::White, Square::S25),
+            (Color::Black, Square::S13, Square::S21.bit()),
+            (
+                Color::Black,
+                Square::S55,
+                Square::S43.bit() | Square::S63.bit(),
+            ),
+            (Color::Black, Square::S99, Square::S87.bit()),
+            (Color::White, Square::S11, Square::S23.bit()),
+            (
+                Color::White,
+                Square::S55,
+                Square::S47.bit() | Square::S67.bit(),
+            ),
+            (Color::White, Square::S97, Square::S89.bit()),
         ];
 
-        for (color, square) in cases {
-            let expected = relative_steps(square, color, &SILVER_OFFSETS);
-            assert_eq!(silver_attacks(color, square), expected);
+        for (color, square, knight_attacks) in cases.iter() {
+            assert_eq!(attacks::knight_attacks(*color, *square), *knight_attacks);
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn multi_silver_attacks_matches_individual_silvers() {
-        let black_silvers = [Square::S55, Square::S23, Square::S12];
-        let white_silvers = [Square::S55, Square::S77, Square::S88];
-        let edge_black = [Square::S72];
+    #[should_panic]
+    fn knight_attacks_black_panics_on_rank1() {
+        let _ = attacks::knight_attacks(Color::Black, Square::S51);
+    }
 
-        let empty: &[Square] = &[];
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn knight_attacks_white_panics_on_rank9() {
+        let _ = attacks::knight_attacks(Color::White, Square::S59);
+    }
 
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn knight_attacks_black_panics_on_rank2() {
+        let _ = attacks::knight_attacks(Color::Black, Square::S52);
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn knight_attacks_white_panics_on_rank8() {
+        let _ = attacks::knight_attacks(Color::White, Square::S58);
+    }
+
+    #[test]
+    fn multi_knight_attacks() {
         let cases = [
-            (Color::Black, &black_silvers[..]),
-            (Color::White, &white_silvers[..]),
-            (Color::Black, &edge_black[..]),
-            (Color::White, empty),
+            (
+                Color::Black,
+                Square::S13.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S21.bit() | Square::S43.bit() | Square::S63.bit() | Square::S87.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11.bit() | Square::S55.bit() | Square::S97.bit(),
+                Square::S23.bit() | Square::S47.bit() | Square::S67.bit() | Square::S89.bit(),
+            ),
         ];
 
-        for (color, silvers) in cases {
-            let bb = bb_from_squares(silvers);
-            let expected = silvers.iter().fold(Bitboard::empty(), |attacks, &sq| {
-                attacks | silver_attacks(color, sq)
-            });
-
-            assert_eq!(multi_silver_attacks(color, bb), expected);
+        for (color, knights_bb, knights_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::multi_knight_attacks(*color, *knights_bb),
+                *knights_attacks
+            );
         }
     }
 
+    #[cfg(debug_assertions)]
     #[test]
-    fn gold_attacks_match_reference() {
-        const GOLD_OFFSETS: [(i8, i8); 6] = [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (1, -1)];
+    #[should_panic]
+    fn multi_knight_attacks_black_panics_if_contains_rank1() {
+        let _ = attacks::multi_knight_attacks(Color::Black, Square::S51.bit());
+    }
 
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn multi_knight_attacks_white_panics_if_contains_rank9() {
+        let _ = attacks::multi_knight_attacks(Color::White, Square::S59.bit());
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn multi_knight_attacks_black_panics_if_contains_rank2() {
+        let _ = attacks::multi_knight_attacks(Color::Black, Square::S52.bit());
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    #[should_panic]
+    fn multi_knight_attacks_white_panics_if_contains_rank8() {
+        let _ = attacks::multi_knight_attacks(Color::White, Square::S58.bit());
+    }
+
+    #[test]
+    fn silver_attacks() {
         let cases = [
-            (Color::Black, Square::S55),
-            (Color::Black, Square::S19),
-            (Color::White, Square::S85),
-            (Color::White, Square::S23),
+            (Color::Black, Square::S11, Square::S22.bit()),
+            (
+                Color::Black,
+                Square::S55,
+                Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S54.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S99,
+                Square::S88.bit() | Square::S98.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11,
+                Square::S12.bit() | Square::S22.bit(),
+            ),
+            (
+                Color::White,
+                Square::S55,
+                Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S56.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit(),
+            ),
+            (Color::White, Square::S99, Square::S88.bit()),
         ];
 
-        for (color, square) in cases {
-            let expected = relative_steps(square, color, &GOLD_OFFSETS);
-            assert_eq!(gold_attacks(color, square), expected);
+        for (color, square, silver_attacks) in cases.iter() {
+            assert_eq!(attacks::silver_attacks(*color, *square), *silver_attacks);
         }
     }
 
     #[test]
-    fn multi_gold_attacks_matches_individual_golds() {
-        let black_golds = [Square::S55, Square::S13, Square::S87];
-        let white_golds = [Square::S55, Square::S24, Square::S68];
-        let single_white = [Square::S52];
-        let empty: &[Square] = &[];
-
+    fn multi_silver_attacks() {
         let cases = [
-            (Color::Black, &black_golds[..]),
-            (Color::White, &white_golds[..]),
-            (Color::White, &single_white[..]),
-            (Color::Black, empty),
+            (
+                Color::Black,
+                Square::S11.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S22.bit()
+                    | Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S54.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit()
+                    | Square::S88.bit()
+                    | Square::S98.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S12.bit()
+                    | Square::S22.bit()
+                    | Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S56.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit()
+                    | Square::S88.bit(),
+            ),
         ];
 
-        for (color, golds) in cases {
-            let bb = bb_from_squares(golds);
-            let expected = golds.iter().fold(Bitboard::empty(), |attacks, &sq| {
-                attacks | gold_attacks(color, sq)
-            });
-
-            assert_eq!(multi_gold_attacks(color, bb), expected);
+        for (color, silvers_bb, silvers_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::multi_silver_attacks(*color, *silvers_bb),
+                *silvers_attacks
+            );
         }
     }
 
     #[test]
-    fn lance_attacks_stop_at_blockers() {
-        let black_square = Square::S55;
-        let black_occupied = bb_from_squares(&[Square::S54, Square::S53, Square::S72]);
+    fn gold_attacks() {
+        let cases = [
+            (
+                Color::Black,
+                Square::S11,
+                Square::S12.bit() | Square::S21.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S55,
+                Square::S44.bit()
+                    | Square::S45.bit()
+                    | Square::S54.bit()
+                    | Square::S56.bit()
+                    | Square::S64.bit()
+                    | Square::S65.bit(),
+            ),
+            (
+                Color::Black,
+                Square::S99,
+                Square::S88.bit() | Square::S89.bit() | Square::S98.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11,
+                Square::S12.bit() | Square::S21.bit() | Square::S22.bit(),
+            ),
+            (
+                Color::White,
+                Square::S55,
+                Square::S45.bit()
+                    | Square::S46.bit()
+                    | Square::S54.bit()
+                    | Square::S56.bit()
+                    | Square::S65.bit()
+                    | Square::S66.bit(),
+            ),
+            (
+                Color::White,
+                Square::S99,
+                Square::S89.bit() | Square::S98.bit(),
+            ),
+        ];
 
-        assert_eq!(
-            lance_attacks(Color::Black, black_square, black_occupied),
-            reference_lance(Color::Black, black_square, black_occupied)
-        );
-
-        let white_square = Square::S45;
-        let white_occupied = bb_from_squares(&[Square::S46, Square::S48, Square::S54]);
-
-        assert_eq!(
-            lance_attacks(Color::White, white_square, white_occupied),
-            reference_lance(Color::White, white_square, white_occupied)
-        );
-
-        let cramped_square = Square::S43;
-        let cramped_occupied = bb_from_squares(&[Square::S42, Square::S49, Square::S31]);
-
-        assert_eq!(
-            lance_attacks(Color::Black, cramped_square, cramped_occupied),
-            reference_lance(Color::Black, cramped_square, cramped_occupied)
-        );
+        for (color, square, gold_attacks) in cases.iter() {
+            assert_eq!(attacks::gold_attacks(*color, *square), *gold_attacks);
+        }
     }
 
     #[test]
-    fn bishop_attacks_follow_diagonals() {
+    fn multi_gold_attacks() {
         let cases = [
+            (
+                Color::Black,
+                Square::S11.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S12.bit()
+                    | Square::S21.bit()
+                    | Square::S44.bit()
+                    | Square::S45.bit()
+                    | Square::S54.bit()
+                    | Square::S56.bit()
+                    | Square::S64.bit()
+                    | Square::S65.bit()
+                    | Square::S88.bit()
+                    | Square::S89.bit()
+                    | Square::S98.bit(),
+            ),
+            (
+                Color::White,
+                Square::S11.bit() | Square::S55.bit() | Square::S99.bit(),
+                Square::S12.bit()
+                    | Square::S21.bit()
+                    | Square::S22.bit()
+                    | Square::S45.bit()
+                    | Square::S46.bit()
+                    | Square::S54.bit()
+                    | Square::S56.bit()
+                    | Square::S65.bit()
+                    | Square::S66.bit()
+                    | Square::S89.bit()
+                    | Square::S98.bit(),
+            ),
+        ];
+
+        for (color, golds_bb, golds_attacks) in cases.iter() {
+            assert_eq!(
+                attacks::multi_gold_attacks(*color, *golds_bb),
+                *golds_attacks
+            );
+        }
+    }
+
+    #[test]
+    fn bishop_pseudo_attacks() {
+        let cases = [
+            (
+                Square::S11,
+                Square::S22.bit()
+                    | Square::S33.bit()
+                    | Square::S44.bit()
+                    | Square::S55.bit()
+                    | Square::S66.bit()
+                    | Square::S77.bit()
+                    | Square::S88.bit()
+                    | Square::S99.bit(),
+            ),
+            (
+                Square::S15,
+                Square::S24.bit()
+                    | Square::S26.bit()
+                    | Square::S33.bit()
+                    | Square::S37.bit()
+                    | Square::S42.bit()
+                    | Square::S48.bit()
+                    | Square::S51.bit()
+                    | Square::S59.bit(),
+            ),
+            (
+                Square::S19,
+                Square::S28.bit()
+                    | Square::S37.bit()
+                    | Square::S46.bit()
+                    | Square::S55.bit()
+                    | Square::S64.bit()
+                    | Square::S73.bit()
+                    | Square::S82.bit()
+                    | Square::S91.bit(),
+            ),
+            (
+                Square::S51,
+                Square::S15.bit()
+                    | Square::S24.bit()
+                    | Square::S33.bit()
+                    | Square::S42.bit()
+                    | Square::S62.bit()
+                    | Square::S73.bit()
+                    | Square::S84.bit()
+                    | Square::S95.bit(),
+            ),
             (
                 Square::S55,
-                bb_from_squares(&[Square::S33, Square::S73, Square::S37, Square::S77]),
+                Square::S11.bit()
+                    | Square::S11.bit()
+                    | Square::S19.bit()
+                    | Square::S22.bit()
+                    | Square::S28.bit()
+                    | Square::S33.bit()
+                    | Square::S37.bit()
+                    | Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit()
+                    | Square::S73.bit()
+                    | Square::S77.bit()
+                    | Square::S82.bit()
+                    | Square::S88.bit()
+                    | Square::S91.bit()
+                    | Square::S99.bit(),
             ),
             (
-                Square::S22,
-                bb_from_squares(&[Square::S11, Square::S44, Square::S64]),
+                Square::S59,
+                Square::S15.bit()
+                    | Square::S26.bit()
+                    | Square::S37.bit()
+                    | Square::S48.bit()
+                    | Square::S68.bit()
+                    | Square::S77.bit()
+                    | Square::S86.bit()
+                    | Square::S95.bit(),
             ),
-            (Square::S88, Bitboard::empty()),
+            (
+                Square::S91,
+                Square::S19.bit()
+                    | Square::S28.bit()
+                    | Square::S37.bit()
+                    | Square::S46.bit()
+                    | Square::S55.bit()
+                    | Square::S64.bit()
+                    | Square::S73.bit()
+                    | Square::S82.bit(),
+            ),
+            (
+                Square::S95,
+                Square::S51.bit()
+                    | Square::S59.bit()
+                    | Square::S62.bit()
+                    | Square::S68.bit()
+                    | Square::S73.bit()
+                    | Square::S77.bit()
+                    | Square::S84.bit()
+                    | Square::S86.bit(),
+            ),
+            (
+                Square::S99,
+                Square::S11.bit()
+                    | Square::S22.bit()
+                    | Square::S33.bit()
+                    | Square::S44.bit()
+                    | Square::S55.bit()
+                    | Square::S66.bit()
+                    | Square::S77.bit()
+                    | Square::S88.bit(),
+            ),
         ];
 
-        for (square, occupied) in cases {
+        for (square, bishop_pseudo_attacks) in cases.iter() {
             assert_eq!(
-                bishop_attacks(square, occupied),
-                reference_bishop(square, occupied)
+                attacks::bishop_pseudo_attacks(*square),
+                *bishop_pseudo_attacks
             );
         }
     }
 
     #[test]
-    fn rook_attacks_follow_ranks_and_files() {
+    fn bishop_attacks() {
+        for square in 0..Square::COUNT {
+            let square = Square::from(square);
+
+            assert_eq!(
+                attacks::bishop_attacks(square, Bitboard::empty()),
+                attacks::bishop_pseudo_attacks(square)
+            );
+
+            assert_eq!(
+                attacks::bishop_attacks(square, Bitboard::all()),
+                attacks::silver_attacks(Color::Black, square)
+                    & if matches!(square.rank(), Rank::Rank1) {
+                        Bitboard::all()
+                    } else {
+                        !attacks::pawn_attacks(Color::Black, square)
+                    }
+            );
+        }
+
         let cases = [
             (
-                Square::S55,
-                bb_from_squares(&[Square::S53, Square::S57, Square::S45, Square::S65]),
+                Square::S11,
+                Square::S55.bit(),
+                Square::S22.bit() | Square::S33.bit() | Square::S44.bit() | Square::S55.bit(),
             ),
             (
-                Square::S22,
-                bb_from_squares(&[Square::S23, Square::S24, Square::S62]),
+                Square::S15,
+                Square::S33.bit() | Square::S37.bit(),
+                Square::S24.bit() | Square::S26.bit() | Square::S33.bit() | Square::S37.bit(),
             ),
-            (Square::S77, Bitboard::empty()),
+            (
+                Square::S19,
+                Square::S73.bit(),
+                Square::S28.bit()
+                    | Square::S37.bit()
+                    | Square::S46.bit()
+                    | Square::S55.bit()
+                    | Square::S64.bit()
+                    | Square::S73.bit(),
+            ),
+            (
+                Square::S51,
+                Square::S24.bit() | Square::S84.bit(),
+                Square::S24.bit()
+                    | Square::S33.bit()
+                    | Square::S42.bit()
+                    | Square::S62.bit()
+                    | Square::S73.bit()
+                    | Square::S84.bit(),
+            ),
+            (
+                Square::S55,
+                Square::S11.bit() | Square::S37.bit() | Square::S64.bit() | Square::S88.bit(),
+                Square::S11.bit()
+                    | Square::S11.bit()
+                    | Square::S22.bit()
+                    | Square::S33.bit()
+                    | Square::S37.bit()
+                    | Square::S44.bit()
+                    | Square::S46.bit()
+                    | Square::S64.bit()
+                    | Square::S66.bit()
+                    | Square::S77.bit()
+                    | Square::S88.bit(),
+            ),
+            (
+                Square::S59,
+                Square::S48.bit() | Square::S86.bit(),
+                Square::S48.bit() | Square::S68.bit() | Square::S77.bit() | Square::S86.bit(),
+            ),
+            (
+                Square::S91,
+                Square::S19.bit() | Square::S55.bit(),
+                Square::S55.bit() | Square::S64.bit() | Square::S73.bit() | Square::S82.bit(),
+            ),
+            (
+                Square::S95,
+                Square::S51.bit() | Square::S77.bit(),
+                Square::S51.bit()
+                    | Square::S62.bit()
+                    | Square::S73.bit()
+                    | Square::S77.bit()
+                    | Square::S84.bit()
+                    | Square::S86.bit(),
+            ),
+            (
+                Square::S99,
+                Square::S22.bit() | Square::S88.bit(),
+                Square::S88.bit(),
+            ),
         ];
 
-        for (square, occupied) in cases {
-            assert_eq!(
-                rook_attacks(square, occupied),
-                reference_rook(square, occupied)
-            );
+        for (square, occupied, bishop_attacks) in cases.iter() {
+            assert_eq!(attacks::bishop_attacks(*square, *occupied), *bishop_attacks);
         }
     }
 
     #[test]
-    fn horse_and_dragon_include_king_moves() {
+    fn rook_pseudo_attacks() {
+        for square in 0..Square::COUNT {
+            let square = Square::from(square);
+
+            assert_eq!(attacks::rook_pseudo_attacks(square).count_ones(), 16);
+        }
+
         let cases = [
             (
-                Square::S55,
-                bb_from_squares(&[
-                    Square::S33,
-                    Square::S73,
-                    Square::S37,
-                    Square::S77,
-                    Square::S53,
-                    Square::S57,
-                    Square::S45,
-                    Square::S65,
-                ]),
+                Square::S11,
+                (File::File1.bit() | Rank::Rank1.bit()) & !Square::S11.bit(),
             ),
             (
-                Square::S22,
-                bb_from_squares(&[Square::S23, Square::S24, Square::S44]),
+                Square::S15,
+                (File::File1.bit() | Rank::Rank5.bit()) & !Square::S15.bit(),
             ),
-            (Square::S88, Bitboard::empty()),
+            (
+                Square::S19,
+                (File::File1.bit() | Rank::Rank9.bit()) & !Square::S19.bit(),
+            ),
+            (
+                Square::S51,
+                (File::File5.bit() | Rank::Rank1.bit()) & !Square::S51.bit(),
+            ),
+            (
+                Square::S55,
+                (File::File5.bit() | Rank::Rank5.bit()) & !Square::S55.bit(),
+            ),
+            (
+                Square::S59,
+                (File::File5.bit() | Rank::Rank9.bit()) & !Square::S59.bit(),
+            ),
+            (
+                Square::S91,
+                (File::File9.bit() | Rank::Rank1.bit()) & !Square::S91.bit(),
+            ),
+            (
+                Square::S95,
+                (File::File9.bit() | Rank::Rank5.bit()) & !Square::S95.bit(),
+            ),
+            (
+                Square::S99,
+                (File::File9.bit() | Rank::Rank9.bit()) & !Square::S99.bit(),
+            ),
         ];
 
-        for (square, occupied) in cases {
-            assert_eq!(
-                horse_attacks(square, occupied),
-                reference_bishop(square, occupied) | reference_king(square)
-            );
-            assert_eq!(
-                dragon_attacks(square, occupied),
-                reference_rook(square, occupied) | reference_king(square)
-            );
+        for (square, rook_pseudo_attacks) in cases.iter() {
+            assert_eq!(attacks::rook_pseudo_attacks(*square), *rook_pseudo_attacks);
         }
     }
 
     #[test]
-    fn king_attacks_cover_adjacent_squares() {
-        let cases = [Square::S55, Square::S11, Square::S59];
+    fn rook_attacks() {
+        for square in 0..Square::COUNT {
+            let square = Square::from(square);
 
-        for square in cases {
-            assert_eq!(king_attacks(square), reference_king(square));
+            assert_eq!(
+                attacks::rook_attacks(square, Bitboard::empty()),
+                attacks::rook_pseudo_attacks(square)
+            );
+
+            assert_eq!(
+                attacks::rook_attacks(square, Bitboard::all()),
+                attacks::king_attacks(square) & !attacks::bishop_attacks(square, Bitboard::all())
+            );
+        }
+
+        let cases = [
+            (
+                Square::S11,
+                Square::S15.bit() | Square::S51.bit(),
+                Square::S12.bit()
+                    | Square::S13.bit()
+                    | Square::S14.bit()
+                    | Square::S15.bit()
+                    | Square::S21.bit()
+                    | Square::S31.bit()
+                    | Square::S41.bit()
+                    | Square::S51.bit(),
+            ),
+            (
+                Square::S15,
+                Square::S13.bit() | Square::S17.bit() | Square::S55.bit(),
+                Square::S13.bit()
+                    | Square::S14.bit()
+                    | Square::S16.bit()
+                    | Square::S17.bit()
+                    | Square::S25.bit()
+                    | Square::S35.bit()
+                    | Square::S45.bit()
+                    | Square::S55.bit(),
+            ),
+            (
+                Square::S19,
+                Square::S14.bit() | Square::S69.bit(),
+                Square::S14.bit()
+                    | Square::S15.bit()
+                    | Square::S16.bit()
+                    | Square::S17.bit()
+                    | Square::S18.bit()
+                    | Square::S29.bit()
+                    | Square::S39.bit()
+                    | Square::S49.bit()
+                    | Square::S59.bit()
+                    | Square::S69.bit(),
+            ),
+            (
+                Square::S51,
+                Square::S11.bit()
+                    | Square::S31.bit()
+                    | Square::S53.bit()
+                    | Square::S57.bit()
+                    | Square::S71.bit()
+                    | Square::S91.bit(),
+                Square::S52.bit()
+                    | Square::S53.bit()
+                    | Square::S31.bit()
+                    | Square::S41.bit()
+                    | Square::S61.bit()
+                    | Square::S71.bit(),
+            ),
+            (
+                Square::S55,
+                Square::S15.bit() | Square::S52.bit() | Square::S57.bit() | Square::S65.bit(),
+                Square::S52.bit()
+                    | Square::S53.bit()
+                    | Square::S54.bit()
+                    | Square::S56.bit()
+                    | Square::S57.bit()
+                    | Square::S15.bit()
+                    | Square::S25.bit()
+                    | Square::S35.bit()
+                    | Square::S45.bit()
+                    | Square::S65.bit(),
+            ),
+            (
+                Square::S59,
+                Square::S49.bit() | Square::S53.bit() | Square::S57.bit() | Square::S69.bit(),
+                Square::S57.bit() | Square::S58.bit() | Square::S49.bit() | Square::S69.bit(),
+            ),
+            (
+                Square::S91,
+                Square::S71.bit() | Square::S97.bit(),
+                Square::S71.bit()
+                    | Square::S81.bit()
+                    | Square::S92.bit()
+                    | Square::S93.bit()
+                    | Square::S94.bit()
+                    | Square::S95.bit()
+                    | Square::S96.bit()
+                    | Square::S97.bit(),
+            ),
+            (
+                Square::S95,
+                Square::S35.bit() | Square::S65.bit() | Square::S92.bit() | Square::S99.bit(),
+                Square::S65.bit()
+                    | Square::S75.bit()
+                    | Square::S85.bit()
+                    | Square::S92.bit()
+                    | Square::S93.bit()
+                    | Square::S94.bit()
+                    | Square::S96.bit()
+                    | Square::S97.bit()
+                    | Square::S98.bit()
+                    | Square::S99.bit(),
+            ),
+            (
+                Square::S99,
+                Square::S79.bit() | Square::S92.bit() | Square::S96.bit(),
+                Square::S79.bit()
+                    | Square::S89.bit()
+                    | Square::S96.bit()
+                    | Square::S97.bit()
+                    | Square::S98.bit(),
+            ),
+        ];
+
+        for (square, occupied, rook_attacks) in cases.iter() {
+            assert_eq!(attacks::rook_attacks(*square, *occupied), *rook_attacks);
         }
     }
 
     #[test]
-    fn piece_attacks_dispatches_to_specialized_implementation() {
-        let square = Square::S55;
-        let occupied = bb_from_squares(&[
-            Square::S54,
-            Square::S57,
-            Square::S45,
-            Square::S65,
-            Square::S33,
-            Square::S37,
-            Square::S73,
-            Square::S77,
-        ]);
+    fn king_attacks() {
+        for square in 0..Square::COUNT {
+            let square = Square::from(square);
 
-        assert_eq!(
-            piece_attacks(Piece::new(Color::Black, PieceType::Pawn), square, occupied),
-            pawn_attacks(Color::Black, square)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::White, PieceType::Pawn), square, occupied),
-            pawn_attacks(Color::White, square)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::Black, PieceType::Lance), square, occupied),
-            lance_attacks(Color::Black, square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::White, PieceType::Lance), square, occupied),
-            lance_attacks(Color::White, square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::Black, PieceType::Knight),
-                square,
-                occupied
-            ),
-            knight_attacks(Color::Black, square)
-        );
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::White, PieceType::Knight),
-                square,
-                occupied
-            ),
-            knight_attacks(Color::White, square)
-        );
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::Black, PieceType::Silver),
-                square,
-                occupied
-            ),
-            silver_attacks(Color::Black, square)
-        );
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::White, PieceType::Silver),
-                square,
-                occupied
-            ),
-            silver_attacks(Color::White, square)
-        );
-
-        let gold_like = [
-            PieceType::Gold,
-            PieceType::ProPawn,
-            PieceType::ProLance,
-            PieceType::ProKnight,
-            PieceType::ProSilver,
-        ];
-
-        for piece_type in gold_like {
-            let piece = Piece::new(Color::White, piece_type);
             assert_eq!(
-                piece_attacks(piece, square, occupied),
-                gold_attacks(Color::White, square)
+                attacks::king_attacks(square),
+                attacks::silver_attacks(Color::Black, square)
+                    | attacks::gold_attacks(Color::Black, square)
             );
         }
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::Black, PieceType::Bishop),
-                square,
-                occupied
-            ),
-            bishop_attacks(square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::Black, PieceType::Rook), square, occupied),
-            rook_attacks(square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::Black, PieceType::Horse), square, occupied),
-            horse_attacks(square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(
-                Piece::new(Color::Black, PieceType::Dragon),
-                square,
-                occupied
-            ),
-            dragon_attacks(square, occupied)
-        );
-
-        assert_eq!(
-            piece_attacks(Piece::new(Color::Black, PieceType::King), square, occupied),
-            king_attacks(square)
-        );
-    }
-
-    fn bb_from_squares(squares: &[Square]) -> Bitboard {
-        squares
-            .iter()
-            .fold(Bitboard::empty(), |bb, &square| bb | square.bit())
-    }
-
-    fn offset_square(square: Square, file_delta: i8, rank_delta: i8) -> Option<Square> {
-        let file_idx = square.file().as_u8() as i8 + file_delta;
-        let rank_idx = square.rank().as_u8() as i8 + rank_delta;
-
-        if file_idx < 0
-            || file_idx >= File::COUNT as i8
-            || rank_idx < 0
-            || rank_idx >= Rank::COUNT as i8
-        {
-            None
-        } else {
-            Some(Square::new(
-                File::from(file_idx as u8),
-                Rank::from(rank_idx as u8),
-            ))
-        }
-    }
-
-    fn relative_steps(square: Square, color: Color, offsets: &[(i8, i8)]) -> Bitboard {
-        offsets.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
-            let (df, dr) = if color.is_black() {
-                (df, dr)
-            } else {
-                (-df, -dr)
-            };
-
-            if let Some(target) = offset_square(square, df, dr) {
-                bb | target.bit()
-            } else {
-                bb
-            }
-        })
-    }
-
-    fn slider_ray(square: Square, file_delta: i8, rank_delta: i8, occupied: Bitboard) -> Bitboard {
-        let mut bb = Bitboard::empty();
-        let mut file_idx = square.file().as_u8() as i8;
-        let mut rank_idx = square.rank().as_u8() as i8;
-
-        loop {
-            file_idx += file_delta;
-            rank_idx += rank_delta;
-
-            if file_idx < 0
-                || file_idx >= File::COUNT as i8
-                || rank_idx < 0
-                || rank_idx >= Rank::COUNT as i8
-            {
-                break;
-            }
-
-            let next = Square::new(File::from(file_idx as u8), Rank::from(rank_idx as u8));
-            let bit = next.bit();
-            bb |= bit;
-
-            if (occupied & bit).is_any() {
-                break;
-            }
-        }
-
-        bb
-    }
-
-    fn reference_lance(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
-        let rank_delta = if color.is_black() { -1 } else { 1 };
-        slider_ray(square, 0, rank_delta, occupied)
-    }
-
-    fn reference_bishop(square: Square, occupied: Bitboard) -> Bitboard {
-        slider_ray(square, -1, -1, occupied)
-            | slider_ray(square, -1, 1, occupied)
-            | slider_ray(square, 1, -1, occupied)
-            | slider_ray(square, 1, 1, occupied)
-    }
-
-    fn reference_rook(square: Square, occupied: Bitboard) -> Bitboard {
-        slider_ray(square, 0, -1, occupied)
-            | slider_ray(square, 0, 1, occupied)
-            | slider_ray(square, -1, 0, occupied)
-            | slider_ray(square, 1, 0, occupied)
-    }
-
-    fn reference_king(square: Square) -> Bitboard {
-        let deltas = [
-            (0, -1),
-            (0, 1),
-            (-1, 0),
-            (1, 0),
-            (-1, -1),
-            (-1, 1),
-            (1, -1),
-            (1, 1),
-        ];
-
-        deltas.iter().fold(Bitboard::empty(), |bb, &(df, dr)| {
-            if let Some(target) = offset_square(square, df, dr) {
-                bb | target.bit()
-            } else {
-                bb
-            }
-        })
     }
 }
