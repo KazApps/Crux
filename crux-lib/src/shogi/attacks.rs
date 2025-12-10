@@ -13,13 +13,13 @@ type SidedAttacks = [Attacks; Color::COUNT];
 type Masks = [(Bitboard, Bitboard, Bitboard, Bitboard, Bitboard); Square::COUNT];
 
 macro_rules! generate_attacks {
-    (|$square:ident| $body:stmt) => {{
+    (|$square:ident| $body:expr) => {{
         let mut attacks = [Bitboard::empty(); Square::COUNT];
 
         const_for!(square_idx in 0..Square::COUNT => {
             let $square = Square::from(square_idx);
 
-            attacks[square_idx] = { $body };
+            attacks[square_idx] = $body;
         });
 
         attacks
@@ -27,7 +27,7 @@ macro_rules! generate_attacks {
 }
 
 macro_rules! generate_sided_attacks {
-    (|$color:ident, $square:ident| $body:stmt) => {{
+    (|$color:ident, $square:ident| $body:expr) => {{
         let mut attacks = [[Bitboard::empty(); Square::COUNT]; Color::COUNT];
 
         const_for!(color_idx in 0..Color::COUNT => {
@@ -35,7 +35,7 @@ macro_rules! generate_sided_attacks {
                 let $color = Color::from(color_idx);
                 let $square = Square::from(square_idx);
 
-                attacks[color_idx][square_idx] = { $body };
+                attacks[color_idx][square_idx] = $body;
             });
         });
 
@@ -44,7 +44,7 @@ macro_rules! generate_sided_attacks {
 }
 
 macro_rules! generate_masks {
-    (|$square:ident| $body:stmt) => {{
+    (|$square:ident| $body:expr) => {{
         let mut masks = [(Bitboard::empty(), Bitboard::empty(),
                             Bitboard::empty(), Bitboard::empty(),
                             Bitboard::empty()); Square::COUNT];
@@ -52,7 +52,7 @@ macro_rules! generate_masks {
         const_for!(square_idx in 0..Square::COUNT => {
             let $square = Square::from(square_idx);
 
-            masks[square_idx] = { $body };
+            masks[square_idx] = $body;
         });
 
         masks

@@ -529,7 +529,6 @@ mod tests {
             (
                 Square::S55,
                 Square::S11.bit()
-                    | Square::S11.bit()
                     | Square::S19.bit()
                     | Square::S22.bit()
                     | Square::S28.bit()
@@ -656,7 +655,6 @@ mod tests {
                 Square::S55,
                 Square::S11.bit() | Square::S37.bit() | Square::S64.bit() | Square::S88.bit(),
                 Square::S11.bit()
-                    | Square::S11.bit()
                     | Square::S22.bit()
                     | Square::S33.bit()
                     | Square::S37.bit()
