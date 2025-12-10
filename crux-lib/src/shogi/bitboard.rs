@@ -32,7 +32,6 @@ use crate::shogi::core::{Color, File, Rank, Square};
 /// +----+----+----+----+----+----+----+----+----+
 /// | 80 | 71 | 62 | 53 | 44 | 35 | 26 | 17 |  8 | 九
 /// +----+----+----+----+----+----+----+----+----+
-#[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Bitboard(u128);
 

@@ -65,6 +65,7 @@ macro_rules! generate_masks {
 /// # Panics
 ///
 /// Panics if the square is on the relative rank 1 for the given color.
+#[must_use]
 pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
 
@@ -76,6 +77,7 @@ pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
 /// # Panics
 ///
 /// Panics if any square lies on relative rank 1 for the given color.
+#[must_use]
 pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
 
@@ -94,6 +96,7 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
 /// # Panics
 ///
 /// Panics if the given square is on relative `Rank1`.
+#[must_use]
 pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
 
@@ -107,6 +110,7 @@ pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
 /// # Panics
 ///
 /// Panics if the given square is on relative `Rank1`.
+#[must_use]
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
 
@@ -124,6 +128,7 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
 /// # Panics
 ///
 /// Panics if the given square is on relative `Rank1` or `Rank2` for the given color.
+#[must_use]
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(!matches!(
         square.rank().relative(color),
@@ -146,6 +151,7 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
 /// # Panics
 ///
 /// Panics if any square lies on relative ranks 1 or 2 for the given color.
+#[must_use]
 pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboard {
     debug_assert!((knights_bb
         & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
@@ -159,6 +165,7 @@ pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboar
 }
 
 /// Returns silver attacks from the given color and square.
+#[must_use]
 pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
     const SILVER_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_silver_attacks(color, square.bit()));
@@ -167,6 +174,7 @@ pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
 }
 
 /// Returns silver attacks for all squares set in `silvers_bb` for the given color.
+#[must_use]
 pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboard {
     let without_rank1 = silvers_bb & !Rank::Rank1.bit();
     let without_rank9 = silvers_bb & !Rank::Rank9.bit();
@@ -187,6 +195,7 @@ pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboar
 }
 
 /// Returns gold attacks from the given color and square.
+#[must_use]
 pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
     const GOLD_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_gold_attacks(color, square.bit()));
@@ -195,6 +204,7 @@ pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
 }
 
 /// Returns gold attacks for all squares set in `golds_bb` for the given color.
+#[must_use]
 pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
     let without_rank1 = golds_bb & !Rank::Rank1.bit();
     let without_rank9 = golds_bb & !Rank::Rank9.bit();
@@ -220,6 +230,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
 ///
 /// This is equivalent to calling `bishop_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
+#[must_use]
 pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
     BISHOP_MASKS[square.as_usize()].4
 }
@@ -227,6 +238,7 @@ pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
 /// Returns bishop attacks from the given square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
+#[must_use]
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     let masks = BISHOP_MASKS[square.as_usize()];
 
@@ -240,6 +252,7 @@ pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 ///
 /// This is equivalent to calling `rook_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
+#[must_use]
 pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
     ROOK_MASKS[square.as_usize()].4
 }
@@ -247,6 +260,7 @@ pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
 /// Returns rook attacks from the given square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
+#[must_use]
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     let masks = ROOK_MASKS[square.as_usize()];
 
@@ -260,6 +274,7 @@ pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 ///
 /// This is equivalent to calling `horse_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
+#[must_use]
 pub const fn horse_pseudo_attacks(square: Square) -> Bitboard {
     bishop_pseudo_attacks(square) | king_attacks(square)
 }
@@ -267,6 +282,7 @@ pub const fn horse_pseudo_attacks(square: Square) -> Bitboard {
 /// Returns horse attacks from the given square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
+#[must_use]
 pub const fn horse_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     bishop_attacks(square, occupied) | king_attacks(square)
 }
@@ -275,6 +291,7 @@ pub const fn horse_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 ///
 /// This is equivalent to calling `dragon_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
+#[must_use]
 pub const fn dragon_pseudo_attacks(square: Square) -> Bitboard {
     rook_pseudo_attacks(square) | king_attacks(square)
 }
@@ -282,11 +299,13 @@ pub const fn dragon_pseudo_attacks(square: Square) -> Bitboard {
 /// Returns dragon attacks from the given square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
+#[must_use]
 pub const fn dragon_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     rook_attacks(square, occupied) | king_attacks(square)
 }
 
 /// Returns king attacks from the given square.
+#[must_use]
 pub const fn king_attacks(square: Square) -> Bitboard {
     const KING_ATTACKS: Attacks = generate_attacks!(
         |square| silver_attacks(Color::Black, square) | gold_attacks(Color::Black, square)
@@ -302,6 +321,7 @@ pub const fn king_attacks(square: Square) -> Bitboard {
 /// Panics if the square is invalid for the piece type:
 /// - A pawn or lance on the relative rank 1 for its color.
 /// - A knight on the last two ranks relative to its color.
+#[must_use]
 pub const fn piece_pseudo_attacks(piece: Piece, square: Square) -> Bitboard {
     match piece.piece_type() {
         PieceType::Pawn => pawn_attacks(piece.color(), square),
@@ -330,6 +350,7 @@ pub const fn piece_pseudo_attacks(piece: Piece, square: Square) -> Bitboard {
 /// Panics if the square is invalid for the piece type:
 /// - A pawn or lance on the relative rank 1 for its color.
 /// - A knight on the last two ranks relative to its color.
+#[must_use]
 pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> Bitboard {
     match piece.piece_type() {
         PieceType::Pawn => pawn_attacks(piece.color(), square),
@@ -349,6 +370,7 @@ pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> 
     }
 }
 
+#[must_use]
 const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     let tz = (occupied & mask | Square::S99.bit())
         .as_u128()
@@ -357,6 +379,7 @@ const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     Bitboard::new(mask.as_u128() & ((1 << (tz + 1)) - 1))
 }
 
+#[must_use]
 const fn sliding_backward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     let lz = (occupied & mask | Square::S11.bit())
         .as_u128()
