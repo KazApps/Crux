@@ -45,17 +45,17 @@ macro_rules! generate_sided_attacks {
 
 macro_rules! generate_masks {
     (|$square:ident| $body:stmt) => {{
-        let mut attacks = [(Bitboard::empty(), Bitboard::empty(),
+        let mut masks = [(Bitboard::empty(), Bitboard::empty(),
                             Bitboard::empty(), Bitboard::empty(),
                             Bitboard::empty()); Square::COUNT];
 
         const_for!(square_idx in 0..Square::COUNT => {
             let $square = Square::from(square_idx);
 
-            attacks[square_idx] = { $body };
+            masks[square_idx] = { $body };
         });
 
-        attacks
+        masks
     }};
 }
 
