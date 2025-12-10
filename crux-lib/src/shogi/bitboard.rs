@@ -34,9 +34,17 @@ use crate::shogi::core::{Color, File, Rank, Square};
 /// +----+----+----+----+----+----+----+----+----+
 #[repr(transparent)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Bitboard(pub(crate) u128);
+pub struct Bitboard(u128);
 
 impl Bitboard {
+    /// Creates a new `Bitboard` from the given raw `u128` value.
+    #[must_use]
+    pub(crate) const fn new(value: u128) -> Self {
+        debug_assert!(value <= Self::MASK);
+
+        Self(value)
+    }
+
     /// Returns a bitboard with all bits set.
     #[must_use]
     pub const fn all() -> Self {
@@ -91,18 +99,6 @@ impl Bitboard {
         Square::from(self.0.trailing_zeros() as u8)
     }
 
-    /// Returns a bitboard with only the most significant bit set.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the bitboard has no bits set.
-    #[must_use]
-    pub const fn isolate_msb(self) -> Self {
-        debug_assert!(self.is_any());
-
-        Self(1u128 << (127 - self.0.leading_zeros()))
-    }
-
     /// Returns a bitboard with only the least significant bit set.
     ///
     /// # Panics
@@ -130,197 +126,34 @@ impl Bitboard {
         lsb
     }
 
-    #[must_use]
-    pub(crate) const fn north(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank1.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().north().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn south(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank9.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().south().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn east(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & File::File1.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().east().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn west(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & File::File9.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().west().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn north_east(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank1.bit()).is_any() || (self & File::File1.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().north_east().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn north_west(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank1.bit()).is_any() || (self & File::File9.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().north_west().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn south_east(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank9.bit()).is_any() || (self & File::File1.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().south_east().bit()
-        }
-    }
-
-    #[must_use]
-    pub(crate) const fn south_west(self) -> Self {
-        debug_assert!(self.is_single());
-
-        if (self & Rank::Rank9.bit()).is_any() || (self & File::File9.bit()).is_any() {
-            Self::empty()
-        } else {
-            self.lsb().south_west().bit()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_north(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.north()
-        } else {
-            self.south()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_south(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.south()
-        } else {
-            self.north()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_east(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.east()
-        } else {
-            self.west()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_west(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.west()
-        } else {
-            self.east()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_north_east(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.north_east()
-        } else {
-            self.south_west()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_north_west(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.north_west()
-        } else {
-            self.south_east()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_south_east(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.south_east()
-        } else {
-            self.north_west()
-        }
-    }
-
-    #[must_use]
-    pub const fn relative_south_west(self, color: Color) -> Self {
-        debug_assert!(self.is_single());
-
-        if color.is_black() {
-            self.south_west()
-        } else {
-            self.north_east()
-        }
-    }
-
+    /// Returns `self - other` as a new `Bitboard`.
     #[must_use]
     pub(crate) const fn sub(self, other: Self) -> Self {
         Self(self.0 - other.0)
     }
 
+    /// Returns `self >> n` as a new `Bitboard`.
     #[must_use]
     pub(crate) const fn shr(self, n: usize) -> Self {
         Self(self.0 >> n)
     }
 
+    /// Returns `self << n` as a new `Bitboard`,
+    /// masking the result with `Self::MASK` to ensure the value
+    /// always stays within the valid bitboard range.
     #[must_use]
     pub(crate) const fn shl(self, n: usize) -> Self {
-        Self(self.0 << n)
+        Self((self.0 << n) & Self::MASK)
     }
 
+    /// Returns the underlying raw `u128` value.
+    #[must_use]
+    pub(crate) const fn as_u128(self) -> u128 {
+        self.0
+    }
+
+    /// Mask for keeping bitboards within the valid board range
+    /// (lower `Square::COUNT` bits set).
     const MASK: u128 = (1u128 << Square::COUNT) - 1;
 }
 
