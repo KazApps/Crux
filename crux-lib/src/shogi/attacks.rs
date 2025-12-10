@@ -120,11 +120,9 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
 
 /// Returns knight attacks from the given color and square.
 ///
-/// The `occupied` bitboard may include or exclude the given square.
-///
 /// # Panics
 ///
-/// Panics if the given square is on relative `Rank1`.
+/// Panics if the given square is on relative `Rank1` or `Rank2` for the given color.
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(!matches!(
         square.rank().relative(color),
