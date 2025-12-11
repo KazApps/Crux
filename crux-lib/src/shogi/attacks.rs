@@ -9,8 +9,22 @@ use crate::shogi::{
 type Attacks = [Bitboard; Square::COUNT];
 type SidedAttacks = [Attacks; Color::COUNT];
 
-// (direction0, direction1, direction2, direction3, all_directions)
-type Masks = [(Bitboard, Bitboard, Bitboard, Bitboard, Bitboard); Square::COUNT];
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+struct SlidingMasks {
+    backwards: [Bitboard; 2],
+    forwards: [Bitboard; 2],
+    all: Bitboard,
+}
+
+impl const Default for SlidingMasks {
+    fn default() -> Self {
+        Self {
+            backwards: [Bitboard::empty(), Bitboard::empty()],
+            forwards: [Bitboard::empty(), Bitboard::empty()],
+            all: Bitboard::empty(),
+        }
+    }
+}
 
 macro_rules! generate_attacks {
     (|$square:ident| $body:expr) => {{
@@ -45,9 +59,7 @@ macro_rules! generate_sided_attacks {
 
 macro_rules! generate_masks {
     (|$square:ident| $body:expr) => {{
-        let mut masks = [(Bitboard::empty(), Bitboard::empty(),
-                            Bitboard::empty(), Bitboard::empty(),
-                            Bitboard::empty()); Square::COUNT];
+        let mut masks = [SlidingMasks::default(); Square::COUNT];
 
         const_for!(square_idx in 0..Square::COUNT => {
             let $square = Square::from(square_idx);
@@ -232,7 +244,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
-    BISHOP_MASKS[square.as_usize()].4
+    BISHOP_MASKS[square.as_usize()].all
 }
 
 /// Returns bishop attacks from the given square.
@@ -242,10 +254,10 @@ pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     let masks = BISHOP_MASKS[square.as_usize()];
 
-    sliding_backward(occupied, masks.0)
-        | sliding_backward(occupied, masks.1)
-        | sliding_forward(occupied, masks.2)
-        | sliding_forward(occupied, masks.3)
+    sliding_backward(occupied, masks.backwards[0])
+        | sliding_backward(occupied, masks.backwards[1])
+        | sliding_forward(occupied, masks.forwards[0])
+        | sliding_forward(occupied, masks.forwards[1])
 }
 
 /// Returns the precomputed pseudo rook attacks for the given square.
@@ -254,7 +266,7 @@ pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
-    ROOK_MASKS[square.as_usize()].4
+    ROOK_MASKS[square.as_usize()].all
 }
 
 /// Returns rook attacks from the given square.
@@ -264,10 +276,10 @@ pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
     let masks = ROOK_MASKS[square.as_usize()];
 
-    sliding_backward(occupied, masks.0)
-        | sliding_backward(occupied, masks.1)
-        | sliding_forward(occupied, masks.2)
-        | sliding_forward(occupied, masks.3)
+    sliding_backward(occupied, masks.backwards[0])
+        | sliding_backward(occupied, masks.backwards[1])
+        | sliding_forward(occupied, masks.forwards[0])
+        | sliding_forward(occupied, masks.forwards[1])
 }
 
 /// Returns the precomputed pseudo horse attacks for the given square.
@@ -371,21 +383,21 @@ pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> 
 }
 
 #[must_use]
-const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
-    let tz = (occupied & mask | Square::S99.bit())
-        .as_u128()
-        .trailing_zeros();
-
-    Bitboard::new(mask.as_u128() & ((1 << (tz + 1)) - 1))
-}
-
-#[must_use]
 const fn sliding_backward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     let lz = (occupied & mask | Square::S11.bit())
         .as_u128()
         .leading_zeros();
 
     Bitboard::new(mask.as_u128() & !((1 << (127 - lz)) - 1))
+}
+
+#[must_use]
+const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
+    let tz = (occupied & mask | Square::S99.bit())
+        .as_u128()
+        .trailing_zeros();
+
+    Bitboard::new(mask.as_u128() & ((1 << (tz + 1)) - 1))
 }
 
 const LANCE_PSEUDO_ATTACKS: SidedAttacks = generate_sided_attacks! { |color, square| {
@@ -400,80 +412,72 @@ const LANCE_PSEUDO_ATTACKS: SidedAttacks = generate_sided_attacks! { |color, squ
     res
 }};
 
-const BISHOP_MASKS: Masks = generate_masks!(|square| {
+const BISHOP_MASKS: [SlidingMasks; Square::COUNT] = generate_masks!(|square| {
     let mut bb = square.bit();
-    let mut right_up = Bitboard::empty();
-    let mut right_down = Bitboard::empty();
-    let mut left_up = Bitboard::empty();
-    let mut left_down = Bitboard::empty();
+    let mut masks = SlidingMasks::default();
 
     while (bb & (File::File1.bit() | Rank::Rank1.bit())).is_empty() {
         bb = bb.shr(10);
-        right_up |= bb;
+        masks.backwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File1.bit() | Rank::Rank9.bit())).is_empty() {
         bb = bb.shr(8);
-        right_down |= bb;
+        masks.backwards[1] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File9.bit() | Rank::Rank1.bit())).is_empty() {
         bb = bb.shl(8);
-        left_up |= bb;
+        masks.forwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File9.bit() | Rank::Rank9.bit())).is_empty() {
         bb = bb.shl(10);
-        left_down |= bb;
+        masks.forwards[1] |= bb;
     }
 
-    (
-        right_up,
-        right_down,
-        left_up,
-        left_down,
-        right_up | right_down | left_up | left_down,
-    )
+    masks.all = masks.backwards[0] | masks.backwards[1] | masks.forwards[0] | masks.forwards[1];
+
+    masks
 });
 
-const ROOK_MASKS: Masks = generate_masks!(|square| {
+const ROOK_MASKS: [SlidingMasks; Square::COUNT] = generate_masks!(|square| {
     let mut bb = square.bit();
-    let mut right = Bitboard::empty();
-    let mut up = Bitboard::empty();
-    let mut left = Bitboard::empty();
-    let mut down = Bitboard::empty();
+    let mut masks = SlidingMasks::default();
 
     while (bb & File::File1.bit()).is_empty() {
         bb = bb.shr(9);
-        right |= bb;
+        masks.backwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & Rank::Rank1.bit()).is_empty() {
         bb = bb.shr(1);
-        up |= bb;
+        masks.backwards[1] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & File::File9.bit()).is_empty() {
         bb = bb.shl(9);
-        left |= bb;
+        masks.forwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & Rank::Rank9.bit()).is_empty() {
         bb = bb.shl(1);
-        down |= bb;
+        masks.forwards[1] |= bb;
     }
 
-    (right, up, left, down, right | up | left | down)
+    masks.all = masks.backwards[0] | masks.backwards[1] | masks.forwards[0] | masks.forwards[1];
+
+    masks
 });

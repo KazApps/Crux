@@ -16,7 +16,7 @@ mod tests {
 
         let mut square = 0u8;
 
-        while bb.is_any() {
+        while bb.has_any() {
             let actual = bb.pop_lsb();
 
             assert_eq!(actual, Square::from(square));
@@ -34,7 +34,7 @@ mod tests {
     }
 
     #[test]
-    fn is_any() {
+    fn has_any() {
         let cases = [
             (Bitboard::empty(), false),
             (Bitboard::all(), true),
@@ -47,8 +47,8 @@ mod tests {
             ),
         ];
 
-        for (bb, is_any) in cases.iter() {
-            assert_eq!(bb.is_any(), *is_any);
+        for (bb, has_any) in cases.iter() {
+            assert_eq!(bb.has_any(), *has_any);
         }
     }
 
@@ -230,7 +230,7 @@ mod tests {
 
             let mut rank = 0u8;
 
-            while bb.is_any() {
+            while bb.has_any() {
                 let square = bb.pop_lsb();
 
                 assert_eq!(square.file(), file);
@@ -251,7 +251,7 @@ mod tests {
 
             let mut file = 0u8;
 
-            while bb.is_any() {
+            while bb.has_any() {
                 let square = bb.pop_lsb();
 
                 assert_eq!(square.file(), File::from(file));
@@ -280,7 +280,7 @@ mod tests {
 
             let mut promotion_are = promotion_area_fn(color);
 
-            while promotion_are.is_any() {
+            while promotion_are.has_any() {
                 let square = promotion_are.pop_lsb();
 
                 assert!(square.can_promote(color));

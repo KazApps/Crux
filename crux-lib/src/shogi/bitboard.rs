@@ -58,7 +58,7 @@ impl Bitboard {
 
     /// Returns `true` if any bit in the bitboard is set.
     #[must_use]
-    pub const fn is_any(self) -> bool {
+    pub const fn has_any(self) -> bool {
         self.0 != 0
     }
 
@@ -71,7 +71,7 @@ impl Bitboard {
     /// Returns `true` if exactly one bit in the bitboard is set.
     #[must_use]
     pub const fn is_single(self) -> bool {
-        self.is_any() && !self.is_multiple()
+        self.has_any() && !self.is_multiple()
     }
 
     /// Returns `true` if more than one bit in the bitboard is set.
@@ -93,7 +93,7 @@ impl Bitboard {
     /// Panics if the bitboard has no bits set.
     #[must_use]
     pub const fn lsb(self) -> Square {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         Square::from(self.0.trailing_zeros() as u8)
     }
@@ -105,7 +105,7 @@ impl Bitboard {
     /// Panics if the bitboard has no bits set.
     #[must_use]
     pub const fn isolate_lsb(self) -> Self {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         Self(self.0 & self.0.wrapping_neg())
     }
@@ -117,7 +117,7 @@ impl Bitboard {
     /// Panics if the bitboard has no bits set.
     #[must_use]
     pub const fn pop_lsb(&mut self) -> Square {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         let lsb = self.lsb();
         self.0 &= self.0.wrapping_sub(1);
@@ -154,6 +154,12 @@ impl Bitboard {
     /// Mask for keeping bitboards within the valid board range
     /// (lower `Square::COUNT` bits set).
     const MASK: u128 = (1u128 << Square::COUNT) - 1;
+}
+
+impl const Default for Bitboard {
+    fn default() -> Self {
+        Self::empty()
+    }
 }
 
 impl const BitAnd for Bitboard {
@@ -372,7 +378,7 @@ impl Display for Bitboard {
                 write!(
                     f,
                     "| {} ",
-                    if (*self & Bitboard::from(square)).is_any() {
+                    if (*self & square.bit()).has_any() {
                         'X'
                     } else {
                         ' '
