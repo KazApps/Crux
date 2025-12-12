@@ -1,5 +1,13 @@
 use std::mem::transmute;
 
+pub const MAX_PAWN: u32 = 18;
+pub const MAX_LANCE: u32 = 4;
+pub const MAX_KNIGHT: u32 = 4;
+pub const MAX_SILVER: u32 = 4;
+pub const MAX_GOLD: u32 = 4;
+pub const MAX_BISHOP: u32 = 2;
+pub const MAX_ROOK: u32 = 2;
+
 /// Represents the color of a player or piece in the game.
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

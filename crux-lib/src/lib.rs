@@ -4,3 +4,4 @@
 #![feature(const_trait_impl)]
 
 pub mod shogi;
+pub(crate) mod utils;
