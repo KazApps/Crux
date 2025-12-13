@@ -1,5 +1,4 @@
 use const_for::const_for;
-use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::shogi::core::{
     PieceType, MAX_BISHOP, MAX_GOLD, MAX_KNIGHT, MAX_LANCE, MAX_PAWN, MAX_ROOK, MAX_SILVER,
@@ -51,17 +50,17 @@ impl Hand {
         self.0 = (self.0 & !mask) | (count << offset);
     }
 
-    const fn add_inner(&mut self, piece_type: PieceType, count: u32) {
+    pub const fn increment(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
 
-        self.set(piece_type, self.count(piece_type) + count);
+        self.set(piece_type, self.count(piece_type) + 1);
     }
 
-    const fn sub_inner(&mut self, piece_type: PieceType, count: u32) {
+    pub const fn decrement(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
-        debug_assert!(self.count(piece_type) >= count);
+        debug_assert!(self.count(piece_type) > 0);
 
-        self.set(piece_type, self.count(piece_type) - count);
+        self.set(piece_type, self.count(piece_type) - 1);
     }
 
     pub const HAND_PIECE_TYPES: usize = PieceType::Rook.as_usize() + 1;
@@ -108,66 +107,6 @@ impl Hand {
 impl const Default for Hand {
     fn default() -> Self {
         Self(0)
-    }
-}
-
-impl Add<PieceType> for Hand {
-    type Output = Self;
-
-    fn add(mut self, piece_type: PieceType) -> Self::Output {
-        self.add_inner(piece_type, 1);
-        self
-    }
-}
-
-impl Add<(PieceType, u32)> for Hand {
-    type Output = Self;
-
-    fn add(mut self, (piece_type, count): (PieceType, u32)) -> Self::Output {
-        self.add_inner(piece_type, count);
-        self
-    }
-}
-
-impl AddAssign<PieceType> for Hand {
-    fn add_assign(&mut self, piece_type: PieceType) {
-        self.add_inner(piece_type, 1);
-    }
-}
-
-impl AddAssign<(PieceType, u32)> for Hand {
-    fn add_assign(&mut self, (piece_type, count): (PieceType, u32)) {
-        self.add_inner(piece_type, count);
-    }
-}
-
-impl Sub<PieceType> for Hand {
-    type Output = Self;
-
-    fn sub(mut self, piece_type: PieceType) -> Self::Output {
-        self.sub_inner(piece_type, 1);
-        self
-    }
-}
-
-impl Sub<(PieceType, u32)> for Hand {
-    type Output = Self;
-
-    fn sub(mut self, (piece_type, count): (PieceType, u32)) -> Self::Output {
-        self.sub_inner(piece_type, count);
-        self
-    }
-}
-
-impl SubAssign<PieceType> for Hand {
-    fn sub_assign(&mut self, piece_type: PieceType) {
-        self.sub_inner(piece_type, 1);
-    }
-}
-
-impl SubAssign<(PieceType, u32)> for Hand {
-    fn sub_assign(&mut self, (piece_type, count): (PieceType, u32)) {
-        self.sub_inner(piece_type, count);
     }
 }
 

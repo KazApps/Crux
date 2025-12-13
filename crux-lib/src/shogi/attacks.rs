@@ -382,6 +382,41 @@ pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> 
     }
 }
 
+/// Returns the ray of squares strictly between two squares.
+///
+/// If `from` and `to` are aligned on the same rank, file, or diagonal,
+/// this returns all squares between them, excluding both endpoints.
+///
+/// Otherwise, this returns an empty bitboard.
+#[must_use]
+pub const fn ray_between(from: Square, to: Square) -> Bitboard {
+    #[allow(clippy::large_const_arrays)]
+    const TABLE: [[Bitboard; Square::COUNT]; Square::COUNT] = {
+        let mut table = [[Bitboard::empty(); Square::COUNT]; Square::COUNT];
+
+        const_for!(i in 0..Square::COUNT => {
+            const_for!(j in 0..Square::COUNT => {
+                if i == j {
+                    continue;
+                }
+
+                let from = Square::from(i);
+                let to = Square::from(j);
+
+                if rook_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= rook_attacks(from, to.bit()) & rook_attacks(to, from.bit());
+                } else if bishop_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= bishop_attacks(from, to.bit()) & bishop_attacks(to, from.bit());
+                }
+            });
+        });
+
+        table
+    };
+
+    TABLE[from.as_usize()][to.as_usize()]
+}
+
 #[must_use]
 const fn sliding_backward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     let lz = (occupied & mask | Square::S11.bit())

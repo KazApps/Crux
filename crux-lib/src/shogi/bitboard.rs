@@ -86,6 +86,12 @@ impl Bitboard {
         self.0.count_ones()
     }
 
+    /// Returns if the bitboard contains the given square.
+    #[must_use]
+    pub const fn contains(self, square: Square) -> bool {
+        (self & square.bit()).has_any()
+    }
+
     /// Returns the least significant bit (LSB) as a `Square`.
     ///
     /// # Panics
@@ -375,15 +381,7 @@ impl Display for Bitboard {
                 let file = File::from(file);
                 let square = Square::new(file, rank);
 
-                write!(
-                    f,
-                    "| {} ",
-                    if (*self & square.bit()).has_any() {
-                        'X'
-                    } else {
-                        ' '
-                    }
-                )?;
+                write!(f, "| {} ", if self.contains(square) { 'X' } else { ' ' })?;
             }
 
             writeln!(f, "| {}", RANK_TO_CHAR[rank.as_usize()])?;
