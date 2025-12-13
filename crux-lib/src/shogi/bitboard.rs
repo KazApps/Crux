@@ -1,8 +1,9 @@
-use const_for::const_for;
 use std::{
     fmt::{Display, Formatter, Result},
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not},
 };
+
+use const_for::const_for;
 
 use crate::shogi::core::{Color, File, Rank, Square};
 

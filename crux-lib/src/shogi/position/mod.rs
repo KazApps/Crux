@@ -2,11 +2,13 @@ pub mod hand;
 pub mod key;
 pub mod zobrist;
 
-use crate::shogi::attacks::{
-    bishop_pseudo_attacks, lance_pseudo_attacks, ray_between, rook_pseudo_attacks,
-};
+use const_for::const_for;
+
 use crate::shogi::{
-    attacks::{gold_attacks, knight_attacks, pawn_attacks, silver_attacks},
+    attacks::{
+        bishop_pseudo_attacks, gold_attacks, knight_attacks, lance_pseudo_attacks, pawn_attacks,
+        ray_between, rook_pseudo_attacks, silver_attacks,
+    },
     bitboard::Bitboard,
     core::{Color, Piece, PieceType, Square},
     position::{
@@ -15,7 +17,6 @@ use crate::shogi::{
         zobrist::{hand_key, piece_square_key, side_key},
     },
 };
-use const_for::const_for;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Position {

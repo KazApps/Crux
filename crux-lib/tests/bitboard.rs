@@ -1,12 +1,13 @@
 #[cfg(test)]
 mod tests {
+    use rand::{rngs::StdRng, Rng, SeedableRng};
+
     use crux_lib::shogi::{
         bitboard::{
             pawn_drop_mask as pawn_drop_mask_fn, promotion_area as promotion_area_fn, Bitboard,
         },
         core::{Color, File, Rank, Square},
     };
-    use rand::{rngs::StdRng, Rng, SeedableRng};
 
     #[test]
     fn all() {

@@ -1,9 +1,8 @@
 use const_for::const_for;
 
-use crate::shogi::core::PieceType;
 use crate::shogi::{
     bitboard::Bitboard,
-    core::{Color, File, Piece, Rank, Square},
+    core::{Color, File, Piece, PieceType, Rank, Square},
 };
 
 type Attacks = [Bitboard; Square::COUNT];
