@@ -9,13 +9,13 @@ use crate::shogi::core::{
 /// `Hand(u32)` is a structure that encodes the number of pieces in hand.
 ///
 /// Bit layout (from LSB to MSB):
-/// bits  0..=4  : Pawn count   (max 18, 5 bits)
-/// bits  5..=7  : Lance count  (max  4, 3 bits)
+/// bits  0..=4  : Pawn   count (max 18, 5 bits)
+/// bits  5..=7  : Lance  count (max  4, 3 bits)
 /// bits  8..=10 : Knight count (max  4, 3 bits)
 /// bits 11..=13 : Silver count (max  4, 3 bits)
-/// bits 14..=16 : Gold count   (max  4, 3 bits)
+/// bits 14..=16 : Gold   count (max  4, 3 bits)
 /// bits 17..=18 : Bishop count (max  2, 2 bits)
-/// bits 19..=20 : Rook count   (max  2, 2 bits)
+/// bits 19..=20 : Rook   count (max  2, 2 bits)
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Hand(u32);
 
