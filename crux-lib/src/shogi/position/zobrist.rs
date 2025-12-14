@@ -10,13 +10,14 @@ type SideKey = Key;
 type PieceSquareKey = [[Key; Square::COUNT]; Piece::COUNT];
 type HandKey = [Key; HAND_TOTAL];
 
-const HAND_ENTRIES: usize = Hand::HAND_PIECE_TYPES * Color::COUNT;
+const HAND_ENTRIES: usize = Color::COUNT * Hand::HAND_PIECE_TYPES;
 
 const HAND_OFFSETS: [u32; HAND_ENTRIES] = {
     let mut offsets = [0; HAND_ENTRIES];
 
     const_for!(i in 1..HAND_ENTRIES => {
-        offsets[i] = offsets[i - 1] + Hand::MAX_PIECE_COUNTS[Piece::from(i).piece_type().as_usize()];
+        offsets[i] =
+            offsets[i - 1] + Hand::MAX_PIECE_COUNTS[Piece::from(i - 1).piece_type().as_usize()] + 1;
     });
 
     offsets
@@ -42,9 +43,9 @@ impl const Default for Zobrist {
 }
 
 impl Zobrist {
-    pub const SIDE: SideKey = Self::ALL_KEYS.side;
-    pub const PIECE_SQUARE: PieceSquareKey = Self::ALL_KEYS.piece_square;
-    pub const HAND: HandKey = Self::ALL_KEYS.hand;
+    const SIDE: SideKey = Self::ALL_KEYS.side;
+    const PIECE_SQUARE: PieceSquareKey = Self::ALL_KEYS.piece_square;
+    const HAND: HandKey = Self::ALL_KEYS.hand;
 
     const ALL_KEYS: Self = {
         let mut zobrist = Zobrist::default();
@@ -58,8 +59,14 @@ impl Zobrist {
             });
         });
 
-        const_for!(i in 0..HAND_TOTAL => {
-            zobrist.hand[i] = Key::new(rng.rand());
+        const_for!(color in 0..Color::COUNT => {
+            const_for!(piece_type in 0..Hand::HAND_PIECE_TYPES => {
+                const_for!(count in 0..Hand::MAX_PIECE_COUNTS[piece_type] => {
+                    zobrist.hand
+                        [hand_index(Color::from(color), PieceType::from(piece_type), count + 1)] =
+                        Key::new(rng.rand());
+                });
+            });
         });
 
         zobrist
@@ -81,5 +88,9 @@ pub const fn hand_key(color: Color, piece_type: PieceType, count: u32) -> Key {
     debug_assert!(piece_type.as_usize() < Hand::HAND_PIECE_TYPES);
     debug_assert!(count <= Hand::MAX_PIECE_COUNTS[piece_type.as_usize()]);
 
-    Zobrist::HAND[HAND_OFFSETS[piece_type.with_color(color).as_usize()] as usize + count as usize]
+    Zobrist::HAND[hand_index(color, piece_type, count)]
+}
+
+const fn hand_index(color: Color, piece_type: PieceType, count: u32) -> usize {
+    HAND_OFFSETS[piece_type.with_color(color).as_usize()] as usize + count as usize
 }

@@ -33,6 +33,11 @@ fn empty() {
 }
 
 #[test]
+fn default() {
+    assert_eq!(Bitboard::default(), Bitboard::empty());
+}
+
+#[test]
 fn has_any() {
     let cases = [
         (Bitboard::empty(), false),
