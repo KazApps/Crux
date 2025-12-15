@@ -52,12 +52,20 @@ fn set() {
     let mut hand = Hand::default();
 
     for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        let max_count = Hand::MAX_PIECE_COUNTS[piece_type];
         let piece_type = PieceType::from(piece_type);
+        let max_count = Hand::max_piece_counts(piece_type);
 
         hand.set(piece_type, max_count);
         assert_eq!(hand.count(piece_type), max_count);
     }
+}
+
+#[cfg(debug_assertions)]
+#[test]
+#[should_panic]
+fn set_panics_if_count_is_greater_than_max() {
+    let mut hand = Hand::default();
+    hand.set(PieceType::Pawn, Hand::max_piece_counts(PieceType::Pawn) + 1);
 }
 
 #[test]
@@ -75,8 +83,8 @@ fn decrement() {
     let mut hand = Hand::default();
 
     for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        let max_count = Hand::MAX_PIECE_COUNTS[piece_type];
         let piece_type = PieceType::from(piece_type);
+        let max_count = Hand::max_piece_counts(piece_type);
 
         hand.set(piece_type, max_count);
         hand.decrement(piece_type);

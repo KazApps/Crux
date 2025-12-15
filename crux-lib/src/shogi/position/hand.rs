@@ -42,7 +42,7 @@ impl Hand {
 
     pub const fn set(&mut self, piece_type: PieceType, count: u32) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
-        debug_assert!(count <= Self::MAX_PIECE_COUNTS[piece_type.as_usize()]);
+        debug_assert!(count <= Self::max_piece_counts(piece_type));
 
         let offset = Self::OFFSETS[piece_type.as_usize()];
         let mask = Self::MASKS[piece_type.as_usize()];
@@ -63,9 +63,15 @@ impl Hand {
         self.set(piece_type, self.count(piece_type) - 1);
     }
 
+    pub const fn max_piece_counts(piece_type: PieceType) -> u32 {
+        debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
+
+        Self::MAX_PIECE_COUNTS[piece_type.as_usize()]
+    }
+
     pub const HAND_PIECE_TYPES: usize = PieceType::Rook.as_usize() + 1;
 
-    pub const MAX_PIECE_COUNTS: [u32; Self::HAND_PIECE_TYPES] = [
+    const MAX_PIECE_COUNTS: [u32; Self::HAND_PIECE_TYPES] = [
         MAX_PAWN, MAX_LANCE, MAX_KNIGHT, MAX_SILVER, MAX_GOLD, MAX_BISHOP, MAX_ROOK,
     ];
 
