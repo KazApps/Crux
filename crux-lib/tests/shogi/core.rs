@@ -1,18 +1,6 @@
 use crux_lib::shogi::core::{Color, File, Piece, PieceType, Rank, Square};
 
 #[test]
-fn color_is_black() {
-    assert!(Color::Black.is_black());
-    assert!(!Color::White.is_black());
-}
-
-#[test]
-fn color_is_white() {
-    assert!(Color::White.is_white());
-    assert!(!Color::Black.is_white());
-}
-
-#[test]
 fn color_opposite() {
     assert_eq!(Color::Black.opposite(), Color::White);
     assert_eq!(Color::White.opposite(), Color::Black);

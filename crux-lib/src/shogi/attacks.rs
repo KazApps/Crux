@@ -78,7 +78,7 @@ macro_rules! generate_masks {
 /// Panics if the square is on the relative rank 1 for the given color.
 #[must_use]
 pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    debug_assert!(square.rank().relative(color) != Rank::Rank1);
 
     square.relative_north(color).bit()
 }
@@ -92,7 +92,7 @@ pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
 pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
 
-    if color.is_black() {
+    if color == Color::Black {
         pawns_bb.shr(1)
     } else {
         pawns_bb.shl(1)
@@ -109,7 +109,7 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
 /// Panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    debug_assert!(square.rank().relative(color) != Rank::Rank1);
 
     LANCE_PSEUDO_ATTACKS[color.as_usize()][square.as_usize()]
 }
@@ -123,11 +123,11 @@ pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
 /// Panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    debug_assert!(square.rank().relative(color) != Rank::Rank1);
 
     let pseudo_attacks = LANCE_PSEUDO_ATTACKS[color.as_usize()][square.as_usize()];
 
-    if color.is_black() {
+    if color == Color::Black {
         sliding_backward(occupied, pseudo_attacks)
     } else {
         sliding_forward(occupied, pseudo_attacks)
@@ -168,7 +168,7 @@ pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboar
         & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
     .is_empty());
 
-    if color.is_black() {
+    if color == Color::Black {
         knights_bb.shr(11) | knights_bb.shl(7)
     } else {
         knights_bb.shl(11) | knights_bb.shr(7)
@@ -190,7 +190,7 @@ pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboar
     let without_rank1 = silvers_bb & !Rank::Rank1.bit();
     let without_rank9 = silvers_bb & !Rank::Rank9.bit();
 
-    if color.is_black() {
+    if color == Color::Black {
         without_rank1.shr(10)
             | without_rank1.shr(1)
             | without_rank1.shl(8)
@@ -220,7 +220,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
     let without_rank1 = golds_bb & !Rank::Rank1.bit();
     let without_rank9 = golds_bb & !Rank::Rank9.bit();
 
-    if color.is_black() {
+    if color == Color::Black {
         without_rank1.shr(10)
             | without_rank1.shr(1)
             | without_rank1.shl(8)
@@ -439,7 +439,7 @@ const LANCE_PSEUDO_ATTACKS: SidedAttacks = generate_sided_attacks! { |color, squ
     let mut res = Bitboard::empty();
 
     while (bb & Rank::Rank1.relative(color).bit()).is_empty() {
-        bb = if color.is_black() { bb.shr(1) } else { bb.shl(1) };
+        bb = if color == Color::Black { bb.shr(1) } else { bb.shl(1) };
         res |= bb;
     }
 

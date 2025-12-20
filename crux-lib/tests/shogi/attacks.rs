@@ -127,7 +127,7 @@ fn lance_attacks() {
             let color = Color::from(color);
             let square = Square::from(square);
 
-            if matches!(square.rank().relative(color), Rank::Rank1) {
+            if square.rank().relative(color) == Rank::Rank1 {
                 continue;
             }
 
@@ -610,7 +610,7 @@ fn bishop_attacks() {
         assert_eq!(
             attacks::bishop_attacks(square, Bitboard::all()),
             attacks::silver_attacks(Color::Black, square)
-                & if matches!(square.rank(), Rank::Rank1) {
+                & if square.rank() == Rank::Rank1 {
                     Bitboard::all()
                 } else {
                     !attacks::pawn_attacks(Color::Black, square)

@@ -10,7 +10,7 @@ use crate::shogi::{
         ray_between, rook_pseudo_attacks, silver_attacks,
     },
     bitboard::Bitboard,
-    core::{Color, Piece, PieceType, Square},
+    core::{Color, File, Piece, PieceType, Rank, Square, MAX_KING},
     position::{
         hand::Hand,
         key::Key,
@@ -205,7 +205,7 @@ impl Position {
         self.color_bb[color.as_usize()] |= bit;
         self.piece_type_bb[pt.as_usize()] |= bit;
 
-        if matches!(pt, PieceType::King) {
+        if pt == PieceType::King {
             self.king_squares[color.as_usize()] = Some(square);
         }
 
@@ -227,7 +227,7 @@ impl Position {
         self.color_bb[color.as_usize()] ^= bit;
         self.piece_type_bb[pt.as_usize()] ^= bit;
 
-        if matches!(pt, PieceType::King) {
+        if pt == PieceType::King {
             self.king_squares[color.as_usize()] = None;
         }
 
@@ -260,7 +260,7 @@ impl Position {
         )
     }
 
-    pub const fn switch_hand_key(
+    const fn switch_hand_key(
         &mut self,
         color: Color,
         piece_type: PieceType,
@@ -372,7 +372,76 @@ impl PositionBuilder {
         self
     }
 
+    /// Verifies that the position is structurally valid.
+    ///
+    /// This function checks only *basic invariants* of a shogi position:
+    ///
+    /// - Total piece counts do not exceed the maximum allowed
+    ///   (including promoted pieces and pieces in hand)
+    /// - There are no illegal pieces with no legal moves
+    ///   (pawns/lances on the last rank, knights on the last two ranks)
+    /// - There are no double pawns
+    ///
+    /// It does NOT check dynamic legality, such as whether the non-side-to-move king is in check.
+    pub const fn verify(&self) -> bool {
+        let black_hand = self.0.hand(Color::Black);
+        let white_hand = self.0.hand(Color::White);
+
+        const_for!(piece_type in 0..Hand::HAND_PIECE_TYPES => {
+            let piece_type = PieceType::from(piece_type);
+
+            let mut total = self.0.piece_type_bb(piece_type).count_ones() + black_hand.count(piece_type) + white_hand.count(piece_type);
+
+            if piece_type != piece_type.promoted() {
+                total += self.0.piece_type_bb(piece_type.promoted()).count_ones();
+            }
+
+            if total > Hand::max_piece_counts(piece_type) {
+                return false;
+            }
+        });
+
+        let kings_count = self.0.piece_type_bb(PieceType::King).count_ones();
+
+        if kings_count > MAX_KING {
+            return false;
+        }
+
+        const_for!(color in 0..Color::COUNT => {
+            let color = Color::from(color);
+
+            let pawns = self.0.piece_bb(PieceType::Pawn.with_color(color));
+
+            if ((pawns
+                | self.0.piece_bb(PieceType::Lance.with_color(color)))
+                & Rank::Rank1.relative(color).bit())
+            .has_any()
+            {
+                return false;
+            }
+
+            if (self.0.piece_bb(PieceType::Knight.with_color(color))
+                & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
+            .has_any()
+            {
+                return false;
+            }
+
+            const_for!(file in 0..File::COUNT => {
+                let file = File::from(file);
+
+                if (pawns & file.bit()).is_multiple() {
+                    return false;
+                }
+            });
+        });
+
+        true
+    }
+
     pub const fn build(mut self) -> Position {
+        debug_assert!(self.verify());
+
         self.0.update_non_sliding_checkers();
         self.0.update_sliding_checkers_and_pins();
 

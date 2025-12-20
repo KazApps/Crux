@@ -7,10 +7,11 @@ pub const MAX_SILVER: u32 = 4;
 pub const MAX_GOLD: u32 = 4;
 pub const MAX_BISHOP: u32 = 2;
 pub const MAX_ROOK: u32 = 2;
+pub const MAX_KING: u32 = 2;
 
 /// Represents the color of a player or piece in the game.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Color {
     Black,
     White,
@@ -19,18 +20,6 @@ pub enum Color {
 impl Color {
     /// The number of colors.
     pub const COUNT: usize = 2;
-
-    /// Returns `true` if the color is black.
-    #[must_use]
-    pub const fn is_black(self) -> bool {
-        matches!(self, Color::Black)
-    }
-
-    /// Returns `true` if the color is white.
-    #[must_use]
-    pub const fn is_white(self) -> bool {
-        matches!(self, Color::White)
-    }
 
     /// Returns the opposite color.
     #[must_use]
@@ -80,9 +69,18 @@ impl const From<usize> for Color {
     }
 }
 
+impl const PartialEq for Color {
+    /// Compares two `Color` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Color {}
+
 /// Represents the types of pieces.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum PieceType {
     Pawn,
     Lance,
@@ -191,13 +189,22 @@ impl const From<usize> for PieceType {
     }
 }
 
+impl const PartialEq for PieceType {
+    /// Compares two `PieceType` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for PieceType {}
+
 /// Represents a piece in the game.
 ///
 /// `Piece(u8)` is a structure that holds the color and types of pieces.
 /// bit    0   : `Color`
 /// bits 1..=4 : `PieceType` (4 bits)
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Piece {
     BlackPawn,
     WhitePawn,
@@ -312,9 +319,18 @@ impl const From<usize> for Piece {
     }
 }
 
+impl const PartialEq for Piece {
+    /// Compares two `Piece` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Piece {}
+
 /// Represents a file on the board.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum File {
     File1,
     File2,
@@ -338,7 +354,7 @@ impl File {
     /// Panics if called on `File1`, since there is no file to the right.
     #[must_use]
     pub const fn east(self) -> Self {
-        debug_assert!(!matches!(self, File::File1));
+        debug_assert!(self != File::File1);
 
         unsafe { transmute(self.as_u8() - 1) }
     }
@@ -350,7 +366,7 @@ impl File {
     /// Panics if called on `File9`, since there is no file to the left.
     #[must_use]
     pub const fn west(self) -> Self {
-        debug_assert!(!matches!(self, File::File9));
+        debug_assert!(self != File::File9);
 
         unsafe { transmute(self.as_u8() + 1) }
     }
@@ -364,7 +380,7 @@ impl File {
     /// because `east()` or `west()` would panic.
     #[must_use]
     pub const fn relative_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.east()
         } else {
             self.west()
@@ -380,7 +396,7 @@ impl File {
     /// because `west()` or `east()` would panic.
     #[must_use]
     pub const fn relative_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.west()
         } else {
             self.east()
@@ -400,7 +416,7 @@ impl File {
     /// perspective, `File1` corresponds to `File9`, `File2` to `File8`, and so on).
     #[must_use]
     pub const fn relative(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self
         } else {
             self.flip()
@@ -446,9 +462,18 @@ impl const From<usize> for File {
     }
 }
 
+impl const PartialEq for File {
+    /// Compares two `File` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for File {}
+
 /// Represents a rank on the board.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Rank {
     Rank1,
     Rank2,
@@ -472,7 +497,7 @@ impl Rank {
     /// Panics if called on `Rank1`, as there is no rank above it.
     #[must_use]
     pub const fn north(self) -> Self {
-        debug_assert!(!matches!(self, Rank::Rank1));
+        debug_assert!(self != Rank::Rank1);
 
         unsafe { transmute(self.as_u8() - 1) }
     }
@@ -484,7 +509,7 @@ impl Rank {
     /// Panics if called on `Rank9`, as there is no rank below it.
     #[must_use]
     pub const fn south(self) -> Self {
-        debug_assert!(!matches!(self, Rank::Rank9));
+        debug_assert!(self != Rank::Rank9);
 
         unsafe { transmute(self.as_u8() + 1) }
     }
@@ -498,7 +523,7 @@ impl Rank {
     /// because `north()` or `south()` would panic.
     #[must_use]
     pub const fn relative_north(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north()
         } else {
             self.south()
@@ -514,7 +539,7 @@ impl Rank {
     /// because `south()` or `north()` would panic.
     #[must_use]
     pub const fn relative_south(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south()
         } else {
             self.north()
@@ -534,7 +559,7 @@ impl Rank {
     /// perspective, `Rank1` corresponds to `Rank9`, `Rank2` to `Rank8`, and so on).
     #[must_use]
     pub const fn relative(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self
         } else {
             self.flip()
@@ -544,8 +569,10 @@ impl Rank {
     /// Returns `true` if a piece on this rank can promote for the given color.
     #[must_use]
     pub const fn can_promote(self, color: Color) -> bool {
-        (color.is_black() && self.as_u8() <= Self::Rank3.as_u8())
-            || (color.is_white() && self.as_u8() >= Self::Rank7.as_u8())
+        matches!(
+            self.relative(color),
+            Rank::Rank1 | Rank::Rank2 | Rank::Rank3
+        )
     }
 
     /// Returns the `Rank` as a `u8`.
@@ -587,6 +614,15 @@ impl const From<usize> for Rank {
     }
 }
 
+impl const PartialEq for Rank {
+    /// Compares two `Rank` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Rank {}
+
 /// Represents a square on the board.
 ///
 /// ==============================================
@@ -614,7 +650,7 @@ impl const From<usize> for Rank {
 /// | 80 | 71 | 62 | 53 | 44 | 35 | 26 | 17 |  8 | 九
 /// +----+----+----+----+----+----+----+----+----+
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 #[rustfmt::skip]
 pub enum Square {
     S11, S12, S13, S14, S15, S16, S17, S18, S19,
@@ -744,7 +780,7 @@ impl Square {
     /// - For white, if the square is on the bottom rank (`Rank9`)
     #[must_use]
     pub const fn relative_north(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north()
         } else {
             self.south()
@@ -761,7 +797,7 @@ impl Square {
     /// - For white, if the square is on the top rank (`Rank1`)
     #[must_use]
     pub const fn relative_south(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south()
         } else {
             self.north()
@@ -778,7 +814,7 @@ impl Square {
     /// - For white, if the square is on the leftmost file (`File9`)
     #[must_use]
     pub const fn relative_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.east()
         } else {
             self.west()
@@ -795,7 +831,7 @@ impl Square {
     /// - For white, if the square is on the rightmost file (`File1`)
     #[must_use]
     pub const fn relative_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.west()
         } else {
             self.east()
@@ -812,7 +848,7 @@ impl Square {
     /// - For white, if the square is on the bottom rank (`Rank9`) or leftmost file (`File9`)
     #[must_use]
     pub const fn relative_north_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north_east()
         } else {
             self.south_west()
@@ -829,7 +865,7 @@ impl Square {
     /// - For white, if the square is on the bottom rank (`Rank9`) or rightmost file (`File1`)
     #[must_use]
     pub const fn relative_north_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north_west()
         } else {
             self.south_east()
@@ -846,7 +882,7 @@ impl Square {
     /// - For white, if the square is on the top rank (`Rank1`) or leftmost file (`File9`)
     #[must_use]
     pub const fn relative_south_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south_east()
         } else {
             self.north_west()
@@ -863,7 +899,7 @@ impl Square {
     /// - For white, if the square is on the top rank (`Rank1`) or rightmost file (`File1`)
     #[must_use]
     pub const fn relative_south_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south_west()
         } else {
             self.north_east()
@@ -945,3 +981,12 @@ impl const From<usize> for Square {
         unsafe { transmute(value as u8) }
     }
 }
+
+impl const PartialEq for Square {
+    /// Compares two `Square` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Square {}

@@ -317,7 +317,7 @@ pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
     // If a file has a pawn, no bits are set in `bb` for that file.
     let bb = RANK9.sub(pawns_bb) & RANK9;
 
-    if color.is_black() {
+    if color == Color::Black {
         // If a file has no pawn:
         //     `RANK9.sub(bb.shr(7))` sets bits on ranks 2–8 for that file.
         // If a file has a pawn:
