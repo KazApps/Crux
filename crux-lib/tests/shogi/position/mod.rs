@@ -1,4 +1,5 @@
 use const_for::const_for;
+
 use crux_lib::shogi::{
     bitboard::Bitboard,
     core::{Color, Piece, PieceType, Square},
