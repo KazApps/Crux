@@ -42,11 +42,11 @@ impl const Default for Position {
             color_bb: [Bitboard::empty(); Color::COUNT],
             piece_type_bb: [Bitboard::empty(); PieceType::COUNT],
             king_squares: [None; Color::COUNT],
-            key: Key::default(),
             checkers: Bitboard::empty(),
             pinners: Bitboard::empty(),
             pinned: Bitboard::empty(),
             ply: 0,
+            key: Key::default(),
         }
     }
 }
@@ -226,6 +226,12 @@ impl Position {
         self.mailbox[square.as_usize()] = None;
         self.color_bb[color.as_usize()] ^= bit;
         self.piece_type_bb[pt.as_usize()] ^= bit;
+
+        if matches!(pt, PieceType::King) {
+            self.king_squares[color.as_usize()] = None;
+        }
+
+        self.key ^= piece_square_key(piece, square);
     }
 
     const fn set_hand_piece_count(&mut self, color: Color, piece_type: PieceType, count: u32) {
