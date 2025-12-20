@@ -9,9 +9,52 @@ mod hand;
 mod key;
 mod zobrist;
 
+const PIN_CHECK_POS1: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S11, Piece::WhiteKing)
+        .place(Square::S12, Piece::WhitePawn)
+        .place(Square::S13, Piece::BlackLance)
+        .set_side_to_move(Color::White);
+
+    builder.build()
+};
+
+const PIN_CHECK_POS2: Position = {
+    let mut builder = PIN_CHECK_POS1.builder();
+
+    builder
+        .place(Square::S22, Piece::BlackPawn)
+        .place(Square::S44, Piece::BlackBishop);
+
+    builder.build()
+};
+
+const PIN_CHECK_POS3: Position = {
+    let mut builder = PIN_CHECK_POS2.builder();
+
+    builder
+        .place(Square::S21, Piece::WhiteKnight)
+        .place(Square::S41, Piece::BlackRook);
+
+    builder.build()
+};
+
+const PIN_CHECK_POS4: Position = {
+    let mut builder = PIN_CHECK_POS3.builder();
+
+    builder
+        .place(Square::S19, Piece::BlackLance)
+        .place(Square::S55, Piece::BlackHorse)
+        .place(Square::S61, Piece::BlackDragon);
+
+    builder.build()
+};
+
 #[test]
-fn default() {
-    let pos = Position::default();
+fn empty() {
+    let pos = Position::empty();
 
     assert_eq!(pos.side_to_move(), Color::Black);
     assert_eq!(pos.occupancy(), Bitboard::empty());
@@ -35,6 +78,8 @@ fn default() {
 fn startpos() {
     let pos = Position::startpos();
 
+    println!("{}", pos);
+
     assert_eq!(pos.side_to_move(), Color::Black);
     assert_eq!(pos.occupancy().count_ones(), 40);
     assert_eq!(pos.color_bb(Color::Black).count_ones(), 20);
@@ -55,6 +100,11 @@ fn startpos() {
     assert_eq!(pos.pinned(), Bitboard::empty());
     assert_eq!(pos.ply(), 0);
     assert_ne!(pos.key(), Key::default());
+}
+
+#[test]
+fn default() {
+    assert_eq!(Position::default(), Position::empty());
 }
 
 #[test]
@@ -114,4 +164,174 @@ fn builder() {
     let pos2 = builder.build();
 
     assert_eq!(pos1, pos2);
+}
+
+#[test]
+fn pinners() {
+    assert_eq!(PIN_CHECK_POS1.pinners(), Square::S13.bit());
+    assert_eq!(PIN_CHECK_POS2.pinners(), Square::S13.bit());
+    assert_eq!(
+        PIN_CHECK_POS3.pinners(),
+        Square::S13.bit() | Square::S41.bit()
+    );
+    assert_eq!(
+        PIN_CHECK_POS4.pinners(),
+        Square::S13.bit() | Square::S41.bit() | Square::S19.bit() | Square::S61.bit()
+    );
+}
+
+#[test]
+fn pinned() {
+    assert_eq!(PIN_CHECK_POS1.pinned(), Square::S12.bit());
+    assert_eq!(PIN_CHECK_POS2.pinned(), Square::S12.bit());
+    assert_eq!(
+        PIN_CHECK_POS3.pinned(),
+        Square::S12.bit() | Square::S21.bit()
+    );
+    assert_eq!(
+        PIN_CHECK_POS4.pinned(),
+        Square::S12.bit() | Square::S21.bit()
+    );
+}
+
+#[test]
+fn display_empty() {
+    let pos = Position::empty();
+
+    let expected = "  9   8   7   6   5   4   3   2   1
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 一
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 二
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 三
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 四
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 五
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 六
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 七
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 八
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 九
++---+---+---+---+---+---+---+---+---+
+
+Side to Move : Black
+Hand (Black) : None
+Hand (White) : None
+Moves        : 0
+Key          : 0";
+
+    assert_eq!(pos.to_string(), expected);
+}
+
+#[test]
+fn display_startpos() {
+    let pos = Position::startpos();
+
+    let expected = "  9   8   7   6   5   4   3   2   1
++---+---+---+---+---+---+---+---+---+
+|w香|w桂|w銀|w金|w玉|w金|w銀|w桂|w香| 一
++---+---+---+---+---+---+---+---+---+
+|   |w飛|   |   |   |   |   |w角|   | 二
++---+---+---+---+---+---+---+---+---+
+|w歩|w歩|w歩|w歩|w歩|w歩|w歩|w歩|w歩| 三
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 四
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 五
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |   | 六
++---+---+---+---+---+---+---+---+---+
+|b歩|b歩|b歩|b歩|b歩|b歩|b歩|b歩|b歩| 七
++---+---+---+---+---+---+---+---+---+
+|   |b角|   |   |   |   |   |b飛|   | 八
++---+---+---+---+---+---+---+---+---+
+|b香|b桂|b銀|b金|b玉|b金|b銀|b桂|b香| 九
++---+---+---+---+---+---+---+---+---+
+
+Side to Move : Black
+Hand (Black) : None
+Hand (White) : None
+Moves        : 0
+Key          : 88abfff4d6167b4";
+
+    assert_eq!(pos.to_string(), expected);
+}
+
+#[test]
+fn display_matsuri_pos() {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S11, Piece::WhiteLance)
+        .place(Square::S12, Piece::WhiteKing)
+        .place(Square::S14, Piece::WhitePawn)
+        .place(Square::S16, Piece::BlackPawn)
+        .place(Square::S19, Piece::BlackLance)
+        .place(Square::S21, Piece::WhiteKnight)
+        .place(Square::S22, Piece::WhiteGold)
+        .place(Square::S24, Piece::BlackPawn)
+        .place(Square::S25, Piece::WhitePawn)
+        .place(Square::S27, Piece::BlackSilver)
+        .place(Square::S29, Piece::BlackKing)
+        .place(Square::S35, Piece::BlackSilver)
+        .place(Square::S36, Piece::BlackPawn)
+        .place(Square::S37, Piece::BlackGold)
+        .place(Square::S39, Piece::WhiteBishop)
+        .place(Square::S42, Piece::BlackProPawn)
+        .place(Square::S43, Piece::BlackSilver)
+        .place(Square::S63, Piece::WhitePawn)
+        .place(Square::S65, Piece::BlackPawn)
+        .place(Square::S66, Piece::WhiteBishop)
+        .place(Square::S73, Piece::WhiteKnight)
+        .place(Square::S74, Piece::WhitePawn)
+        .place(Square::S76, Piece::BlackPawn)
+        .place(Square::S86, Piece::BlackPawn)
+        .place(Square::S89, Piece::BlackKnight)
+        .place(Square::S91, Piece::WhiteLance)
+        .place(Square::S94, Piece::WhitePawn)
+        .place(Square::S97, Piece::BlackPawn)
+        .place(Square::S98, Piece::BlackRook)
+        .place(Square::S99, Piece::BlackLance)
+        .set_hand_piece_count(Color::Black, PieceType::Rook, 1)
+        .set_hand_piece_count(Color::Black, PieceType::Gold, 1)
+        .set_hand_piece_count(Color::White, PieceType::Gold, 1)
+        .set_hand_piece_count(Color::White, PieceType::Silver, 1)
+        .set_hand_piece_count(Color::White, PieceType::Knight, 1)
+        .set_hand_piece_count(Color::White, PieceType::Pawn, 5);
+
+    let pos = builder.build();
+
+    let expected = "  9   8   7   6   5   4   3   2   1
++---+---+---+---+---+---+---+---+---+
+|w香|   |   |   |   |   |   |w桂|w香| 一
++---+---+---+---+---+---+---+---+---+
+|   |   |   |   |   |bと|   |w金|w玉| 二
++---+---+---+---+---+---+---+---+---+
+|   |   |w桂|w歩|   |b銀|   |   |   | 三
++---+---+---+---+---+---+---+---+---+
+|w歩|   |w歩|   |   |   |   |b歩|w歩| 四
++---+---+---+---+---+---+---+---+---+
+|   |   |   |b歩|   |   |b銀|w歩|   | 五
++---+---+---+---+---+---+---+---+---+
+|   |b歩|b歩|w角|   |   |b歩|   |b歩| 六
++---+---+---+---+---+---+---+---+---+
+|b歩|   |   |   |   |   |b金|b銀|   | 七
++---+---+---+---+---+---+---+---+---+
+|b飛|   |   |   |   |   |   |   |   | 八
++---+---+---+---+---+---+---+---+---+
+|b香|b桂|   |   |   |   |w角|b玉|b香| 九
++---+---+---+---+---+---+---+---+---+
+
+Side to Move : Black
+Hand (Black) : 飛, 金
+Hand (White) : 金, 銀, 桂, 歩x5
+Moves        : 0
+Key          : 5ed2639a48bb4076";
+
+    assert_eq!(pos.to_string(), expected);
 }

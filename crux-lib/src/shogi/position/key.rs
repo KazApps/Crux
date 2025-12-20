@@ -1,14 +1,9 @@
 use std::ops::{BitXor, BitXorAssign};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub struct Key(u64);
 
 impl Key {
-    #[must_use]
-    pub const fn new(value: u64) -> Self {
-        Self(value)
-    }
-
     #[must_use]
     pub const fn value(self) -> u64 {
         self.0
@@ -20,6 +15,20 @@ impl const Default for Key {
         Self(0)
     }
 }
+
+impl const From<u64> for Key {
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl const PartialEq for Key {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl const Eq for Key {}
 
 impl const BitXor for Key {
     type Output = Self;

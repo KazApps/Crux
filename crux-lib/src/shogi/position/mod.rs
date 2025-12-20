@@ -2,6 +2,8 @@ pub mod hand;
 pub mod key;
 pub mod zobrist;
 
+use std::fmt::{Display, Formatter, Result};
+
 use const_for::const_for;
 
 use crate::shogi::{
@@ -18,7 +20,7 @@ use crate::shogi::{
     },
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct Position {
     side_to_move: Color,
     mailbox: [Option<Piece>; Square::COUNT],
@@ -35,6 +37,13 @@ pub struct Position {
 
 impl const Default for Position {
     fn default() -> Self {
+        Self::empty()
+    }
+}
+
+impl Position {
+    #[must_use]
+    pub const fn empty() -> Self {
         Self {
             side_to_move: Color::Black,
             mailbox: [None; Square::COUNT],
@@ -49,9 +58,7 @@ impl const Default for Position {
             key: Key::default(),
         }
     }
-}
 
-impl Position {
     #[must_use]
     pub const fn startpos() -> Self {
         const STARTPOS: Position = {
@@ -323,6 +330,107 @@ impl Position {
                 }
             }
         }
+    }
+}
+
+impl const PartialEq for Position {
+    fn eq(&self, other: &Self) -> bool {
+        self.key() == other.key()
+    }
+}
+
+impl const Eq for Position {}
+
+impl Display for Position {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        const COLOR_TO_STR: [&str; Color::COUNT] = ["Black", "White"];
+
+        const RANK_TO_CHAR: [char; Rank::COUNT] =
+            ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+        const PIECE_TYPE_TO_CHAR: [char; PieceType::COUNT] = [
+            '歩', '香', '桂', '銀', '金', '角', '飛', 'と', '杏', '圭', '全', '馬', '龍', '玉',
+        ];
+
+        const RANK_SEPARATOR: &str = "+---+---+---+---+---+---+---+---+---+";
+
+        writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
+        writeln!(f, "{}", RANK_SEPARATOR)?;
+
+        for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
+            for file in (0..File::COUNT).rev() {
+                let file = File::from(file);
+                let rank = Rank::from(rank);
+
+                let square = Square::new(file, rank);
+
+                if let Some(piece) = self.piece_at(square) {
+                    let color = piece.color();
+                    let pt = piece.piece_type();
+                    let pt_str = PIECE_TYPE_TO_CHAR[pt.as_usize()];
+
+                    write!(
+                        f,
+                        "|{}{}",
+                        if color == Color::Black { 'b' } else { 'w' },
+                        pt_str
+                    )?;
+                } else {
+                    write!(f, "|   ")?;
+                }
+            }
+
+            writeln!(f, "| {}", rank_char)?;
+            writeln!(f, "{}", RANK_SEPARATOR)?;
+        }
+
+        writeln!(f)?;
+        writeln!(
+            f,
+            "Side to Move : {}",
+            COLOR_TO_STR[self.side_to_move().as_usize()]
+        )?;
+
+        for (color, color_str) in COLOR_TO_STR.iter().enumerate() {
+            let color = Color::from(color);
+
+            write!(f, "Hand ({}) : ", color_str)?;
+
+            let hand = self.hand(color);
+
+            if hand.is_empty() {
+                writeln!(f, "None")?;
+                continue;
+            }
+
+            let mut parts = Vec::new();
+
+            for (piece_type, piece_type_char) in PIECE_TYPE_TO_CHAR
+                .iter()
+                .take(Hand::HAND_PIECE_TYPES)
+                .enumerate()
+                .rev()
+            {
+                let piece_type = PieceType::from(piece_type);
+                let count = hand.count(piece_type);
+
+                if count != 0 {
+                    parts.push(if count > 1 {
+                        format!("{}x{}", piece_type_char, count)
+                    } else {
+                        format!("{}", piece_type_char)
+                    });
+                }
+            }
+
+            writeln!(f, "{}", parts.join(", "))?;
+        }
+
+        write!(f, "Moves        : {}", self.ply())?;
+        writeln!(f)?;
+        write!(f, "Key          : {:x}", self.key().value())?;
+
+        Ok(())
     }
 }
 

@@ -51,11 +51,11 @@ impl Zobrist {
         let mut zobrist = Zobrist::default();
         let mut rng = Prng::new(20251212);
 
-        zobrist.side = Key::new(rng.rand());
+        zobrist.side = Key::from(rng.rand());
 
         const_for!(i in 0..Piece::COUNT => {
             const_for!(j in 0..Square::COUNT => {
-                zobrist.piece_square[i][j] = Key::new(rng.rand());
+                zobrist.piece_square[i][j] = Key::from(rng.rand());
             });
         });
 
@@ -66,7 +66,7 @@ impl Zobrist {
                 const_for!(count in 0..Hand::max_piece_counts(piece_type) => {
                     zobrist.hand
                         [hand_index(Color::from(color), piece_type, count + 1)] =
-                        Key::new(rng.rand());
+                        Key::from(rng.rand());
                 });
             });
         });
