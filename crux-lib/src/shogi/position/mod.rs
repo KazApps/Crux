@@ -491,6 +491,7 @@ impl PositionBuilder {
     /// - There are no double pawns
     ///
     /// It does NOT check dynamic legality, such as whether the non-side-to-move king is in check.
+    #[must_use]
     pub const fn verify(&self) -> bool {
         let black_hand = self.0.hand(Color::Black);
         let white_hand = self.0.hand(Color::White);
@@ -547,6 +548,7 @@ impl PositionBuilder {
         true
     }
 
+    #[must_use]
     pub const fn build(mut self) -> Position {
         debug_assert!(self.verify());
 
