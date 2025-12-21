@@ -8,6 +8,7 @@ use crux_lib::shogi::{
 
 mod hand;
 mod key;
+mod mv;
 mod zobrist;
 
 const PIN_CHECK_POS1: Position = {

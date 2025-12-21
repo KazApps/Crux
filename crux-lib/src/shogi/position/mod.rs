@@ -1,5 +1,6 @@
 pub mod hand;
 pub mod key;
+pub mod mv;
 pub mod zobrist;
 
 use std::fmt::{Display, Formatter, Result};
@@ -192,7 +193,7 @@ impl Position {
     }
 
     const fn set_side_to_move(&mut self, side_to_move: Color) {
-        if self.side_to_move.as_u8() != side_to_move.as_u8() {
+        if self.side_to_move != side_to_move {
             self.side_to_move = side_to_move;
             self.key ^= side_key();
         }

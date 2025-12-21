@@ -23,6 +23,7 @@ impl const From<u64> for Key {
 }
 
 impl const PartialEq for Key {
+    /// Compares two `Key` values for equality.
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
