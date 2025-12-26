@@ -7,6 +7,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use const_for::const_for;
 
+use crate::shogi::attacks::piece_pseudo_attacks;
 use crate::shogi::{
     attacks::{
         bishop_pseudo_attacks, gold_attacks, knight_attacks, lance_pseudo_attacks, pawn_attacks,
@@ -17,6 +18,7 @@ use crate::shogi::{
     position::{
         hand::Hand,
         key::Key,
+        mv::Move,
         zobrist::{hand_key, piece_square_key, side_key},
     },
 };
@@ -115,6 +117,86 @@ impl Position {
     #[must_use]
     pub const fn builder(self) -> PositionBuilder {
         PositionBuilder(self)
+    }
+
+    pub const fn make_move(&mut self, mv: Move) -> Option<Piece> {
+        debug_assert!(!mv.is_special());
+
+        let stm = self.side_to_move();
+        let nstm = stm.opposite();
+        let to_piece = self.piece_at(mv.to());
+        let moved_piece;
+
+        if mv.is_drop() {
+            debug_assert!(to_piece.is_none());
+            moved_piece = mv.drop_piece_type().with_color(stm);
+        } else {
+            let moving_piece = self.piece_at(mv.from()).unwrap();
+            debug_assert!(moving_piece.color() == stm);
+
+            moved_piece = if mv.is_promotion() {
+                moving_piece.promoted()
+            } else {
+                moving_piece
+            };
+
+            self.remove(mv.from());
+
+            if let Some(captured) = to_piece {
+                debug_assert!(captured.color() == nstm);
+
+                self.increment_hand_piece_count(stm, captured.piece_type().unpromoted());
+                self.remove(mv.to());
+            }
+        }
+
+        self.place(mv.to(), moved_piece);
+        self.set_side_to_move(nstm);
+
+        // Update checker states.
+        self.clear_checker_states();
+        self.update_checkers_for(mv.to());
+        self.update_sliding_checkers_and_pins();
+
+        to_piece
+    }
+
+    pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
+        debug_assert!(!mv.is_special());
+
+        let stm = self.side_to_move();
+        let nstm = stm.opposite();
+        let moved_piece = self.piece_at(mv.to()).unwrap();
+        debug_assert!(moved_piece.color() == stm);
+
+        if mv.is_drop() {
+            debug_assert!(captured.is_none());
+
+            self.increment_hand_piece_count(nstm, moved_piece.piece_type().unpromoted());
+        } else {
+            let moving_piece = if mv.is_promotion() {
+                moved_piece.unpromoted()
+            } else {
+                moved_piece
+            };
+
+            self.place(mv.from(), moving_piece);
+        }
+
+        self.remove(mv.to());
+
+        self.set_side_to_move(nstm);
+
+        // Update checker states.
+        self.clear_checker_states();
+        self.update_sliding_checkers_and_pins();
+
+        if let Some(captured) = captured {
+            debug_assert!(captured.color() == stm);
+
+            self.place(mv.to(), captured);
+            self.update_checkers_for(mv.to());
+        }
     }
 
     #[must_use]
@@ -280,6 +362,18 @@ impl Position {
         self.key ^= diff;
     }
 
+    const fn update_checkers_for(&mut self, square: Square) {
+        let stm = self.side_to_move();
+
+        if let Some(piece) = self.piece_at(square)
+            && piece.color() != stm
+            && let Some(king_square) = self.king_square(stm)
+            && (piece_pseudo_attacks(piece, square) & king_square.bit()).has_any()
+        {
+            self.checkers |= square.bit();
+        }
+    }
+
     const fn update_non_sliding_checkers(&mut self) {
         let stm = self.side_to_move();
 
@@ -292,7 +386,7 @@ impl Position {
                 | self.piece_type_bb(PieceType::ProLance)
                 | self.piece_type_bb(PieceType::ProSilver);
 
-            self.checkers = ((pawns & pawn_attacks(stm, king_square))
+            self.checkers |= ((pawns & pawn_attacks(stm, king_square))
                 | (knights & knight_attacks(stm, king_square))
                 | (silvers & silver_attacks(stm, king_square))
                 | (golds & gold_attacks(stm, king_square)))
@@ -301,9 +395,6 @@ impl Position {
     }
 
     const fn update_sliding_checkers_and_pins(&mut self) {
-        self.pinners = Bitboard::empty();
-        self.pinned = Bitboard::empty();
-
         let stm = self.side_to_move();
 
         if let Some(king_square) = self.king_square(stm) {
@@ -331,6 +422,12 @@ impl Position {
                 }
             }
         }
+    }
+
+    const fn clear_checker_states(&mut self) {
+        self.checkers = Bitboard::empty();
+        self.pinners = Bitboard::empty();
+        self.pinned = Bitboard::empty();
     }
 }
 
@@ -553,6 +650,7 @@ impl PositionBuilder {
     pub const fn build(mut self) -> Position {
         debug_assert!(self.verify());
 
+        self.0.clear_checker_states();
         self.0.update_non_sliding_checkers();
         self.0.update_sliding_checkers_and_pins();
 
