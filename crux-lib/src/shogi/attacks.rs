@@ -73,9 +73,9 @@ macro_rules! generate_masks {
 /// Returns pawn attacks from the given color and square.
 /// Always a single bit is set in the returned bitboard.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the square is on the relative rank 1 for the given color.
+/// In debug builds, panics if the square is on the relative rank 1 for the given color.
 #[must_use]
 pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(square.rank().relative(color) != Rank::Rank1);
@@ -85,9 +85,9 @@ pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
 
 /// Returns pawn attacks for all squares set in `pawns_bb` for the given color.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if any square lies on relative rank 1 for the given color.
+/// In debug builds, panics if any square lies on relative rank 1 for the given color.
 #[must_use]
 pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
@@ -104,9 +104,9 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
 /// This is equivalent to calling `lance_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the given square is on relative `Rank1`.
+/// In debug builds, panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(square.rank().relative(color) != Rank::Rank1);
@@ -118,9 +118,9 @@ pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
 ///
 /// The `occupied` bitboard may include or exclude the given square.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the given square is on relative `Rank1`.
+/// In debug builds, panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
     debug_assert!(square.rank().relative(color) != Rank::Rank1);
@@ -136,9 +136,9 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
 
 /// Returns knight attacks from the given color and square.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the given square is on relative `Rank1` or `Rank2` for the given color.
+/// In debug builds, panics if the given square is on relative `Rank1` or `Rank2` for the given color.
 #[must_use]
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
     debug_assert!(!matches!(
@@ -159,9 +159,9 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
 
 /// Returns knight attacks for all squares set in `knights_bb` for the given color.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if any square lies on relative ranks 1 or 2 for the given color.
+/// In debug builds, panics if any square lies on relative ranks 1 or 2 for the given color.
 #[must_use]
 pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboard {
     debug_assert!((knights_bb
@@ -327,9 +327,9 @@ pub const fn king_attacks(square: Square) -> Bitboard {
 
 /// Returns the pseudo attacks of the given piece type from the square.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the square is invalid for the piece type:
+/// In debug builds, panics if the square is invalid for the piece type:
 /// - A pawn or lance on the relative rank 1 for its color.
 /// - A knight on the last two ranks relative to its color.
 #[must_use]
@@ -356,9 +356,9 @@ pub const fn piece_pseudo_attacks(piece: Piece, square: Square) -> Bitboard {
 ///
 /// The `occupied` bitboard may include or exclude the given square.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if the square is invalid for the piece type:
+/// In debug builds, panics if the square is invalid for the piece type:
 /// - A pawn or lance on the relative rank 1 for its color.
 /// - A knight on the last two ranks relative to its color.
 #[must_use]

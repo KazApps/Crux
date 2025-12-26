@@ -95,9 +95,9 @@ impl Bitboard {
 
     /// Returns the least significant bit (LSB) as a `Square`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn lsb(self) -> Square {
         debug_assert!(self.has_any());
@@ -107,9 +107,9 @@ impl Bitboard {
 
     /// Returns a bitboard with only the least significant bit set.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn isolate_lsb(self) -> Self {
         debug_assert!(self.has_any());
@@ -119,9 +119,9 @@ impl Bitboard {
 
     /// Returns the least significant bit (LSB) as a `Square` and clears it from the bitboard.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn pop_lsb(&mut self) -> Square {
         debug_assert!(self.has_any());
@@ -303,9 +303,10 @@ pub const fn promotion_area(color: Color) -> Bitboard {
 /// This implementation is inspired by the approach described in:
 /// https://www.apply.computer-shogi.org/wcsc31/appeal/Qugiy/appeal.pdf
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// If `pawns_bb` contains a state that would result in doubled pawns, this function may panic.
+/// In debug builds, this function may panic if `pawns_bb` contains a state
+/// that would result in doubled pawns.
 #[must_use]
 pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!(pawns_bb.count_ones() <= 9);

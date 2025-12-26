@@ -34,9 +34,9 @@ impl Hand {
 
     /// Returns the number of pieces of the given piece type in the hand.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if `piece_type` is not a valid hand piece type.
+    /// In debug builds, panics if `piece_type` is not a valid hand piece type.
     #[must_use]
     pub const fn count(self, piece_type: PieceType) -> u32 {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
@@ -49,9 +49,9 @@ impl Hand {
 
     /// Sets the number of pieces of the given piece type in the hand.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if `piece_type` is not a valid hand piece type,
+    /// In debug builds, panics if `piece_type` is not a valid hand piece type,
     /// or if `count` exceeds the maximum allowed for the given piece type.
     pub const fn set(&mut self, piece_type: PieceType, count: u32) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
@@ -65,9 +65,9 @@ impl Hand {
 
     /// Increments the number of pieces of the given piece type in the hand by one.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if `piece_type` is not a valid hand piece type,
+    /// In debug builds, panics if `piece_type` is not a valid hand piece type,
     /// or if the resulting count exceeds the maximum allowed.
     pub const fn increment(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
@@ -77,9 +77,9 @@ impl Hand {
 
     /// Increments the number of pieces of the given piece type in the hand by one.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if `piece_type` is not a valid hand piece type,
+    /// In debug builds, panics if `piece_type` is not a valid hand piece type,
     /// or if the piece count is zero.
     pub const fn decrement(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
@@ -90,9 +90,9 @@ impl Hand {
 
     /// Returns the maximum number of pieces of the given piece type.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if `piece_type` is not a valid hand piece type.
+    /// In debug builds, panics if `piece_type` is not a valid hand piece type.
     pub const fn max_piece_counts(piece_type: PieceType) -> u32 {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
 
