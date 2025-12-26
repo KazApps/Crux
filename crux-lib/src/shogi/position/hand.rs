@@ -20,16 +20,23 @@ use crate::shogi::core::{
 pub struct Hand(u32);
 
 impl Hand {
+    /// Returns `true` if the hand contains at least one piece.
     #[must_use]
     pub const fn has_any(self) -> bool {
         self.0 != 0
     }
 
+    /// Returns `true` if the hand contains no pieces.
     #[must_use]
     pub const fn is_empty(self) -> bool {
         self.0 == 0
     }
 
+    /// Returns the number of pieces of the given piece type in the hand.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `piece_type` is not a valid hand piece type.
     #[must_use]
     pub const fn count(self, piece_type: PieceType) -> u32 {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
@@ -40,6 +47,12 @@ impl Hand {
         (self.0 & mask) >> offset
     }
 
+    /// Sets the number of pieces of the given piece type in the hand.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `piece_type` is not a valid hand piece type,
+    /// or if `count` exceeds the maximum allowed for the given piece type.
     pub const fn set(&mut self, piece_type: PieceType, count: u32) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
         debug_assert!(count <= Self::max_piece_counts(piece_type));
@@ -50,12 +63,24 @@ impl Hand {
         self.0 = (self.0 & !mask) | (count << offset);
     }
 
+    /// Increments the number of pieces of the given piece type in the hand by one.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `piece_type` is not a valid hand piece type,
+    /// or if the resulting count exceeds the maximum allowed.
     pub const fn increment(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
 
         self.set(piece_type, self.count(piece_type) + 1);
     }
 
+    /// Increments the number of pieces of the given piece type in the hand by one.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `piece_type` is not a valid hand piece type,
+    /// or if the piece count is zero.
     pub const fn decrement(&mut self, piece_type: PieceType) {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
         debug_assert!(self.count(piece_type) > 0);
@@ -63,12 +88,18 @@ impl Hand {
         self.set(piece_type, self.count(piece_type) - 1);
     }
 
+    /// Returns the maximum number of pieces of the given piece type.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `piece_type` is not a valid hand piece type.
     pub const fn max_piece_counts(piece_type: PieceType) -> u32 {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
 
         Self::MAX_PIECE_COUNTS[piece_type.as_usize()]
     }
 
+    /// Number of piece types that can appear in a hand.
     pub const HAND_PIECE_TYPES: usize = PieceType::Rook.as_usize() + 1;
 
     const MAX_PIECE_COUNTS: [u32; Self::HAND_PIECE_TYPES] = [
@@ -111,6 +142,7 @@ impl Hand {
 }
 
 impl const Default for Hand {
+    /// Creates an empty hand.
     fn default() -> Self {
         Self(0)
     }

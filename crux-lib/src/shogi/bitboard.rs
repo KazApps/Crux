@@ -164,6 +164,7 @@ impl Bitboard {
 }
 
 impl const Default for Bitboard {
+    /// Creates an empty bitboard.
     fn default() -> Self {
         Self::empty()
     }

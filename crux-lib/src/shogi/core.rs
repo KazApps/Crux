@@ -1,12 +1,34 @@
 use std::mem::transmute;
 
+/// Maximum number of pawns that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_PAWN: u32 = 18;
+
+/// Maximum number of lances that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_LANCE: u32 = 4;
+
+/// Maximum number of knights that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_KNIGHT: u32 = 4;
+
+/// Maximum number of silvers that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_SILVER: u32 = 4;
+
+/// Maximum number of golds that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_GOLD: u32 = 4;
+
+/// Maximum number of bishops that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_BISHOP: u32 = 2;
+
+/// Maximum number of rooks that can exist in total,
+/// including pieces on the board and in hand.
 pub const MAX_ROOK: u32 = 2;
+
+/// Maximum number of kings that can exist in total.
 pub const MAX_KING: u32 = 2;
 
 /// Represents the color of a player or piece in the game.
