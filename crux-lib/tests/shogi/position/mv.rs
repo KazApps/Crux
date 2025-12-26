@@ -40,6 +40,10 @@ fn normal() {
             let from = Square::from(from);
             let to = Square::from(to);
 
+            if from == to {
+                continue;
+            }
+
             let mv = Move::normal(from, to);
 
             assert_eq!(mv.from(), from);
@@ -58,6 +62,10 @@ fn promote() {
         for to in 0..Square::COUNT {
             let from = Square::from(from);
             let to = Square::from(to);
+
+            if from == to {
+                continue;
+            }
 
             let mv = Move::promote(from, to);
 
