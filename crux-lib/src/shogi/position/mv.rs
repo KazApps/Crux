@@ -29,21 +29,28 @@ use crate::shogi::{
 pub struct Move(u16);
 
 impl Move {
+    /// Returns a "null" move.
     #[must_use]
     pub const fn null() -> Self {
         Self(Self::NULL_SQUARE)
     }
 
+    /// Returns a "win" move.
     #[must_use]
     pub const fn win() -> Self {
         Self(Self::WIN_SQUARE)
     }
 
+    /// Returns a "resign" move.
     #[must_use]
     pub const fn resign() -> Self {
         Self(Self::RESIGN_SQUARE)
     }
 
+    /// Creates a normal move from `from` square to `to` square.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if `from` == `to`.
     #[must_use]
     pub const fn normal(from: Square, to: Square) -> Self {
         debug_assert!(from != to);
@@ -51,6 +58,10 @@ impl Move {
         Self(((from as u16) << Self::FROM_SHIFT) | (to as u16))
     }
 
+    /// Creates a promotion move from `from` square to `to` square.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if `from` == `to`.
     #[must_use]
     pub const fn promote(from: Square, to: Square) -> Self {
         debug_assert!(from != to);
@@ -58,45 +69,61 @@ impl Move {
         Self(Self::PROMOTION_FLAG_MASK | ((from as u16) << Self::FROM_SHIFT) | (to as u16))
     }
 
+    /// Creates a drop move of `piece_type` to `to` square.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if `piece_type` is invalid as a hand piece type.
     #[must_use]
     pub const fn drop(piece_type: PieceType, to: Square) -> Self {
-        debug_assert!(piece_type.as_usize() <= Hand::HAND_PIECE_TYPES);
+        debug_assert!(piece_type.as_usize() < Hand::HAND_PIECE_TYPES);
 
         Self(Self::DROP_FLAG_MASK | (piece_type as u16) << Self::DROP_PIECE_SHIFT | (to as u16))
     }
 
+    /// Returns `true` if this is a special move (null/win/resign).
     #[must_use]
     pub const fn is_special(self) -> bool {
         self.as_u16() & Self::SQUARE_MASK >= Square::COUNT as u16
     }
 
-    #[must_use]
-    pub const fn is_normal(self) -> bool {
-        !self.is_special() && self.0 & Self::DROP_FLAG_MASK == 0
-    }
-
+    /// Returns `true` if this move is a promotion.
     #[must_use]
     pub const fn is_promotion(self) -> bool {
         self.0 & Self::PROMOTION_FLAG_MASK != 0
     }
 
+    /// Returns `true` if this move is a drop.
     #[must_use]
     pub const fn is_drop(self) -> bool {
         self.0 & Self::DROP_FLAG_MASK != 0
     }
 
+    /// Returns the source square of a normal move.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if this is not a normal move.
     #[must_use]
     pub const fn from(self) -> Square {
-        debug_assert!(self.is_normal());
+        debug_assert!(!self.is_special() && !self.is_drop());
 
         Square::from(((self.as_u16() >> Self::FROM_SHIFT) & Self::SQUARE_MASK) as u8)
     }
 
+    /// Returns the destination square of the move.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if this is a special move.
     #[must_use]
     pub const fn to(self) -> Square {
+        debug_assert!(!self.is_special());
+
         Square::from((self.as_u16() & Self::SQUARE_MASK) as u8)
     }
 
+    /// Returns the `PieceType` of a drop move.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if this is not a drop move.
     #[must_use]
     pub const fn drop_piece_type(self) -> PieceType {
         debug_assert!(self.is_drop());
@@ -104,6 +131,7 @@ impl Move {
         PieceType::from(((self.as_u16() >> Self::DROP_PIECE_SHIFT) & Self::PIECE_MASK) as u8)
     }
 
+    /// Returns the underlying `u16` representation of the move.
     #[must_use]
     pub const fn as_u16(self) -> u16 {
         self.0

@@ -8,7 +8,6 @@ fn null() {
     let mv = Move::null();
 
     assert!(mv.is_special());
-    assert!(!mv.is_normal());
     assert!(!mv.is_promotion());
     assert!(!mv.is_drop());
 }
@@ -18,7 +17,6 @@ fn win() {
     let mv = Move::win();
 
     assert!(mv.is_special());
-    assert!(!mv.is_normal());
     assert!(!mv.is_promotion());
     assert!(!mv.is_drop());
 }
@@ -28,7 +26,6 @@ fn resign() {
     let mv = Move::resign();
 
     assert!(mv.is_special());
-    assert!(!mv.is_normal());
     assert!(!mv.is_promotion());
     assert!(!mv.is_drop());
 }
@@ -49,7 +46,6 @@ fn normal() {
             assert_eq!(mv.from(), from);
             assert_eq!(mv.to(), to);
             assert!(!mv.is_special());
-            assert!(mv.is_normal());
             assert!(!mv.is_promotion());
             assert!(!mv.is_drop());
         }
@@ -72,7 +68,6 @@ fn promote() {
             assert_eq!(mv.from(), from);
             assert_eq!(mv.to(), to);
             assert!(!mv.is_special());
-            assert!(mv.is_normal());
             assert!(mv.is_promotion());
             assert!(!mv.is_drop());
         }
@@ -90,7 +85,6 @@ fn drop() {
 
             assert_eq!(mv.to(), to);
             assert!(!mv.is_special());
-            assert!(!mv.is_normal());
             assert!(!mv.is_promotion());
             assert!(mv.is_drop());
         }
