@@ -39,12 +39,14 @@ pub struct Position {
 }
 
 impl const Default for Position {
+    /// Same as [`Position::empty`].
     fn default() -> Self {
         Self::empty()
     }
 }
 
 impl Position {
+    /// Creates an empty `Position`.
     #[must_use]
     pub const fn empty() -> Self {
         Self {
@@ -62,6 +64,7 @@ impl Position {
         }
     }
 
+    /// Creates the standard initial position.
     #[must_use]
     pub const fn startpos() -> Self {
         const STARTPOS: Position = {
@@ -114,22 +117,33 @@ impl Position {
         STARTPOS
     }
 
+    /// Returns a builder for modifying this `Position`.
     #[must_use]
     pub const fn builder(self) -> PositionBuilder {
         PositionBuilder(self)
     }
 
+    /// Applies a non-special move to the position.
+    ///
+    /// Updates the board state, hands, side to move, ply, and checker-related state.
+    /// /// Returns `Some(piece)` if a piece was captured, or `None` otherwise.
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if the move is special or
+    /// inconsistent with the current position.
     pub const fn make_move(&mut self, mv: Move) -> Option<Piece> {
         debug_assert!(!mv.is_special());
 
         let stm = self.side_to_move();
         let nstm = stm.opposite();
         let to_piece = self.piece_at(mv.to());
-        let moved_piece;
+        let moved_piece: Piece;
 
         if mv.is_drop() {
             debug_assert!(to_piece.is_none());
+
             moved_piece = mv.drop_piece_type().with_color(stm);
+            self.hand(stm).decrement(mv.drop_piece_type());
         } else {
             let moving_piece = self.piece_at(mv.from()).unwrap();
             debug_assert!(moving_piece.color() == stm);
@@ -152,6 +166,7 @@ impl Position {
 
         self.place(mv.to(), moved_piece);
         self.set_side_to_move(nstm);
+        self.ply += 1;
 
         // Update checker states.
         self.clear_checker_states();
@@ -161,13 +176,21 @@ impl Position {
         to_piece
     }
 
+    /// Reverts a previously applied non-special move.
+    ///
+    /// Restores the board state, hands, side to move, ply, and checker-related state.
+    /// The `captured` piece must be the value returned by [`Position::make_move`].
+    ///
+    /// # Debug assertions
+    /// In debug builds, panics if the move is special or
+    /// inconsistent with the current position.
     pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
         debug_assert!(!mv.is_special());
 
         let stm = self.side_to_move();
         let nstm = stm.opposite();
         let moved_piece = self.piece_at(mv.to()).unwrap();
-        debug_assert!(moved_piece.color() == stm);
+        debug_assert!(moved_piece.color() == nstm);
 
         if mv.is_drop() {
             debug_assert!(captured.is_none());
@@ -184,8 +207,8 @@ impl Position {
         }
 
         self.remove(mv.to());
-
         self.set_side_to_move(nstm);
+        self.ply -= 1;
 
         // Update checker states.
         self.clear_checker_states();
@@ -199,76 +222,94 @@ impl Position {
         }
     }
 
+    /// Returns the side to move.
     #[must_use]
     pub const fn side_to_move(&self) -> Color {
         self.side_to_move
     }
 
+    /// Returns `Some(piece)` if the given square is occupied, or `None` otherwise.
     #[must_use]
     pub const fn piece_at(&self, square: Square) -> Option<Piece> {
         self.mailbox[square.as_usize()]
     }
 
+    /// Returns `true` if any piece occupies the given square.
     #[must_use]
     pub const fn has_any(&self, square: Square) -> bool {
         self.piece_at(square).is_some()
     }
 
+    /// Returns `true` if the given square is empty.
     #[must_use]
     pub const fn is_empty(&self, square: Square) -> bool {
         self.piece_at(square).is_none()
     }
 
+    /// Returns the hand of the given color.
     #[must_use]
     pub const fn hand(&self, color: Color) -> Hand {
         self.hands[color.as_usize()]
     }
 
+    /// Returns a bitboard of all pieces of the given color.
     #[must_use]
     pub const fn color_bb(&self, color: Color) -> Bitboard {
         self.color_bb[color.as_usize()]
     }
 
+    /// Returns a bitboard of all pieces of the given piece type.
     #[must_use]
     pub const fn piece_type_bb(&self, piece_type: PieceType) -> Bitboard {
         self.piece_type_bb[piece_type.as_usize()]
     }
 
+    /// Returns a bitboard of all pieces of the given piece.
     #[must_use]
     pub const fn piece_bb(&self, piece: Piece) -> Bitboard {
         self.color_bb(piece.color()) & self.piece_type_bb(piece.piece_type())
     }
 
+    /// Returns a bitboard of all occupied squares.
     #[must_use]
     pub const fn occupancy(&self) -> Bitboard {
         self.color_bb(Color::Black) | self.color_bb(Color::White)
     }
 
+    /// Returns the square of the king of the given color, if present.
     #[must_use]
     pub const fn king_square(&self, color: Color) -> Option<Square> {
         self.king_squares[color.as_usize()]
     }
 
+    /// Returns a bitboard of pieces currently giving check to
+    /// the king of the side to move.
     #[must_use]
     pub const fn checkers(&self) -> Bitboard {
         self.checkers
     }
 
+    /// Returns a bitboard of opponent sliding pieces that pin
+    /// a piece of the side to move to its king.
     #[must_use]
     pub const fn pinners(&self) -> Bitboard {
         self.pinners
     }
 
+    /// Returns a bitboard of pieces of the side to move that are
+    /// pinned to their king by an opponent sliding piece.
     #[must_use]
     pub const fn pinned(&self) -> Bitboard {
         self.pinned
     }
 
+    /// Returns the current ply count.
     #[must_use]
     pub const fn ply(&self) -> u32 {
         self.ply
     }
 
+    /// Returns the Zobrist hash key of the position.
     #[must_use]
     pub const fn key(&self) -> Key {
         self.key
@@ -432,6 +473,7 @@ impl Position {
 }
 
 impl const PartialEq for Position {
+    /// Compares position by their Zobrist hash keys.
     fn eq(&self, other: &Self) -> bool {
         self.key() == other.key()
     }
@@ -439,6 +481,45 @@ impl const PartialEq for Position {
 
 impl const Eq for Position {}
 
+/// Formats the position as a human-readable shogi board.
+///
+/// The board is shown as a 9x9 grid with files labeled 9..1 from left to right
+/// and ranks labeled 一..九 on the right.
+/// Each square displays the piece on it, if any, prefixed with its color
+/// ('b' for Black, 'w' for White).
+///
+/// After the board, the side to move, pieces in hand for each side,
+/// the current ply count, and the position hash key are displayed.
+///
+/// Example output:
+/// ```text
+///   9   8   7   6   5   4   3   2   1
+/// +---+---+---+---+---+---+---+---+---+
+/// |w香|w桂|w銀|w金|w玉|w金|w銀|w桂|w香| 一
+/// +---+---+---+---+---+---+---+---+---+
+/// |   |w飛|   |   |   |   |   |w角|   | 二
+/// +---+---+---+---+---+---+---+---+---+
+/// |w歩|w歩|w歩|w歩|w歩|w歩|w歩|w歩|w歩| 三
+/// +---+---+---+---+---+---+---+---+---+
+/// |   |   |   |   |   |   |   |   |   | 四
+/// +---+---+---+---+---+---+---+---+---+
+/// |   |   |   |   |   |   |   |   |   | 五
+/// +---+---+---+---+---+---+---+---+---+
+/// |   |   |   |   |   |   |   |   |   | 六
+/// +---+---+---+---+---+---+---+---+---+
+/// |b歩|b歩|b歩|b歩|b歩|b歩|b歩|b歩|b歩| 七
+/// +---+---+---+---+---+---+---+---+---+
+/// |   |b角|   |   |   |   |   |b飛|   | 八
+/// +---+---+---+---+---+---+---+---+---+
+/// |b香|b桂|b銀|b金|b玉|b金|b銀|b桂|b香| 九
+/// +---+---+---+---+---+---+---+---+---+
+///
+/// Side to Move : Black
+/// Hand (Black) : None
+/// Hand (White) : None
+/// Moves        : 0
+/// Key          : 88abfff4d6167b4
+/// ```
 impl Display for Position {
     fn fmt(&self, f: &mut Formatter) -> Result {
         const COLOR_TO_STR: [&str; Color::COUNT] = ["Black", "White"];
@@ -532,24 +613,29 @@ impl Display for Position {
     }
 }
 
+/// A builder for constructing a `Position` incrementally.
 pub struct PositionBuilder(Position);
 
 impl PositionBuilder {
+    /// Sets the side to move.
     pub const fn set_side_to_move(&mut self, side_to_move: Color) -> &mut Self {
         self.0.set_side_to_move(side_to_move);
         self
     }
 
+    /// Places a piece on the given square.
     pub const fn place(&mut self, square: Square, piece: Piece) -> &mut Self {
         self.0.place(square, piece);
         self
     }
 
+    /// Removes any piece from the given square.
     pub const fn remove(&mut self, square: Square) -> &mut Self {
         self.0.remove(square);
         self
     }
 
+    /// Sets the number of pieces of the given piece type in hand for the given color.
     pub const fn set_hand_piece_count(
         &mut self,
         color: Color,
@@ -560,6 +646,7 @@ impl PositionBuilder {
         self
     }
 
+    /// Increments the hand piece count for the given color and piece type.
     pub const fn increment_hand_piece_count(
         &mut self,
         color: Color,
@@ -569,6 +656,7 @@ impl PositionBuilder {
         self
     }
 
+    /// Decrements the hand piece count for the given color and piece type.
     pub const fn decrement_hand_piece_count(
         &mut self,
         color: Color,
@@ -646,6 +734,11 @@ impl PositionBuilder {
         true
     }
 
+    /// Builds the `Position`.
+    ///
+    /// # Debug assertions
+    /// In debug builds, this function panics if the position fails structural validation.
+    /// See [`PositionBuilder::verify`] for the details of the checks performed.
     #[must_use]
     pub const fn build(mut self) -> Position {
         debug_assert!(self.verify());

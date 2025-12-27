@@ -142,7 +142,7 @@ impl Hand {
 }
 
 impl const Default for Hand {
-    /// Creates an empty hand.
+    /// Creates an empty `Hand`.
     fn default() -> Self {
         Self(0)
     }
