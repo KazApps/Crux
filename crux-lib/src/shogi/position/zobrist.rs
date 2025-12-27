@@ -75,16 +75,22 @@ impl Zobrist {
     };
 }
 
+/// Returns the Zobrist key for the side to move.
 #[must_use]
 pub const fn side_key() -> Key {
     Zobrist::SIDE
 }
 
+/// Returns the Zobrist key for the given piece on a given square.
 #[must_use]
 pub const fn piece_square_key(piece: Piece, square: Square) -> Key {
     Zobrist::PIECE_SQUARE[piece.as_usize()][square.as_usize()]
 }
 
+/// Returns the Zobrist key for a piece in hand.
+///
+/// # Debug assertions
+/// In debug builds, panics if `piece_type` or `count` is invalid.
 #[must_use]
 pub const fn hand_key(color: Color, piece_type: PieceType, count: u32) -> Key {
     debug_assert!(piece_type.as_usize() < Hand::HAND_PIECE_TYPES);
