@@ -54,6 +54,23 @@ const PIN_CHECK_POS4: Position = {
     builder.build()
 };
 
+fn same_position(lhs: &Position, rhs: &Position) -> bool {
+    lhs.side_to_move() == rhs.side_to_move()
+        && lhs.occupancy() == rhs.occupancy()
+        && (0..Piece::COUNT).all(|piece| {
+            let piece = Piece::from(piece);
+
+            lhs.piece_bb(piece) == rhs.piece_bb(piece)
+        })
+        && lhs.king_square(Color::Black) == rhs.king_square(Color::Black)
+        && lhs.king_square(Color::White) == rhs.king_square(Color::White)
+        && lhs.checkers() == rhs.checkers()
+        && lhs.pinners() == rhs.pinners()
+        && lhs.pinned() == rhs.pinned()
+        && lhs.ply() == rhs.ply()
+        && lhs.key() == rhs.key()
+}
+
 #[test]
 fn empty() {
     let pos = Position::empty();
@@ -80,8 +97,6 @@ fn empty() {
 fn startpos() {
     let pos = Position::startpos();
 
-    println!("{}", pos);
-
     assert_eq!(pos.side_to_move(), Color::Black);
     assert_eq!(pos.occupancy().count_ones(), 40);
     assert_eq!(pos.color_bb(Color::Black).count_ones(), 20);
@@ -106,7 +121,7 @@ fn startpos() {
 
 #[test]
 fn default() {
-    assert_eq!(Position::default(), Position::empty());
+    assert!(same_position(&Position::default(), &Position::empty()));
 }
 
 #[test]
@@ -165,7 +180,7 @@ fn builder() {
 
     let pos2 = builder.build();
 
-    assert_eq!(pos1, pos2);
+    assert!(same_position(&pos1, &pos2));
 }
 
 #[test]

@@ -472,15 +472,6 @@ impl Position {
     }
 }
 
-impl const PartialEq for Position {
-    /// Compares position by their Zobrist hash keys.
-    fn eq(&self, other: &Self) -> bool {
-        self.key() == other.key()
-    }
-}
-
-impl const Eq for Position {}
-
 /// Formats the position as a human-readable shogi board.
 ///
 /// The board is shown as a 9x9 grid with files labeled 9..1 from left to right
