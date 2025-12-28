@@ -58,7 +58,7 @@ const CHECKER_TEST_POS5: Position = {
 
     builder
         .place(Square::S11, Piece::WhiteKing)
-        .place(Square::S15, Piece::BlackLance)
+        .place(Square::S19, Piece::BlackLance)
         .place(Square::S23, Piece::BlackKnight)
         .set_side_to_move(Color::White);
 
@@ -70,7 +70,7 @@ const CHECKER_TEST_POS6: Position = {
 
     builder
         .place(Square::S99, Piece::BlackKing)
-        .place(Square::S95, Piece::WhiteLance)
+        .place(Square::S91, Piece::WhiteLance)
         .place(Square::S87, Piece::WhiteKnight);
 
     builder.build()
@@ -256,11 +256,11 @@ fn checkers() {
     assert_eq!(CHECKER_TEST_POS4.checkers(), Square::S97.bit());
     assert_eq!(
         CHECKER_TEST_POS5.checkers(),
-        Square::S15.bit() | Square::S23.bit()
+        Square::S19.bit() | Square::S23.bit()
     );
     assert_eq!(
         CHECKER_TEST_POS6.checkers(),
-        Square::S95.bit() | Square::S87.bit()
+        Square::S91.bit() | Square::S87.bit()
     );
 
     assert_eq!(PIN_TEST_POS1.checkers(), Bitboard::empty());
