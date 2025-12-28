@@ -11,7 +11,72 @@ mod key;
 mod mv;
 mod zobrist;
 
-const PIN_CHECK_POS1: Position = {
+const CHECKER_TEST_POS1: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S11, Piece::WhiteKing)
+        .place(Square::S12, Piece::BlackPawn)
+        .set_side_to_move(Color::White);
+
+    builder.build()
+};
+
+const CHECKER_TEST_POS2: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S99, Piece::BlackKing)
+        .place(Square::S98, Piece::WhitePawn);
+
+    builder.build()
+};
+
+const CHECKER_TEST_POS3: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S11, Piece::WhiteKing)
+        .place(Square::S13, Piece::BlackLance)
+        .set_side_to_move(Color::White);
+
+    builder.build()
+};
+
+const CHECKER_TEST_POS4: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S99, Piece::BlackKing)
+        .place(Square::S97, Piece::WhiteLance);
+
+    builder.build()
+};
+
+const CHECKER_TEST_POS5: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S11, Piece::WhiteKing)
+        .place(Square::S15, Piece::BlackLance)
+        .place(Square::S23, Piece::BlackKnight)
+        .set_side_to_move(Color::White);
+
+    builder.build()
+};
+
+const CHECKER_TEST_POS6: Position = {
+    let mut builder = Position::empty().builder();
+
+    builder
+        .place(Square::S99, Piece::BlackKing)
+        .place(Square::S95, Piece::WhiteLance)
+        .place(Square::S87, Piece::WhiteKnight);
+
+    builder.build()
+};
+
+const PIN_TEST_POS1: Position = {
     let mut builder = Position::empty().builder();
 
     builder
@@ -23,8 +88,8 @@ const PIN_CHECK_POS1: Position = {
     builder.build()
 };
 
-const PIN_CHECK_POS2: Position = {
-    let mut builder = PIN_CHECK_POS1.builder();
+const PIN_TEST_POS2: Position = {
+    let mut builder = PIN_TEST_POS1.builder();
 
     builder
         .place(Square::S22, Piece::BlackPawn)
@@ -33,8 +98,8 @@ const PIN_CHECK_POS2: Position = {
     builder.build()
 };
 
-const PIN_CHECK_POS3: Position = {
-    let mut builder = PIN_CHECK_POS2.builder();
+const PIN_TEST_POS3: Position = {
+    let mut builder = PIN_TEST_POS2.builder();
 
     builder
         .place(Square::S21, Piece::WhiteKnight)
@@ -43,8 +108,8 @@ const PIN_CHECK_POS3: Position = {
     builder.build()
 };
 
-const PIN_CHECK_POS4: Position = {
-    let mut builder = PIN_CHECK_POS3.builder();
+const PIN_TEST_POS4: Position = {
+    let mut builder = PIN_TEST_POS3.builder();
 
     builder
         .place(Square::S19, Piece::BlackLance)
@@ -184,29 +249,50 @@ fn builder() {
 }
 
 #[test]
-fn pinners() {
-    assert_eq!(PIN_CHECK_POS1.pinners(), Square::S13.bit());
-    assert_eq!(PIN_CHECK_POS2.pinners(), Square::S13.bit());
+fn checkers() {
+    assert_eq!(CHECKER_TEST_POS1.checkers(), Square::S12.bit());
+    assert_eq!(CHECKER_TEST_POS2.checkers(), Square::S98.bit());
+    assert_eq!(CHECKER_TEST_POS3.checkers(), Square::S13.bit());
+    assert_eq!(CHECKER_TEST_POS4.checkers(), Square::S97.bit());
     assert_eq!(
-        PIN_CHECK_POS3.pinners(),
+        CHECKER_TEST_POS5.checkers(),
+        Square::S15.bit() | Square::S23.bit()
+    );
+    assert_eq!(
+        CHECKER_TEST_POS6.checkers(),
+        Square::S95.bit() | Square::S87.bit()
+    );
+
+    assert_eq!(PIN_TEST_POS1.checkers(), Bitboard::empty());
+    assert_eq!(PIN_TEST_POS2.checkers(), Bitboard::empty());
+    assert_eq!(PIN_TEST_POS3.checkers(), Bitboard::empty());
+    assert_eq!(PIN_TEST_POS4.checkers(), Bitboard::empty());
+}
+
+#[test]
+fn pinners() {
+    assert_eq!(PIN_TEST_POS1.pinners(), Square::S13.bit());
+    assert_eq!(PIN_TEST_POS2.pinners(), Square::S13.bit());
+    assert_eq!(
+        PIN_TEST_POS3.pinners(),
         Square::S13.bit() | Square::S41.bit()
     );
     assert_eq!(
-        PIN_CHECK_POS4.pinners(),
+        PIN_TEST_POS4.pinners(),
         Square::S13.bit() | Square::S41.bit() | Square::S19.bit() | Square::S61.bit()
     );
 }
 
 #[test]
 fn pinned() {
-    assert_eq!(PIN_CHECK_POS1.pinned(), Square::S12.bit());
-    assert_eq!(PIN_CHECK_POS2.pinned(), Square::S12.bit());
+    assert_eq!(PIN_TEST_POS1.pinned(), Square::S12.bit());
+    assert_eq!(PIN_TEST_POS2.pinned(), Square::S12.bit());
     assert_eq!(
-        PIN_CHECK_POS3.pinned(),
+        PIN_TEST_POS3.pinned(),
         Square::S12.bit() | Square::S21.bit()
     );
     assert_eq!(
-        PIN_CHECK_POS4.pinned(),
+        PIN_TEST_POS4.pinned(),
         Square::S12.bit() | Square::S21.bit()
     );
 }
