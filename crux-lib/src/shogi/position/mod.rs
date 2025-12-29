@@ -365,14 +365,14 @@ impl Position {
         self.key ^= piece_square_key(piece, square);
     }
 
-    const fn set_hand_piece_count(&mut self, color: Color, piece_type: PieceType, count: u32) {
+    const fn set_hand_piece_count(&mut self, color: Color, piece_type: PieceType, new_count: u32) {
         self.switch_hand_key(
             color,
             piece_type,
             self.hands[color.as_usize()].count(piece_type),
-            count,
+            new_count,
         );
-        self.hands[color.as_usize()].set(piece_type, count);
+        self.hands[color.as_usize()].set(piece_type, new_count);
     }
 
     const fn increment_hand_piece_count(&mut self, color: Color, piece_type: PieceType) {
