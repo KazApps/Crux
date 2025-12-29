@@ -23,7 +23,7 @@ use crate::shogi::{
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Position {
     side_to_move: Color,
     mailbox: [Option<Piece>; Square::COUNT],
@@ -143,7 +143,7 @@ impl Position {
             debug_assert!(to_piece.is_none());
 
             moved_piece = mv.drop_piece_type().with_color(stm);
-            self.hand(stm).decrement(mv.drop_piece_type());
+            self.decrement_hand_piece_count(stm, mv.drop_piece_type());
         } else {
             let moving_piece = self.piece_at(mv.from()).unwrap();
             debug_assert!(moving_piece.color() == stm);
