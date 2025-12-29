@@ -426,6 +426,7 @@ impl Position {
             let golds = self.piece_type_bb(PieceType::Gold)
                 | self.piece_type_bb(PieceType::ProPawn)
                 | self.piece_type_bb(PieceType::ProLance)
+                | self.piece_type_bb(PieceType::ProKnight)
                 | self.piece_type_bb(PieceType::ProSilver);
 
             self.checkers |= ((pawns & pawn_attacks(stm, king_square))
