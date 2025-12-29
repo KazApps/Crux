@@ -192,6 +192,8 @@ impl Position {
         let moved_piece = self.piece_at(mv.to()).unwrap();
         debug_assert!(moved_piece.color() == nstm);
 
+        self.remove(mv.to());
+
         if mv.is_drop() {
             debug_assert!(captured.is_none());
 
@@ -206,21 +208,20 @@ impl Position {
             self.place(mv.from(), moving_piece);
         }
 
-        self.remove(mv.to());
-        self.set_side_to_move(nstm);
-        self.ply -= 1;
-
-        // Update checker states.
-        self.clear_checker_states();
-        self.update_sliding_checkers_and_pins();
-
         if let Some(captured) = captured {
             debug_assert!(captured.color() == stm);
 
             self.place(mv.to(), captured);
             self.decrement_hand_piece_count(nstm, captured.piece_type().unpromoted());
-            self.update_checkers_for(mv.to());
         }
+
+        self.set_side_to_move(nstm);
+        self.ply -= 1;
+
+        // Update checker states.
+        self.clear_checker_states();
+        self.update_non_sliding_checkers();
+        self.update_sliding_checkers_and_pins();
     }
 
     /// Returns the side to move.
