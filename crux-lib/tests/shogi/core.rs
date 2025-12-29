@@ -15,9 +15,9 @@ fn piece_type_with_color() {
         (PieceType::King, Piece::BlackKing, Piece::WhiteKing),
     ];
 
-    for (piece_type, black, white) in cases.iter() {
-        assert_eq!(piece_type.with_color(Color::Black), *black);
-        assert_eq!(piece_type.with_color(Color::White), *white);
+    for (piece_type, black, white) in cases {
+        assert_eq!(piece_type.with_color(Color::Black), black);
+        assert_eq!(piece_type.with_color(Color::White), white);
     }
 }
 
@@ -32,8 +32,8 @@ fn piece_type_promoted() {
         (PieceType::Rook, PieceType::Dragon),
     ];
 
-    for (piece_type, promoted) in cases.iter() {
-        assert_eq!(piece_type.promoted(), *promoted);
+    for (piece_type, promoted) in cases {
+        assert_eq!(piece_type.promoted(), promoted);
     }
 
     for piece_type in [
@@ -43,10 +43,8 @@ fn piece_type_promoted() {
         PieceType::ProSilver,
         PieceType::Horse,
         PieceType::Dragon,
-    ]
-    .iter()
-    {
-        assert_eq!(piece_type.promoted(), *piece_type);
+    ] {
+        assert_eq!(piece_type.promoted(), piece_type);
     }
 }
 
@@ -61,8 +59,8 @@ fn piece_type_unpromoted() {
         (PieceType::Dragon, PieceType::Rook),
     ];
 
-    for (piece_type, unpromoted) in cases.iter() {
-        assert_eq!(piece_type.unpromoted(), *unpromoted);
+    for (piece_type, unpromoted) in cases {
+        assert_eq!(piece_type.unpromoted(), unpromoted);
     }
 
     for piece_type in [
@@ -74,10 +72,8 @@ fn piece_type_unpromoted() {
         PieceType::Bishop,
         PieceType::Rook,
         PieceType::King,
-    ]
-    .iter()
-    {
-        assert_eq!(piece_type.unpromoted(), *piece_type);
+    ] {
+        assert_eq!(piece_type.unpromoted(), piece_type);
     }
 }
 
@@ -121,8 +117,8 @@ fn piece_get_color() {
         (Piece::WhiteKing, Color::White),
     ];
 
-    for (piece, color) in cases.iter() {
-        assert_eq!(piece.color(), *color);
+    for (piece, color) in cases {
+        assert_eq!(piece.color(), color);
     }
 }
 
@@ -139,8 +135,8 @@ fn piece_get_type() {
         (Piece::WhiteKing, PieceType::King),
     ];
 
-    for (piece, piece_type) in cases.iter() {
-        assert_eq!(piece.piece_type(), *piece_type);
+    for (piece, piece_type) in cases {
+        assert_eq!(piece.piece_type(), piece_type);
     }
 }
 
@@ -152,8 +148,8 @@ fn file_east() {
         (File::File9, File::File8),
     ];
 
-    for (file, east) in cases.iter() {
-        assert_eq!(file.east(), *east);
+    for (file, east) in cases {
+        assert_eq!(file.east(), east);
     }
 }
 
@@ -172,8 +168,8 @@ fn file_west() {
         (File::File8, File::File9),
     ];
 
-    for (file, west) in cases.iter() {
-        assert_eq!(file.west(), *west);
+    for (file, west) in cases {
+        assert_eq!(file.west(), west);
     }
 }
 
@@ -195,8 +191,8 @@ fn file_relative_east() {
         (Color::White, File::File8, File::File9),
     ];
 
-    for (color, file, relative_east) in cases.iter() {
-        assert_eq!(file.relative_east(*color), *relative_east);
+    for (color, file, relative_east) in cases {
+        assert_eq!(file.relative_east(color), relative_east);
     }
 }
 
@@ -225,8 +221,8 @@ fn file_relative_west() {
         (Color::White, File::File9, File::File8),
     ];
 
-    for (color, file, relative_west) in cases.iter() {
-        assert_eq!(file.relative_west(*color), *relative_west);
+    for (color, file, relative_west) in cases {
+        assert_eq!(file.relative_west(color), relative_west);
     }
 }
 
@@ -258,8 +254,8 @@ fn file_flip() {
         (File::File9, File::File1),
     ];
 
-    for (file, flipped) in cases.iter() {
-        assert_eq!(file.flip(), *flipped);
+    for (file, flipped) in cases {
+        assert_eq!(file.flip(), flipped);
     }
 }
 
@@ -271,8 +267,8 @@ fn rank_north() {
         (Rank::Rank9, Rank::Rank8),
     ];
 
-    for (rank, north) in cases.iter() {
-        assert_eq!(rank.north(), *north);
+    for (rank, north) in cases {
+        assert_eq!(rank.north(), north);
     }
 }
 
@@ -291,8 +287,8 @@ fn rank_south() {
         (Rank::Rank8, Rank::Rank9),
     ];
 
-    for (rank, south) in cases.iter() {
-        assert_eq!(rank.south(), *south);
+    for (rank, south) in cases {
+        assert_eq!(rank.south(), south);
     }
 }
 
@@ -314,8 +310,8 @@ fn rank_relative_north() {
         (Color::White, Rank::Rank8, Rank::Rank9),
     ];
 
-    for (color, rank, relative_north) in cases.iter() {
-        assert_eq!(rank.relative_north(*color), *relative_north);
+    for (color, rank, relative_north) in cases {
+        assert_eq!(rank.relative_north(color), relative_north);
     }
 }
 
@@ -344,8 +340,8 @@ fn rank_relative_south() {
         (Color::White, Rank::Rank9, Rank::Rank8),
     ];
 
-    for (color, rank, relative_south) in cases.iter() {
-        assert_eq!(rank.relative_south(*color), *relative_south);
+    for (color, rank, relative_south) in cases {
+        assert_eq!(rank.relative_south(color), relative_south);
     }
 }
 
@@ -377,8 +373,8 @@ fn rank_flip() {
         (Rank::Rank9, Rank::Rank1),
     ];
 
-    for (rank, flipped) in cases.iter() {
-        assert_eq!(rank.flip(), *flipped);
+    for (rank, flipped) in cases {
+        assert_eq!(rank.flip(), flipped);
     }
 }
 
@@ -405,8 +401,8 @@ fn rank_can_promote() {
         (Color::White, Rank::Rank9, true),
     ];
 
-    for (color, rank, can_promote) in cases.iter() {
-        assert_eq!(rank.can_promote(*color), *can_promote);
+    for (color, rank, can_promote) in cases {
+        assert_eq!(rank.can_promote(color), can_promote);
     }
 }
 
@@ -433,8 +429,8 @@ fn square_file() {
         (Square::new(File::File9, Rank::Rank5), File::File9),
     ];
 
-    for (square, file) in cases.iter() {
-        assert_eq!(square.file(), *file);
+    for (square, file) in cases {
+        assert_eq!(square.file(), file);
     }
 }
 
@@ -446,8 +442,8 @@ fn square_rank() {
         (Square::new(File::File9, Rank::Rank5), Rank::Rank5),
     ];
 
-    for (square, rank) in cases.iter() {
-        assert_eq!(square.rank(), *rank);
+    for (square, rank) in cases {
+        assert_eq!(square.rank(), rank);
     }
 }
 
@@ -468,8 +464,8 @@ fn square_north() {
         ),
     ];
 
-    for (square, north) in cases.iter() {
-        assert_eq!(square.north(), *north);
+    for (square, north) in cases {
+        assert_eq!(square.north(), north);
     }
 }
 
@@ -497,8 +493,8 @@ fn square_south() {
         ),
     ];
 
-    for (square, south) in cases.iter() {
-        assert_eq!(square.south(), *south);
+    for (square, south) in cases {
+        assert_eq!(square.south(), south);
     }
 }
 
@@ -526,8 +522,8 @@ fn square_east() {
         ),
     ];
 
-    for (square, east) in cases.iter() {
-        assert_eq!(square.east(), *east);
+    for (square, east) in cases {
+        assert_eq!(square.east(), east);
     }
 }
 
@@ -555,8 +551,8 @@ fn square_west() {
         ),
     ];
 
-    for (square, west) in cases.iter() {
-        assert_eq!(square.west(), *west);
+    for (square, west) in cases {
+        assert_eq!(square.west(), west);
     }
 }
 
@@ -584,8 +580,8 @@ fn square_north_east() {
         ),
     ];
 
-    for (square, north_east) in cases.iter() {
-        assert_eq!(square.north_east(), *north_east);
+    for (square, north_east) in cases {
+        assert_eq!(square.north_east(), north_east);
     }
 }
 
@@ -620,8 +616,8 @@ fn square_north_west() {
         ),
     ];
 
-    for (square, north_west) in cases.iter() {
-        assert_eq!(square.north_west(), *north_west);
+    for (square, north_west) in cases {
+        assert_eq!(square.north_west(), north_west);
     }
 }
 
@@ -656,8 +652,8 @@ fn square_south_east() {
         ),
     ];
 
-    for (square, south_east) in cases.iter() {
-        assert_eq!(square.south_east(), *south_east);
+    for (square, south_east) in cases {
+        assert_eq!(square.south_east(), south_east);
     }
 }
 
@@ -692,8 +688,8 @@ fn square_south_west() {
         ),
     ];
 
-    for (square, south_west) in cases.iter() {
-        assert_eq!(square.south_west(), *south_west);
+    for (square, south_west) in cases {
+        assert_eq!(square.south_west(), south_west);
     }
 }
 
@@ -746,8 +742,8 @@ fn square_relative_north() {
         ),
     ];
 
-    for (color, square, relative_north) in cases.iter() {
-        assert_eq!(square.relative_north(*color), *relative_north);
+    for (color, square, relative_north) in cases {
+        assert_eq!(square.relative_north(color), relative_north);
     }
 }
 
@@ -800,8 +796,8 @@ fn square_relative_south() {
         ),
     ];
 
-    for (color, square, relative_south) in cases.iter() {
-        assert_eq!(square.relative_south(*color), *relative_south);
+    for (color, square, relative_south) in cases {
+        assert_eq!(square.relative_south(color), relative_south);
     }
 }
 
@@ -854,8 +850,8 @@ fn square_relative_east() {
         ),
     ];
 
-    for (color, square, relative_east) in cases.iter() {
-        assert_eq!(square.relative_east(*color), *relative_east);
+    for (color, square, relative_east) in cases {
+        assert_eq!(square.relative_east(color), relative_east);
     }
 }
 
@@ -908,8 +904,8 @@ fn square_relative_west() {
         ),
     ];
 
-    for (color, square, relative_west) in cases.iter() {
-        assert_eq!(square.relative_west(*color), *relative_west);
+    for (color, square, relative_west) in cases {
+        assert_eq!(square.relative_west(color), relative_west);
     }
 }
 
@@ -962,8 +958,8 @@ fn square_relative_north_east() {
         ),
     ];
 
-    for (color, square, relative_north_east) in cases.iter() {
-        assert_eq!(square.relative_north_east(*color), *relative_north_east);
+    for (color, square, relative_north_east) in cases {
+        assert_eq!(square.relative_north_east(color), relative_north_east);
     }
 }
 
@@ -1030,8 +1026,8 @@ fn square_relative_north_west() {
         ),
     ];
 
-    for (color, square, relative_north_west) in cases.iter() {
-        assert_eq!(square.relative_north_west(*color), *relative_north_west);
+    for (color, square, relative_north_west) in cases {
+        assert_eq!(square.relative_north_west(color), relative_north_west);
     }
 }
 
@@ -1098,8 +1094,8 @@ fn square_relative_south_east() {
         ),
     ];
 
-    for (color, square, relative_south_east) in cases.iter() {
-        assert_eq!(square.relative_south_east(*color), *relative_south_east);
+    for (color, square, relative_south_east) in cases {
+        assert_eq!(square.relative_south_east(color), relative_south_east);
     }
 }
 
@@ -1166,8 +1162,8 @@ fn square_relative_south_west() {
         ),
     ];
 
-    for (color, square, relative_south_west) in cases.iter() {
-        assert_eq!(square.relative_south_west(*color), *relative_south_west);
+    for (color, square, relative_south_west) in cases {
+        assert_eq!(square.relative_south_west(color), relative_south_west);
     }
 }
 
@@ -1219,8 +1215,8 @@ fn square_with_file() {
         ),
     ];
 
-    for (square, file, flipped) in cases.iter() {
-        assert_eq!(square.with_file(*file), *flipped);
+    for (square, file, flipped) in cases {
+        assert_eq!(square.with_file(file), flipped);
     }
 }
 
@@ -1244,8 +1240,8 @@ fn square_with_rank() {
         ),
     ];
 
-    for (square, rank, flipped) in cases.iter() {
-        assert_eq!(square.with_rank(*rank), *flipped);
+    for (square, rank, flipped) in cases {
+        assert_eq!(square.with_rank(rank), flipped);
     }
 }
 
@@ -1266,8 +1262,8 @@ fn square_flip_file() {
         ),
     ];
 
-    for (square, flipped) in cases.iter() {
-        assert_eq!(square.flip_file(), *flipped);
+    for (square, flipped) in cases {
+        assert_eq!(square.flip_file(), flipped);
     }
 }
 
@@ -1288,8 +1284,8 @@ fn square_flip_rank() {
         ),
     ];
 
-    for (square, flipped) in cases.iter() {
-        assert_eq!(square.flip_rank(), *flipped);
+    for (square, flipped) in cases {
+        assert_eq!(square.flip_rank(), flipped);
     }
 }
 
@@ -1310,8 +1306,8 @@ fn square_rotate() {
         ),
     ];
 
-    for (square, rotated) in cases.iter() {
-        assert_eq!(square.rotate180(), *rotated);
+    for (square, rotated) in cases {
+        assert_eq!(square.rotate180(), rotated);
     }
 }
 
@@ -1326,7 +1322,7 @@ fn can_promote() {
         (Color::White, Square::new(File::File9, Rank::Rank5), false),
     ];
 
-    for (color, square, can_promote) in cases.iter() {
-        assert_eq!(square.can_promote(*color), *can_promote);
+    for (color, square, can_promote) in cases {
+        assert_eq!(square.can_promote(color), can_promote);
     }
 }

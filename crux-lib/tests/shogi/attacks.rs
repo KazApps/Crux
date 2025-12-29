@@ -15,8 +15,8 @@ fn pawn_attacks() {
         (Color::White, Square::S98, Square::S99.bit()),
     ];
 
-    for (color, square, pawn_attacks) in cases.iter() {
-        assert_eq!(attacks::pawn_attacks(*color, *square), *pawn_attacks);
+    for (color, square, pawn_attacks) in cases {
+        assert_eq!(attacks::pawn_attacks(color, square), pawn_attacks);
     }
 }
 
@@ -49,11 +49,8 @@ fn multi_pawn_attacks() {
         ),
     ];
 
-    for (color, pawns_bb, pawns_attacks) in cases.iter() {
-        assert_eq!(
-            attacks::multi_pawn_attacks(*color, *pawns_bb),
-            *pawns_attacks
-        );
+    for (color, pawns_bb, pawns_attacks) in cases {
+        assert_eq!(attacks::multi_pawn_attacks(color, pawns_bb), pawns_attacks);
     }
 }
 
@@ -98,10 +95,10 @@ fn lance_pseudo_attacks() {
         (Color::White, Square::S98, Square::S99.bit()),
     ];
 
-    for (color, square, lance_pseudo_attacks) in cases.iter() {
+    for (color, square, lance_pseudo_attacks) in cases {
         assert_eq!(
-            attacks::lance_pseudo_attacks(*color, *square),
-            *lance_pseudo_attacks
+            attacks::lance_pseudo_attacks(color, square),
+            lance_pseudo_attacks
         );
     }
 }
@@ -182,10 +179,10 @@ fn lance_attacks() {
         ),
     ];
 
-    for (color, square, occupied, lance_attacks) in cases.iter() {
+    for (color, square, occupied, lance_attacks) in cases {
         assert_eq!(
-            attacks::lance_attacks(*color, *square, *occupied),
-            *lance_attacks
+            attacks::lance_attacks(color, square, occupied),
+            lance_attacks
         );
     }
 }
@@ -223,8 +220,8 @@ fn knight_attacks() {
         (Color::White, Square::S97, Square::S89.bit()),
     ];
 
-    for (color, square, knight_attacks) in cases.iter() {
-        assert_eq!(attacks::knight_attacks(*color, *square), *knight_attacks);
+    for (color, square, knight_attacks) in cases {
+        assert_eq!(attacks::knight_attacks(color, square), knight_attacks);
     }
 }
 
@@ -271,10 +268,10 @@ fn multi_knight_attacks() {
         ),
     ];
 
-    for (color, knights_bb, knights_attacks) in cases.iter() {
+    for (color, knights_bb, knights_attacks) in cases {
         assert_eq!(
-            attacks::multi_knight_attacks(*color, *knights_bb),
-            *knights_attacks
+            attacks::multi_knight_attacks(color, knights_bb),
+            knights_attacks
         );
     }
 }
@@ -342,8 +339,8 @@ fn silver_attacks() {
         (Color::White, Square::S99, Square::S88.bit()),
     ];
 
-    for (color, square, silver_attacks) in cases.iter() {
-        assert_eq!(attacks::silver_attacks(*color, *square), *silver_attacks);
+    for (color, square, silver_attacks) in cases {
+        assert_eq!(attacks::silver_attacks(color, square), silver_attacks);
     }
 }
 
@@ -376,10 +373,10 @@ fn multi_silver_attacks() {
         ),
     ];
 
-    for (color, silvers_bb, silvers_attacks) in cases.iter() {
+    for (color, silvers_bb, silvers_attacks) in cases {
         assert_eq!(
-            attacks::multi_silver_attacks(*color, *silvers_bb),
-            *silvers_attacks
+            attacks::multi_silver_attacks(color, silvers_bb),
+            silvers_attacks
         );
     }
 }
@@ -429,8 +426,8 @@ fn gold_attacks() {
         ),
     ];
 
-    for (color, square, gold_attacks) in cases.iter() {
-        assert_eq!(attacks::gold_attacks(*color, *square), *gold_attacks);
+    for (color, square, gold_attacks) in cases {
+        assert_eq!(attacks::gold_attacks(color, square), gold_attacks);
     }
 }
 
@@ -469,11 +466,8 @@ fn multi_gold_attacks() {
         ),
     ];
 
-    for (color, golds_bb, golds_attacks) in cases.iter() {
-        assert_eq!(
-            attacks::multi_gold_attacks(*color, *golds_bb),
-            *golds_attacks
-        );
+    for (color, golds_bb, golds_attacks) in cases {
+        assert_eq!(attacks::multi_gold_attacks(color, golds_bb), golds_attacks);
     }
 }
 
@@ -589,10 +583,10 @@ fn bishop_pseudo_attacks() {
         ),
     ];
 
-    for (square, bishop_pseudo_attacks) in cases.iter() {
+    for (square, bishop_pseudo_attacks) in cases {
         assert_eq!(
-            attacks::bishop_pseudo_attacks(*square),
-            *bishop_pseudo_attacks
+            attacks::bishop_pseudo_attacks(square),
+            bishop_pseudo_attacks
         );
     }
 }
@@ -690,8 +684,8 @@ fn bishop_attacks() {
         ),
     ];
 
-    for (square, occupied, bishop_attacks) in cases.iter() {
-        assert_eq!(attacks::bishop_attacks(*square, *occupied), *bishop_attacks);
+    for (square, occupied, bishop_attacks) in cases {
+        assert_eq!(attacks::bishop_attacks(square, occupied), bishop_attacks);
     }
 }
 
@@ -742,8 +736,8 @@ fn rook_pseudo_attacks() {
         ),
     ];
 
-    for (square, rook_pseudo_attacks) in cases.iter() {
-        assert_eq!(attacks::rook_pseudo_attacks(*square), *rook_pseudo_attacks);
+    for (square, rook_pseudo_attacks) in cases {
+        assert_eq!(attacks::rook_pseudo_attacks(square), rook_pseudo_attacks);
     }
 }
 
@@ -873,8 +867,8 @@ fn rook_attacks() {
         ),
     ];
 
-    for (square, occupied, rook_attacks) in cases.iter() {
-        assert_eq!(attacks::rook_attacks(*square, *occupied), *rook_attacks);
+    for (square, occupied, rook_attacks) in cases {
+        assert_eq!(attacks::rook_attacks(square, occupied), rook_attacks);
     }
 }
 
@@ -930,7 +924,7 @@ fn ray_between() {
         (Square::S99, Square::S58, Bitboard::empty()),
     ];
 
-    for (from, to, ray) in cases.iter() {
-        assert_eq!(attacks::ray_between(*from, *to), *ray);
+    for (from, to, ray) in cases {
+        assert_eq!(attacks::ray_between(from, to), ray);
     }
 }

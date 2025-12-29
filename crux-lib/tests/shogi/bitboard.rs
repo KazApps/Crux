@@ -51,8 +51,8 @@ fn has_any() {
         ),
     ];
 
-    for (bb, has_any) in cases.iter() {
-        assert_eq!(bb.has_any(), *has_any);
+    for (bb, has_any) in cases {
+        assert_eq!(bb.has_any(), has_any);
     }
 }
 
@@ -70,8 +70,8 @@ fn is_empty() {
         ),
     ];
 
-    for (bb, is_empty) in cases.iter() {
-        assert_eq!(bb.is_empty(), *is_empty);
+    for (bb, is_empty) in cases {
+        assert_eq!(bb.is_empty(), is_empty);
     }
 }
 
@@ -89,8 +89,8 @@ fn is_single() {
         ),
     ];
 
-    for (bb, is_single) in cases.iter() {
-        assert_eq!(bb.is_single(), *is_single);
+    for (bb, is_single) in cases {
+        assert_eq!(bb.is_single(), is_single);
     }
 }
 
@@ -108,8 +108,8 @@ fn is_multiple() {
         ),
     ];
 
-    for (bb, is_multiple) in cases.iter() {
-        assert_eq!(bb.is_multiple(), *is_multiple);
+    for (bb, is_multiple) in cases {
+        assert_eq!(bb.is_multiple(), is_multiple);
     }
 }
 
@@ -124,8 +124,8 @@ fn count_ones() {
         (Square::S11.bit() | Square::S55.bit() | Square::S99.bit(), 3),
     ];
 
-    for (bb, ones) in cases.iter() {
-        assert_eq!(bb.count_ones(), *ones);
+    for (bb, ones) in cases {
+        assert_eq!(bb.count_ones(), ones);
     }
 }
 
@@ -142,8 +142,8 @@ fn lsb() {
         ),
     ];
 
-    for (bb, lsb) in cases.iter() {
-        assert_eq!(bb.lsb(), *lsb);
+    for (bb, lsb) in cases {
+        assert_eq!(bb.lsb(), lsb);
     }
 }
 
@@ -167,8 +167,8 @@ fn isolate_lsb() {
         ),
     ];
 
-    for (bb, lsb_bb) in cases.iter() {
-        assert_eq!(bb.isolate_lsb(), *lsb_bb);
+    for (bb, lsb_bb) in cases {
+        assert_eq!(bb.isolate_lsb(), lsb_bb);
     }
 }
 
