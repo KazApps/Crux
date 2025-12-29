@@ -186,6 +186,7 @@ impl Position {
     /// inconsistent with the current position.
     pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
         debug_assert!(!mv.is_special());
+        debug_assert!(self.ply > 0);
 
         let stm = self.side_to_move();
         let nstm = stm.opposite();
@@ -386,11 +387,10 @@ impl Position {
     }
 
     const fn decrement_hand_piece_count(&mut self, color: Color, piece_type: PieceType) {
-        self.set_hand_piece_count(
-            color,
-            piece_type,
-            self.hands[color.as_usize()].count(piece_type) - 1,
-        )
+        let current = self.hands[color.as_usize()].count(piece_type);
+        debug_assert!(current > 0);
+
+        self.set_hand_piece_count(color, piece_type, current - 1)
     }
 
     const fn switch_hand_key(
