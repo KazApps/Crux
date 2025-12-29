@@ -75,7 +75,7 @@ impl Hand {
         self.set(piece_type, self.count(piece_type) + 1);
     }
 
-    /// Increments the number of pieces of the given piece type in the hand by one.
+    /// Decrements the number of pieces of the given piece type in the hand by one.
     ///
     /// # Debug assertions
     ///
