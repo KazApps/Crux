@@ -218,6 +218,7 @@ impl Position {
             debug_assert!(captured.color() == stm);
 
             self.place(mv.to(), captured);
+            self.decrement_hand_piece_count(nstm, captured.piece_type().unpromoted());
             self.update_checkers_for(mv.to());
         }
     }
