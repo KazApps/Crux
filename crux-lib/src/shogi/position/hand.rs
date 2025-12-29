@@ -93,6 +93,7 @@ impl Hand {
     /// # Debug assertions
     ///
     /// In debug builds, panics if `piece_type` is not a valid hand piece type.
+    #[must_use]
     pub const fn max_piece_counts(piece_type: PieceType) -> u32 {
         debug_assert!(piece_type.as_usize() < Self::HAND_PIECE_TYPES);
 

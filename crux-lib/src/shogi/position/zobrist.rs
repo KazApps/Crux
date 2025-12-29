@@ -25,7 +25,6 @@ const HAND_OFFSETS: [u32; HAND_ENTRIES] = {
 
 const HAND_TOTAL: usize = (HAND_OFFSETS[HAND_ENTRIES - 1] + MAX_ROOK + 1) as usize;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Zobrist {
     side: SideKey,
     piece_square: PieceSquareKey,
