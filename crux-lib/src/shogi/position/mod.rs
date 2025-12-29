@@ -7,11 +7,10 @@ use std::fmt::{Display, Formatter, Result};
 
 use const_for::const_for;
 
-use crate::shogi::attacks::piece_pseudo_attacks;
 use crate::shogi::{
     attacks::{
         bishop_pseudo_attacks, gold_attacks, knight_attacks, lance_pseudo_attacks, pawn_attacks,
-        ray_between, rook_pseudo_attacks, silver_attacks,
+        piece_pseudo_attacks, ray_between, rook_pseudo_attacks, silver_attacks,
     },
     bitboard::Bitboard,
     core::{Color, File, Piece, PieceType, Rank, Square, MAX_KING},
@@ -23,6 +22,11 @@ use crate::shogi::{
     },
 };
 
+/// Represents a shogi position.
+///
+/// This struct stores both the primary game state (piece placement, side to move,
+/// pieces in hand) and derived information used for fast move generation and
+/// legality checks, such as checkers, pinners, and pinned pieces.
 #[derive(Debug, Clone)]
 pub struct Position {
     side_to_move: Color,
