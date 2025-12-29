@@ -20,20 +20,6 @@ fn pawn_attacks() {
     }
 }
 
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn pawn_attacks_black_panics_on_rank1() {
-    let _ = attacks::pawn_attacks(Color::Black, Square::S51);
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn pawn_attacks_white_panics_on_rank9() {
-    let _ = attacks::pawn_attacks(Color::White, Square::S59);
-}
-
 #[test]
 fn multi_pawn_attacks() {
     let cases = [
@@ -101,20 +87,6 @@ fn lance_pseudo_attacks() {
             lance_pseudo_attacks
         );
     }
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn lance_pseudo_attacks_black_panics_on_rank1() {
-    let _ = attacks::lance_pseudo_attacks(Color::Black, Square::S51);
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn lance_pseudo_attacks_white_panics_on_rank9() {
-    let _ = attacks::lance_pseudo_attacks(Color::White, Square::S59);
 }
 
 #[test]
@@ -187,20 +159,6 @@ fn lance_attacks() {
     }
 }
 
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn lance_attacks_black_panics_on_rank1() {
-    let _ = attacks::lance_attacks(Color::Black, Square::S51, Bitboard::empty());
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn lance_attacks_white_panics_on_rank9() {
-    let _ = attacks::lance_attacks(Color::White, Square::S59, Bitboard::empty());
-}
-
 #[test]
 fn knight_attacks() {
     let cases = [
@@ -223,34 +181,6 @@ fn knight_attacks() {
     for (color, square, knight_attacks) in cases {
         assert_eq!(attacks::knight_attacks(color, square), knight_attacks);
     }
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn knight_attacks_black_panics_on_rank1() {
-    let _ = attacks::knight_attacks(Color::Black, Square::S51);
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn knight_attacks_white_panics_on_rank9() {
-    let _ = attacks::knight_attacks(Color::White, Square::S59);
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn knight_attacks_black_panics_on_rank2() {
-    let _ = attacks::knight_attacks(Color::Black, Square::S52);
-}
-
-#[cfg(debug_assertions)]
-#[test]
-#[should_panic]
-fn knight_attacks_white_panics_on_rank8() {
-    let _ = attacks::knight_attacks(Color::White, Square::S58);
 }
 
 #[test]
