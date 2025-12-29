@@ -168,7 +168,9 @@ impl Position {
         self.set_side_to_move(nstm);
         self.ply += 1;
 
-        // Update checker states.
+        // Update checker and pins.
+        // For non-sliding pieces, only moves to `mv.to()` can give check,
+        // so checking that square is sufficient.
         self.clear_checker_states();
         self.update_checkers_for(mv.to());
         self.update_sliding_checkers_and_pins();
@@ -219,7 +221,9 @@ impl Position {
         self.set_side_to_move(nstm);
         self.ply -= 1;
 
-        // Update checker states.
+        // Update checkers and pins.
+        // Unlike make_move, if the king was moved, we must enumerate all
+        // potential non-sliding piece checkers to recompute the state correctly.
         self.clear_checker_states();
         self.update_non_sliding_checkers();
         self.update_sliding_checkers_and_pins();
