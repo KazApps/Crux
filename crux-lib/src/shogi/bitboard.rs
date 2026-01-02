@@ -375,7 +375,7 @@ impl Display for Bitboard {
         const RANK_SEPARATOR: &str = "+---+---+---+---+---+---+---+---+---+";
 
         writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
-        writeln!(f, "{}", RANK_SEPARATOR)?;
+        writeln!(f, "{RANK_SEPARATOR}")?;
 
         for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
             let rank = Rank::from(rank);
@@ -387,8 +387,8 @@ impl Display for Bitboard {
                 write!(f, "| {} ", if self.contains(square) { 'X' } else { ' ' })?;
             }
 
-            writeln!(f, "| {}", rank_char)?;
-            write!(f, "{}", RANK_SEPARATOR)?;
+            writeln!(f, "| {rank_char}")?;
+            write!(f, "{RANK_SEPARATOR}")?;
 
             if rank != Rank::Rank9 {
                 writeln!(f)?;

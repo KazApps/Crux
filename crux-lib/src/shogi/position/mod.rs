@@ -536,7 +536,7 @@ impl Display for Position {
         const RANK_SEPARATOR: &str = "+---+---+---+---+---+---+---+---+---+";
 
         writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
-        writeln!(f, "{}", RANK_SEPARATOR)?;
+        writeln!(f, "{RANK_SEPARATOR}")?;
 
         for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
             for file in (0..File::COUNT).rev() {
@@ -552,17 +552,16 @@ impl Display for Position {
 
                     write!(
                         f,
-                        "|{}{}",
-                        if color == Color::Black { 'b' } else { 'w' },
-                        pt_str
+                        "|{}{pt_str}",
+                        if color == Color::Black { 'b' } else { 'w' }
                     )?;
                 } else {
                     write!(f, "|   ")?;
                 }
             }
 
-            writeln!(f, "| {}", rank_char)?;
-            writeln!(f, "{}", RANK_SEPARATOR)?;
+            writeln!(f, "| {rank_char}")?;
+            writeln!(f, "{RANK_SEPARATOR}")?;
         }
 
         writeln!(f)?;
@@ -575,7 +574,7 @@ impl Display for Position {
         for (color, color_str) in COLOR_TO_STR.iter().enumerate() {
             let color = Color::from(color);
 
-            write!(f, "Hand ({}) : ", color_str)?;
+            write!(f, "Hand ({color_str}) : ")?;
 
             let hand = self.hand(color);
 
