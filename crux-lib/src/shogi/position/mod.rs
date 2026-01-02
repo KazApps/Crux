@@ -9,8 +9,8 @@ use const_for::const_for;
 
 use crate::shogi::{
     attacks::{
-        bishop_pseudo_attacks, gold_attacks, knight_attacks, lance_pseudo_attacks, pawn_attacks,
-        piece_pseudo_attacks, ray_between, rook_pseudo_attacks, silver_attacks,
+        bishop_pseudo_attacks, gold_attacks, king_attacks, knight_attacks, lance_pseudo_attacks,
+        pawn_attacks, ray_between, rook_pseudo_attacks, silver_attacks,
     },
     bitboard::Bitboard,
     core::{Color, File, Piece, PieceType, Rank, Square, MAX_KING},
@@ -414,12 +414,30 @@ impl Position {
     }
 
     const fn update_checkers_for(&mut self, square: Square) {
-        let stm = self.side_to_move();
+        // Note: Sliding attacks are handled separately in `update_non_sliding_checkers`,
+        //       so they are ignored here.
+        const fn adjacent_attacks(piece: Piece, square: Square) -> Bitboard {
+            match piece.piece_type() {
+                PieceType::Pawn | PieceType::Lance => pawn_attacks(piece.color(), square),
+                PieceType::Knight => knight_attacks(piece.color(), square),
+                PieceType::Silver => silver_attacks(piece.color(), square),
+                PieceType::Gold
+                | PieceType::ProPawn
+                | PieceType::ProLance
+                | PieceType::ProKnight
+                | PieceType::ProSilver => gold_attacks(piece.color(), square),
+                PieceType::Bishop | PieceType::Rook => Bitboard::empty(),
+                PieceType::Horse | PieceType::Dragon | PieceType::King => king_attacks(square),
+            }
+        }
 
-        if let Some(piece) = self.piece_at(square)
-            && piece.color() != stm
-            && let Some(king_square) = self.king_square(stm)
-            && (piece_pseudo_attacks(piece, square) & king_square.bit()).has_any()
+        let stm = self.side_to_move();
+        let piece = self.piece_at(square).unwrap();
+
+        debug_assert!(piece.color() != stm);
+
+        if let Some(king_square) = self.king_square(stm)
+            && adjacent_attacks(piece, square).contains(king_square)
         {
             self.checkers |= square.bit();
         }

@@ -703,6 +703,65 @@ const MAKE_MOVE_TEST_CASES: &[(Position, Move, Position, Option<Piece>)] = &[
         },
         Some(Piece::BlackLance),
     ),
+    // Checkers and pins test
+    (
+        {
+            let mut builder = Position::empty().builder();
+
+            builder
+                .place(Square::S11, Piece::WhiteKing)
+                .place(Square::S12, Piece::WhitePawn)
+                .place(Square::S22, Piece::WhitePawn)
+                .place(Square::S33, Piece::BlackRook)
+                .place(Square::S44, Piece::BlackBishop);
+
+            builder.build()
+        },
+        Move::normal(Square::S33, Square::S13),
+        {
+            let mut builder = Position::empty().builder();
+
+            builder
+                .place(Square::S11, Piece::WhiteKing)
+                .place(Square::S12, Piece::WhitePawn)
+                .place(Square::S22, Piece::WhitePawn)
+                .place(Square::S13, Piece::BlackRook)
+                .place(Square::S44, Piece::BlackBishop)
+                .set_side_to_move(Color::White);
+
+            builder.build()
+        },
+        None,
+    ),
+    (
+        {
+            let mut builder = Position::empty().builder();
+
+            builder
+                .place(Square::S99, Piece::BlackKing)
+                .place(Square::S98, Piece::BlackPawn)
+                .place(Square::S88, Piece::BlackPawn)
+                .place(Square::S77, Piece::WhiteRook)
+                .place(Square::S66, Piece::WhiteBishop)
+                .set_side_to_move(Color::White);
+
+            builder.build()
+        },
+        Move::normal(Square::S77, Square::S97),
+        {
+            let mut builder = Position::empty().builder();
+
+            builder
+                .place(Square::S99, Piece::BlackKing)
+                .place(Square::S98, Piece::BlackPawn)
+                .place(Square::S88, Piece::BlackPawn)
+                .place(Square::S97, Piece::WhiteRook)
+                .place(Square::S66, Piece::WhiteBishop);
+
+            builder.build()
+        },
+        None,
+    ),
 ];
 
 const PIN_TEST_POS1: Position = {
