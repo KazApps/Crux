@@ -85,7 +85,7 @@ pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
         }
     });
 
-    PAWN_ATTACKS[color.as_usize()][square.as_usize()]
+    PAWN_ATTACKS[color][square]
 }
 
 /// Returns pawn attacks for all squares set in `pawns_bb` for the given color.
@@ -126,7 +126,7 @@ pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
         res
     });
 
-    LANCE_PSEUDO_ATTACKS[color.as_usize()][square.as_usize()]
+    LANCE_PSEUDO_ATTACKS[color][square]
 }
 
 /// Returns lance attacks from the given color and square.
@@ -158,7 +158,7 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
         }
     });
 
-    KNIGHT_ATTACKS[color.as_usize()][square.as_usize()]
+    KNIGHT_ATTACKS[color][square]
 }
 
 /// Returns knight attacks for all squares set in `knights_bb` for the given color.
@@ -185,7 +185,7 @@ pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
     const SILVER_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_silver_attacks(color, square.bit()));
 
-    SILVER_ATTACKS[color.as_usize()][square.as_usize()]
+    SILVER_ATTACKS[color][square]
 }
 
 /// Returns silver attacks for all squares set in `silvers_bb` for the given color.
@@ -215,7 +215,7 @@ pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
     const GOLD_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_gold_attacks(color, square.bit()));
 
-    GOLD_ATTACKS[color.as_usize()][square.as_usize()]
+    GOLD_ATTACKS[color][square]
 }
 
 /// Returns gold attacks for all squares set in `golds_bb` for the given color.
@@ -247,7 +247,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
-    BISHOP_MASKS[square.as_usize()].all
+    BISHOP_MASKS[square].all
 }
 
 /// Returns bishop attacks from the given square.
@@ -255,7 +255,7 @@ pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
 /// The `occupied` bitboard may include or exclude the given square.
 #[must_use]
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    let masks = BISHOP_MASKS[square.as_usize()];
+    let masks = BISHOP_MASKS[square];
 
     sliding_backward(occupied, masks.backwards[0])
         | sliding_backward(occupied, masks.backwards[1])
@@ -269,7 +269,7 @@ pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
-    ROOK_MASKS[square.as_usize()].all
+    ROOK_MASKS[square].all
 }
 
 /// Returns rook attacks from the given square.
@@ -277,7 +277,7 @@ pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
 /// The `occupied` bitboard may include or exclude the given square.
 #[must_use]
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    let masks = ROOK_MASKS[square.as_usize()];
+    let masks = ROOK_MASKS[square];
 
     sliding_backward(occupied, masks.backwards[0])
         | sliding_backward(occupied, masks.backwards[1])
@@ -326,7 +326,7 @@ pub const fn king_attacks(square: Square) -> Bitboard {
         |square| silver_attacks(Color::Black, square) | gold_attacks(Color::Black, square)
     );
 
-    KING_ATTACKS[square.as_usize()]
+    KING_ATTACKS[square]
 }
 
 /// Returns the pseudo attacks of the given piece type from the square.
@@ -405,7 +405,7 @@ pub const fn ray_between(from: Square, to: Square) -> Bitboard {
         table
     };
 
-    TABLE[from.as_usize()][to.as_usize()]
+    TABLE[from][to]
 }
 
 #[must_use]

@@ -1,4 +1,7 @@
-use std::mem::transmute;
+use std::{
+    mem::transmute,
+    ops::{Index, IndexMut},
+};
 
 /// Maximum number of pawns that can exist in total,
 /// including pieces on the board and in hand.
@@ -99,6 +102,22 @@ impl const PartialEq for Color {
 }
 
 impl const Eq for Color {}
+
+impl<T> const Index<Color> for [T; Color::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Color`.
+    fn index(&self, color: Color) -> &Self::Output {
+        &self[color.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Color> for [T; Color::COUNT] {
+    /// Mutably indexes the array by `Color`.
+    fn index_mut(&mut self, color: Color) -> &mut Self::Output {
+        &mut self[color.as_usize()]
+    }
+}
 
 /// Represents the types of pieces.
 #[repr(u8)]
@@ -219,6 +238,22 @@ impl const PartialEq for PieceType {
 }
 
 impl const Eq for PieceType {}
+
+impl<T> const Index<PieceType> for [T; PieceType::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `PieceType`.
+    fn index(&self, piece_type: PieceType) -> &Self::Output {
+        &self[piece_type.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<PieceType> for [T; PieceType::COUNT] {
+    /// Mutably indexes the array by `PieceType`.
+    fn index_mut(&mut self, piece_type: PieceType) -> &mut Self::Output {
+        &mut self[piece_type.as_usize()]
+    }
+}
 
 /// Represents a piece in the game.
 ///
@@ -349,6 +384,22 @@ impl const PartialEq for Piece {
 }
 
 impl const Eq for Piece {}
+
+impl<T> const Index<Piece> for [T; Piece::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Piece`.
+    fn index(&self, piece: Piece) -> &Self::Output {
+        &self[piece.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Piece> for [T; Piece::COUNT] {
+    /// Mutably indexes the array by `Piece`.
+    fn index_mut(&mut self, piece: Piece) -> &mut Self::Output {
+        &mut self[piece.as_usize()]
+    }
+}
 
 /// Represents a file on the board.
 #[repr(u8)]
@@ -492,6 +543,22 @@ impl const PartialEq for File {
 }
 
 impl const Eq for File {}
+
+impl<T> const Index<File> for [T; File::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `File`.
+    fn index(&self, file: File) -> &Self::Output {
+        &self[file.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<File> for [T; File::COUNT] {
+    /// Mutably indexes the array by `File`.
+    fn index_mut(&mut self, file: File) -> &mut Self::Output {
+        &mut self[file.as_usize()]
+    }
+}
 
 /// Represents a rank on the board.
 #[repr(u8)]
@@ -644,6 +711,22 @@ impl const PartialEq for Rank {
 }
 
 impl const Eq for Rank {}
+
+impl<T> const Index<Rank> for [T; Rank::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Rank`.
+    fn index(&self, rank: Rank) -> &Self::Output {
+        &self[rank.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Rank> for [T; Rank::COUNT] {
+    /// Mutably indexes the array by `Rank`.
+    fn index_mut(&mut self, rank: Rank) -> &mut Self::Output {
+        &mut self[rank.as_usize()]
+    }
+}
 
 /// Represents a square on the board.
 ///
@@ -1012,3 +1095,19 @@ impl const PartialEq for Square {
 }
 
 impl const Eq for Square {}
+
+impl<T> const Index<Square> for [T; Square::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Square`.
+    fn index(&self, square: Square) -> &Self::Output {
+        &self[square.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Square> for [T; Square::COUNT] {
+    /// Mutably indexes the array by `Square`.
+    fn index_mut(&mut self, square: Square) -> &mut Self::Output {
+        &mut self[square.as_usize()]
+    }
+}

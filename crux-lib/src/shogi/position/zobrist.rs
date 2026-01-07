@@ -83,7 +83,7 @@ pub const fn side_key() -> Key {
 /// Returns the Zobrist key for the given piece on a given square.
 #[must_use]
 pub const fn piece_square_key(piece: Piece, square: Square) -> Key {
-    Zobrist::PIECE_SQUARE[piece.as_usize()][square.as_usize()]
+    Zobrist::PIECE_SQUARE[piece][square]
 }
 
 /// Returns the Zobrist key for a piece in hand.

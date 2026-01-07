@@ -242,7 +242,7 @@ impl Position {
     /// Returns `Some(piece)` if the given square is occupied, or `None` otherwise.
     #[must_use]
     pub const fn piece_at(&self, square: Square) -> Option<Piece> {
-        self.mailbox[square.as_usize()]
+        self.mailbox[square]
     }
 
     /// Returns `true` if any piece occupies the given square.
@@ -260,19 +260,19 @@ impl Position {
     /// Returns the hand of the given color.
     #[must_use]
     pub const fn hand(&self, color: Color) -> Hand {
-        self.hands[color.as_usize()]
+        self.hands[color]
     }
 
     /// Returns a bitboard of all pieces of the given color.
     #[must_use]
     pub const fn color_bb(&self, color: Color) -> Bitboard {
-        self.color_bb[color.as_usize()]
+        self.color_bb[color]
     }
 
     /// Returns a bitboard of all pieces of the given piece type.
     #[must_use]
     pub const fn piece_type_bb(&self, piece_type: PieceType) -> Bitboard {
-        self.piece_type_bb[piece_type.as_usize()]
+        self.piece_type_bb[piece_type]
     }
 
     /// Returns a bitboard of all pieces of the given piece.
@@ -290,7 +290,7 @@ impl Position {
     /// Returns the square of the king of the given color, if present.
     #[must_use]
     pub const fn king_square(&self, color: Color) -> Option<Square> {
-        self.king_squares[color.as_usize()]
+        self.king_squares[color]
     }
 
     /// Returns a bitboard of pieces currently giving check to
@@ -343,12 +343,12 @@ impl Position {
         debug_assert!(!self.color_bb(color).contains(square));
         debug_assert!(!self.piece_type_bb(pt).contains(square));
 
-        self.mailbox[square.as_usize()] = Some(piece);
-        self.color_bb[color.as_usize()] |= bit;
-        self.piece_type_bb[pt.as_usize()] |= bit;
+        self.mailbox[square] = Some(piece);
+        self.color_bb[color] |= bit;
+        self.piece_type_bb[pt] |= bit;
 
         if pt == PieceType::King {
-            self.king_squares[color.as_usize()] = Some(square);
+            self.king_squares[color] = Some(square);
         }
 
         self.key ^= piece_square_key(piece, square);
@@ -357,7 +357,7 @@ impl Position {
     const fn remove(&mut self, square: Square) {
         debug_assert!(self.has_any(square));
 
-        let piece = self.mailbox[square.as_usize()].unwrap();
+        let piece = self.mailbox[square].unwrap();
         let color = piece.color();
         let pt = piece.piece_type();
         let bit = square.bit();
@@ -365,12 +365,12 @@ impl Position {
         debug_assert!(self.color_bb(color).contains(square));
         debug_assert!(self.piece_type_bb(pt).contains(square));
 
-        self.mailbox[square.as_usize()] = None;
-        self.color_bb[color.as_usize()] ^= bit;
-        self.piece_type_bb[pt.as_usize()] ^= bit;
+        self.mailbox[square] = None;
+        self.color_bb[color] ^= bit;
+        self.piece_type_bb[pt] ^= bit;
 
         if pt == PieceType::King {
-            self.king_squares[color.as_usize()] = None;
+            self.king_squares[color] = None;
         }
 
         self.key ^= piece_square_key(piece, square);
@@ -380,22 +380,18 @@ impl Position {
         self.switch_hand_key(
             color,
             piece_type,
-            self.hands[color.as_usize()].count(piece_type),
+            self.hands[color].count(piece_type),
             new_count,
         );
-        self.hands[color.as_usize()].set(piece_type, new_count);
+        self.hands[color].set(piece_type, new_count);
     }
 
     const fn increment_hand_piece_count(&mut self, color: Color, piece_type: PieceType) {
-        self.set_hand_piece_count(
-            color,
-            piece_type,
-            self.hands[color.as_usize()].count(piece_type) + 1,
-        );
+        self.set_hand_piece_count(color, piece_type, self.hands[color].count(piece_type) + 1);
     }
 
     const fn decrement_hand_piece_count(&mut self, color: Color, piece_type: PieceType) {
-        let current = self.hands[color.as_usize()].count(piece_type);
+        let current = self.hands[color].count(piece_type);
         debug_assert!(current > 0);
 
         self.set_hand_piece_count(color, piece_type, current - 1)
@@ -566,7 +562,7 @@ impl Display for Position {
                 if let Some(piece) = self.piece_at(square) {
                     let color = piece.color();
                     let pt = piece.piece_type();
-                    let pt_str = PIECE_TYPE_TO_CHAR[pt.as_usize()];
+                    let pt_str = PIECE_TYPE_TO_CHAR[pt];
 
                     write!(
                         f,
@@ -583,11 +579,7 @@ impl Display for Position {
         }
 
         writeln!(f)?;
-        writeln!(
-            f,
-            "Side to Move : {}",
-            COLOR_TO_STR[self.side_to_move().as_usize()]
-        )?;
+        writeln!(f, "Side to Move : {}", COLOR_TO_STR[self.side_to_move()])?;
 
         for (color, color_str) in COLOR_TO_STR.iter().enumerate() {
             let color = Color::from(color);

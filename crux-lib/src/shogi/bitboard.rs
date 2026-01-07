@@ -239,14 +239,14 @@ impl const From<File> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[file.as_usize()] |= Bitboard::from(square);
+                    table[file] |= Bitboard::from(square);
                 });
             });
 
             table
         };
 
-        TABLE[value.as_usize()]
+        TABLE[value]
     }
 }
 
@@ -262,14 +262,14 @@ impl const From<Rank> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[rank.as_usize()] |= Bitboard::from(square);
+                    table[rank] |= Bitboard::from(square);
                 });
             });
 
             table
         };
 
-        TABLE[value.as_usize()]
+        TABLE[value]
     }
 }
 
@@ -289,7 +289,7 @@ pub const fn promotion_area(color: Color) -> Bitboard {
     [
         Rank::Rank1.bit() | Rank::Rank2.bit() | Rank::Rank3.bit(),
         Rank::Rank7.bit() | Rank::Rank8.bit() | Rank::Rank9.bit(),
-    ][color.as_usize()]
+    ][color]
 }
 
 /// Returns a `Bitboard` representing squares where a pawn can be dropped for the given color.
