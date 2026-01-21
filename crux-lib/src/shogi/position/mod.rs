@@ -136,8 +136,6 @@ impl Position {
     /// In debug builds, panics if the move is special or
     /// inconsistent with the current position.
     pub const fn make_move(&mut self, mv: Move) -> Option<Piece> {
-        debug_assert!(!mv.is_special());
-
         let stm = self.side_to_move();
         let nstm = stm.opposite();
         let to_piece = self.piece_at(mv.to());
@@ -191,7 +189,6 @@ impl Position {
     /// In debug builds, panics if the move is special or
     /// inconsistent with the current position.
     pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
-        debug_assert!(!mv.is_special());
         debug_assert!(self.ply > 0);
 
         let stm = self.side_to_move();

@@ -4,33 +4,6 @@ use crux_lib::shogi::{
 };
 
 #[test]
-fn null() {
-    let mv = Move::null();
-
-    assert!(mv.is_special());
-    assert!(!mv.is_promotion());
-    assert!(!mv.is_drop());
-}
-
-#[test]
-fn win() {
-    let mv = Move::win();
-
-    assert!(mv.is_special());
-    assert!(!mv.is_promotion());
-    assert!(!mv.is_drop());
-}
-
-#[test]
-fn resign() {
-    let mv = Move::resign();
-
-    assert!(mv.is_special());
-    assert!(!mv.is_promotion());
-    assert!(!mv.is_drop());
-}
-
-#[test]
 fn normal() {
     for from in 0..Square::COUNT {
         for to in 0..Square::COUNT {
@@ -45,7 +18,6 @@ fn normal() {
 
             assert_eq!(mv.from(), from);
             assert_eq!(mv.to(), to);
-            assert!(!mv.is_special());
             assert!(!mv.is_promotion());
             assert!(!mv.is_drop());
         }
@@ -67,7 +39,6 @@ fn promote() {
 
             assert_eq!(mv.from(), from);
             assert_eq!(mv.to(), to);
-            assert!(!mv.is_special());
             assert!(mv.is_promotion());
             assert!(!mv.is_drop());
         }
@@ -84,7 +55,6 @@ fn drop() {
             let mv = Move::drop(piece_type, to);
 
             assert_eq!(mv.to(), to);
-            assert!(!mv.is_special());
             assert!(!mv.is_promotion());
             assert!(mv.is_drop());
         }
