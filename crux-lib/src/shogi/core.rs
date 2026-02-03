@@ -1,8 +1,42 @@
-use std::mem::transmute;
+use std::{
+    mem::transmute,
+    ops::{Index, IndexMut},
+};
+
+/// Maximum number of pawns that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_PAWN: u32 = 18;
+
+/// Maximum number of lances that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_LANCE: u32 = 4;
+
+/// Maximum number of knights that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_KNIGHT: u32 = 4;
+
+/// Maximum number of silvers that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_SILVER: u32 = 4;
+
+/// Maximum number of golds that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_GOLD: u32 = 4;
+
+/// Maximum number of bishops that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_BISHOP: u32 = 2;
+
+/// Maximum number of rooks that can exist in total,
+/// including pieces on the board and in hand.
+pub const MAX_ROOK: u32 = 2;
+
+/// Maximum number of kings that can exist in total.
+pub const MAX_KING: u32 = 2;
 
 /// Represents the color of a player or piece in the game.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Color {
     Black,
     White,
@@ -11,18 +45,6 @@ pub enum Color {
 impl Color {
     /// The number of colors.
     pub const COUNT: usize = 2;
-
-    /// Returns `true` if the color is black.
-    #[must_use]
-    pub const fn is_black(self) -> bool {
-        matches!(self, Color::Black)
-    }
-
-    /// Returns `true` if the color is white.
-    #[must_use]
-    pub const fn is_white(self) -> bool {
-        matches!(self, Color::White)
-    }
 
     /// Returns the opposite color.
     #[must_use]
@@ -49,9 +71,9 @@ impl Color {
 impl const From<u8> for Color {
     /// Creates a `Color` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -62,9 +84,9 @@ impl const From<u8> for Color {
 impl const From<usize> for Color {
     /// Creates a `Color` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
@@ -72,9 +94,34 @@ impl const From<usize> for Color {
     }
 }
 
+impl const PartialEq for Color {
+    /// Compares two `Color` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Color {}
+
+impl<T> const Index<Color> for [T; Color::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Color`.
+    fn index(&self, color: Color) -> &Self::Output {
+        &self[color.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Color> for [T; Color::COUNT] {
+    /// Mutably indexes the array by `Color`.
+    fn index_mut(&mut self, color: Color) -> &mut Self::Output {
+        &mut self[color.as_usize()]
+    }
+}
+
 /// Represents the types of pieces.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum PieceType {
     Pawn,
     Lance,
@@ -160,9 +207,9 @@ impl PieceType {
 impl const From<u8> for PieceType {
     /// Creates a `PieceType` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -173,13 +220,38 @@ impl const From<u8> for PieceType {
 impl const From<usize> for PieceType {
     /// Creates a `PieceType` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
         unsafe { transmute(value as u8) }
+    }
+}
+
+impl const PartialEq for PieceType {
+    /// Compares two `PieceType` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for PieceType {}
+
+impl<T> const Index<PieceType> for [T; PieceType::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `PieceType`.
+    fn index(&self, piece_type: PieceType) -> &Self::Output {
+        &self[piece_type.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<PieceType> for [T; PieceType::COUNT] {
+    /// Mutably indexes the array by `PieceType`.
+    fn index_mut(&mut self, piece_type: PieceType) -> &mut Self::Output {
+        &mut self[piece_type.as_usize()]
     }
 }
 
@@ -189,7 +261,7 @@ impl const From<usize> for PieceType {
 /// bit    0   : `Color`
 /// bits 1..=4 : `PieceType` (4 bits)
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Piece {
     BlackPawn,
     WhitePawn,
@@ -281,9 +353,9 @@ impl Piece {
 impl const From<u8> for Piece {
     /// Creates a `Piece` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -294,9 +366,9 @@ impl const From<u8> for Piece {
 impl const From<usize> for Piece {
     /// Creates a `Piece` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
@@ -304,9 +376,34 @@ impl const From<usize> for Piece {
     }
 }
 
+impl const PartialEq for Piece {
+    /// Compares two `Piece` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Piece {}
+
+impl<T> const Index<Piece> for [T; Piece::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Piece`.
+    fn index(&self, piece: Piece) -> &Self::Output {
+        &self[piece.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Piece> for [T; Piece::COUNT] {
+    /// Mutably indexes the array by `Piece`.
+    fn index_mut(&mut self, piece: Piece) -> &mut Self::Output {
+        &mut self[piece.as_usize()]
+    }
+}
+
 /// Represents a file on the board.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum File {
     File1,
     File2,
@@ -325,24 +422,24 @@ impl File {
 
     /// Returns the file to the right of this file.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if called on `File1`, since there is no file to the right.
+    /// In debug builds, panics if called on `File1`, since there is no file to the right.
     #[must_use]
     pub const fn east(self) -> Self {
-        debug_assert!(!matches!(self, File::File1));
+        debug_assert!(self != File::File1);
 
         unsafe { transmute(self.as_u8() - 1) }
     }
 
     /// Returns the file to the left of this file.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if called on `File9`, since there is no file to the left.
+    /// In debug builds, panics if called on `File9`, since there is no file to the left.
     #[must_use]
     pub const fn west(self) -> Self {
-        debug_assert!(!matches!(self, File::File9));
+        debug_assert!(self != File::File9);
 
         unsafe { transmute(self.as_u8() + 1) }
     }
@@ -350,13 +447,13 @@ impl File {
     /// Returns the file to the right from the perspective of the given color.
     /// For black, this is the same as `east()`. For white, it's `west()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the file is at the board edge (`File1` for black, `File9` for white),
+    /// In debug builds, panics if the file is at the board edge (`File1` for black, `File9` for white),
     /// because `east()` or `west()` would panic.
     #[must_use]
     pub const fn relative_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.east()
         } else {
             self.west()
@@ -366,13 +463,13 @@ impl File {
     /// Returns the file to the left from the perspective of the given color.
     /// For black, this is the same as `west()`. For white, it's `east()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the file is at the board edge (`File9` for black, `File1` for white),
+    /// In debug builds, panics if the file is at the board edge (`File9` for black, `File1` for white),
     /// because `west()` or `east()` would panic.
     #[must_use]
     pub const fn relative_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.west()
         } else {
             self.east()
@@ -392,7 +489,7 @@ impl File {
     /// perspective, `File1` corresponds to `File9`, `File2` to `File8`, and so on).
     #[must_use]
     pub const fn relative(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self
         } else {
             self.flip()
@@ -415,9 +512,9 @@ impl File {
 impl const From<u8> for File {
     /// Creates a `File` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -428,9 +525,9 @@ impl const From<u8> for File {
 impl const From<usize> for File {
     /// Creates a `File` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
@@ -438,9 +535,34 @@ impl const From<usize> for File {
     }
 }
 
+impl const PartialEq for File {
+    /// Compares two `File` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for File {}
+
+impl<T> const Index<File> for [T; File::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `File`.
+    fn index(&self, file: File) -> &Self::Output {
+        &self[file.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<File> for [T; File::COUNT] {
+    /// Mutably indexes the array by `File`.
+    fn index_mut(&mut self, file: File) -> &mut Self::Output {
+        &mut self[file.as_usize()]
+    }
+}
+
 /// Represents a rank on the board.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub enum Rank {
     Rank1,
     Rank2,
@@ -459,24 +581,24 @@ impl Rank {
 
     /// Returns the rank above this rank.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if called on `Rank1`, as there is no rank above it.
+    /// In debug builds, panics if called on `Rank1`, as there is no rank above it.
     #[must_use]
     pub const fn north(self) -> Self {
-        debug_assert!(!matches!(self, Rank::Rank1));
+        debug_assert!(self != Rank::Rank1);
 
         unsafe { transmute(self.as_u8() - 1) }
     }
 
     /// Returns the rank below this rank.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if called on `Rank9`, as there is no rank below it.
+    /// In debug builds, panics if called on `Rank9`, as there is no rank below it.
     #[must_use]
     pub const fn south(self) -> Self {
-        debug_assert!(!matches!(self, Rank::Rank9));
+        debug_assert!(self != Rank::Rank9);
 
         unsafe { transmute(self.as_u8() + 1) }
     }
@@ -484,13 +606,13 @@ impl Rank {
     /// Returns the rank above from the perspective of the given color.
     /// For black, this is the same as `north()`. For white, it's `south()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the rank is at the board edge (`Rank1` for black, `Rank9` for white),
+    /// In debug builds, panics if the rank is at the board edge (`Rank1` for black, `Rank9` for white),
     /// because `north()` or `south()` would panic.
     #[must_use]
     pub const fn relative_north(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north()
         } else {
             self.south()
@@ -500,13 +622,13 @@ impl Rank {
     /// Returns the rank below from the perspective of the given color.
     /// For black, this is the same as `south()`. For white, it's `north()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the rank is at the board edge (`Rank9` for black, `Rank1` for white),
+    /// In debug builds, panics if the rank is at the board edge (`Rank9` for black, `Rank1` for white),
     /// because `south()` or `north()` would panic.
     #[must_use]
     pub const fn relative_south(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south()
         } else {
             self.north()
@@ -526,7 +648,7 @@ impl Rank {
     /// perspective, `Rank1` corresponds to `Rank9`, `Rank2` to `Rank8`, and so on).
     #[must_use]
     pub const fn relative(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self
         } else {
             self.flip()
@@ -536,8 +658,10 @@ impl Rank {
     /// Returns `true` if a piece on this rank can promote for the given color.
     #[must_use]
     pub const fn can_promote(self, color: Color) -> bool {
-        (color.is_black() && self.as_u8() <= Self::Rank3.as_u8())
-            || (color.is_white() && self.as_u8() >= Self::Rank7.as_u8())
+        matches!(
+            self.relative(color),
+            Rank::Rank1 | Rank::Rank2 | Rank::Rank3
+        )
     }
 
     /// Returns the `Rank` as a `u8`.
@@ -556,9 +680,9 @@ impl Rank {
 impl const From<u8> for Rank {
     /// Creates a `Rank` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -569,13 +693,38 @@ impl const From<u8> for Rank {
 impl const From<usize> for Rank {
     /// Creates a `Rank` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
         unsafe { transmute(value as u8) }
+    }
+}
+
+impl const PartialEq for Rank {
+    /// Compares two `Rank` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Rank {}
+
+impl<T> const Index<Rank> for [T; Rank::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Rank`.
+    fn index(&self, rank: Rank) -> &Self::Output {
+        &self[rank.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Rank> for [T; Rank::COUNT] {
+    /// Mutably indexes the array by `Rank`.
+    fn index_mut(&mut self, rank: Rank) -> &mut Self::Output {
+        &mut self[rank.as_usize()]
     }
 }
 
@@ -606,7 +755,7 @@ impl const From<usize> for Rank {
 /// | 80 | 71 | 62 | 53 | 44 | 35 | 26 | 17 |  8 | 九
 /// +----+----+----+----+----+----+----+----+----+
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 #[rustfmt::skip]
 pub enum Square {
     S11, S12, S13, S14, S15, S16, S17, S18, S19,
@@ -644,9 +793,9 @@ impl Square {
 
     /// Returns the square directly above.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the rank of this square is `Rank1`, since there is no square above it.
+    /// In debug builds, panics if the rank of this square is `Rank1`, since there is no square above it.
     #[must_use]
     pub const fn north(self) -> Self {
         Self::new(self.file(), self.rank().north())
@@ -654,9 +803,9 @@ impl Square {
 
     /// Returns the square directly below.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the rank of this square is `Rank9`, since there is no square below it.
+    /// In debug builds, panics if the rank of this square is `Rank9`, since there is no square below it.
     #[must_use]
     pub const fn south(self) -> Self {
         Self::new(self.file(), self.rank().south())
@@ -664,9 +813,9 @@ impl Square {
 
     /// Returns the square directly to the right.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the file of this square is `File1`, since there is no square to the right.
+    /// In debug builds, panics if the file of this square is `File1`, since there is no square to the right.
     #[must_use]
     pub const fn east(self) -> Self {
         Self::new(self.file().east(), self.rank())
@@ -674,9 +823,9 @@ impl Square {
 
     /// Returns the square directly to the left.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the file of this square is `File9`, since there is no square to the left.
+    /// In debug builds, panics if the file of this square is `File9`, since there is no square to the left.
     #[must_use]
     pub const fn west(self) -> Self {
         Self::new(self.file().west(), self.rank())
@@ -684,9 +833,9 @@ impl Square {
 
     /// Returns the square diagonally up-right.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the square is on the top rank (`Rank1`) or the rightmost file (`File1`),
+    /// In debug builds, panics if the square is on the top rank (`Rank1`) or the rightmost file (`File1`),
     /// since there is no square above or to the right.
     #[must_use]
     pub const fn north_east(self) -> Self {
@@ -695,9 +844,9 @@ impl Square {
 
     /// Returns the square diagonally up-left.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the square is on the top rank (`Rank1`) or the leftmost file (`File9`),
+    /// In debug builds, panics if the square is on the top rank (`Rank1`) or the leftmost file (`File9`),
     /// since there is no square above or to the left.
     #[must_use]
     pub const fn north_west(self) -> Self {
@@ -706,9 +855,9 @@ impl Square {
 
     /// Returns the square diagonally down-right.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the square is on the bottom rank (`Rank9`) or the rightmost file (`File1`),
+    /// In debug builds, panics if the square is on the bottom rank (`Rank9`) or the rightmost file (`File1`),
     /// since there is no square below or to the right.
     #[must_use]
     pub const fn south_east(self) -> Self {
@@ -717,9 +866,9 @@ impl Square {
 
     /// Returns the square diagonally down-left.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the square is on the bottom rank (`Rank9`) or the leftmost file (`File9`),
+    /// In debug builds, panics if the square is on the bottom rank (`Rank9`) or the leftmost file (`File9`),
     /// since there is no square below or to the left.
     #[must_use]
     pub const fn south_west(self) -> Self {
@@ -729,14 +878,14 @@ impl Square {
     /// Returns the square directly above from the perspective of the given color.
     /// For black, this is the same as `north()`. For white, it's `south()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the top rank (`Rank1`)
     /// - For white, if the square is on the bottom rank (`Rank9`)
     #[must_use]
     pub const fn relative_north(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north()
         } else {
             self.south()
@@ -746,14 +895,14 @@ impl Square {
     /// Returns the square directly below from the perspective of the given color.
     /// For black, this is the same as `south()`. For white, it's `north()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the bottom rank (`Rank9`)
     /// - For white, if the square is on the top rank (`Rank1`)
     #[must_use]
     pub const fn relative_south(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south()
         } else {
             self.north()
@@ -763,14 +912,14 @@ impl Square {
     /// Returns the square to the right from the perspective of the given color.
     /// For black, this is the same as `east()`. For white, it's `west()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the rightmost file (`File1`)
     /// - For white, if the square is on the leftmost file (`File9`)
     #[must_use]
     pub const fn relative_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.east()
         } else {
             self.west()
@@ -780,14 +929,14 @@ impl Square {
     /// Returns the square to the left from the perspective of the given color.
     /// For black, this is the same as `west()`. For white, it's `east()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the leftmost file (`File9`)
     /// - For white, if the square is on the rightmost file (`File1`)
     #[must_use]
     pub const fn relative_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.west()
         } else {
             self.east()
@@ -797,14 +946,14 @@ impl Square {
     /// Returns the square diagonally up-right from the perspective of the given color.
     /// For black, this is the same as `north_east()`. For white, it's `south_west()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the top rank (`Rank1`) or rightmost file (`File1`)
     /// - For white, if the square is on the bottom rank (`Rank9`) or leftmost file (`File9`)
     #[must_use]
     pub const fn relative_north_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north_east()
         } else {
             self.south_west()
@@ -814,14 +963,14 @@ impl Square {
     /// Returns the square diagonally up-left from the perspective of the given color.
     /// For black, this is the same as `north_west()`. For white, it's `south_east()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the top rank (`Rank1`) or leftmost file (`File9`)
     /// - For white, if the square is on the bottom rank (`Rank9`) or rightmost file (`File1`)
     #[must_use]
     pub const fn relative_north_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.north_west()
         } else {
             self.south_east()
@@ -831,14 +980,14 @@ impl Square {
     /// Returns the square diagonally down-right from the perspective of the given color.
     /// For black, this is the same as `south_east()`. For white, it's `north_west()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the bottom rank (`Rank9`) or rightmost file (`File1`)
     /// - For white, if the square is on the top rank (`Rank1`) or leftmost file (`File9`)
     #[must_use]
     pub const fn relative_south_east(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south_east()
         } else {
             self.north_west()
@@ -848,14 +997,14 @@ impl Square {
     /// Returns the square diagonally down-left from the perspective of the given color.
     /// For black, this is the same as `south_west()`. For white, it's `north_east()`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the resulting square would be outside the board:
+    /// In debug builds, panics if the resulting square would be outside the board:
     /// - For black, if the square is on the bottom rank (`Rank9`) or leftmost file (`File9`)
     /// - For white, if the square is on the top rank (`Rank1`) or rightmost file (`File1`)
     #[must_use]
     pub const fn relative_south_west(self, color: Color) -> Self {
-        if color.is_black() {
+        if color == Color::Black {
             self.south_west()
         } else {
             self.north_east()
@@ -915,9 +1064,9 @@ impl Square {
 impl const From<u8> for Square {
     /// Creates a `Square` from the given raw `u8` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: u8) -> Self {
         debug_assert!(value < Self::COUNT as u8);
 
@@ -928,12 +1077,37 @@ impl const From<u8> for Square {
 impl const From<usize> for Square {
     /// Creates a `Square` from the given raw `usize` value.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panic if `value` is greater than or equal to `COUNT`.
+    /// In debug builds, panics if `value` is greater than or equal to `COUNT`.
     fn from(value: usize) -> Self {
         debug_assert!(value < Self::COUNT);
 
         unsafe { transmute(value as u8) }
+    }
+}
+
+impl const PartialEq for Square {
+    /// Compares two `Square` values for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u8() == other.as_u8()
+    }
+}
+
+impl const Eq for Square {}
+
+impl<T> const Index<Square> for [T; Square::COUNT] {
+    type Output = T;
+
+    /// Indexes the array by `Square`.
+    fn index(&self, square: Square) -> &Self::Output {
+        &self[square.as_usize()]
+    }
+}
+
+impl<T> const IndexMut<Square> for [T; Square::COUNT] {
+    /// Mutably indexes the array by `Square`.
+    fn index_mut(&mut self, square: Square) -> &mut Self::Output {
+        &mut self[square.as_usize()]
     }
 }

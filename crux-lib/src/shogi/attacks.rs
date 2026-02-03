@@ -1,16 +1,29 @@
 use const_for::const_for;
 
-use crate::shogi::core::PieceType;
 use crate::shogi::{
     bitboard::Bitboard,
-    core::{Color, File, Piece, Rank, Square},
+    core::{Color, File, Piece, PieceType, Rank, Square},
 };
 
 type Attacks = [Bitboard; Square::COUNT];
 type SidedAttacks = [Attacks; Color::COUNT];
 
-// (direction0, direction1, direction2, direction3, all_directions)
-type Masks = [(Bitboard, Bitboard, Bitboard, Bitboard, Bitboard); Square::COUNT];
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+struct SlidingMasks {
+    backwards: [Bitboard; 2],
+    forwards: [Bitboard; 2],
+    all: Bitboard,
+}
+
+impl const Default for SlidingMasks {
+    fn default() -> Self {
+        Self {
+            backwards: [Bitboard::empty(), Bitboard::empty()],
+            forwards: [Bitboard::empty(), Bitboard::empty()],
+            all: Bitboard::empty(),
+        }
+    }
+}
 
 macro_rules! generate_attacks {
     (|$square:ident| $body:expr) => {{
@@ -45,9 +58,7 @@ macro_rules! generate_sided_attacks {
 
 macro_rules! generate_masks {
     (|$square:ident| $body:expr) => {{
-        let mut masks = [(Bitboard::empty(), Bitboard::empty(),
-                            Bitboard::empty(), Bitboard::empty(),
-                            Bitboard::empty()); Square::COUNT];
+        let mut masks = [SlidingMasks::default(); Square::COUNT];
 
         const_for!(square_idx in 0..Square::COUNT => {
             let $square = Square::from(square_idx);
@@ -60,28 +71,33 @@ macro_rules! generate_masks {
 }
 
 /// Returns pawn attacks from the given color and square.
-/// Always a single bit is set in the returned bitboard.
 ///
-/// # Panics
-///
-/// Panics if the square is on the relative rank 1 for the given color.
+/// If the square is on the relative rank 1 for the given color,
+/// this function returns an empty bitboard.
+/// Otherwise, exactly one bit is set in the returned bitboard.
 #[must_use]
 pub const fn pawn_attacks(color: Color, square: Square) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    const PAWN_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
+        if square.rank().relative(color) == Rank::Rank1 {
+            Bitboard::empty()
+        } else {
+            multi_pawn_attacks(color, square.bit())
+        }
+    });
 
-    square.relative_north(color).bit()
+    PAWN_ATTACKS[color][square]
 }
 
 /// Returns pawn attacks for all squares set in `pawns_bb` for the given color.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if any square lies on relative rank 1 for the given color.
+/// In debug builds, panics if any square lies on relative rank 1 for the given color.
 #[must_use]
 pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!((pawns_bb & Rank::Rank1.relative(color).bit()).is_empty());
 
-    if color.is_black() {
+    if color == Color::Black {
         pawns_bb.shr(1)
     } else {
         pawns_bb.shl(1)
@@ -92,31 +108,35 @@ pub const fn multi_pawn_attacks(color: Color, pawns_bb: Bitboard) -> Bitboard {
 ///
 /// This is equivalent to calling `lance_attacks` with `occupied = Bitboard::empty()`,
 /// i.e., it ignores all pieces and assumes an empty board.
-///
-/// # Panics
-///
-/// Panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_pseudo_attacks(color: Color, square: Square) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    const LANCE_PSEUDO_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
+        let mut bb = square.bit();
+        let mut res = Bitboard::empty();
 
-    LANCE_PSEUDO_ATTACKS[color.as_usize()][square.as_usize()]
+        while (bb & Rank::Rank1.relative(color).bit()).is_empty() {
+            bb = if color == Color::Black {
+                bb.shr(1)
+            } else {
+                bb.shl(1)
+            };
+            res |= bb;
+        }
+
+        res
+    });
+
+    LANCE_PSEUDO_ATTACKS[color][square]
 }
 
 /// Returns lance attacks from the given color and square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
-///
-/// # Panics
-///
-/// Panics if the given square is on relative `Rank1`.
 #[must_use]
 pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> Bitboard {
-    debug_assert!(!matches!(square.rank().relative(color), Rank::Rank1));
+    let pseudo_attacks = lance_pseudo_attacks(color, square);
 
-    let pseudo_attacks = LANCE_PSEUDO_ATTACKS[color.as_usize()][square.as_usize()];
-
-    if color.is_black() {
+    if color == Color::Black {
         sliding_backward(occupied, pseudo_attacks)
     } else {
         sliding_forward(occupied, pseudo_attacks)
@@ -125,16 +145,11 @@ pub const fn lance_attacks(color: Color, square: Square, occupied: Bitboard) -> 
 
 /// Returns knight attacks from the given color and square.
 ///
-/// # Panics
-///
-/// Panics if the given square is on relative `Rank1` or `Rank2` for the given color.
+/// If the square is on the relative rank 1 or 2 for the given color,
+/// this function returns an empty bitboard.
+/// Otherwise, up to two bits are set in the returned bitboard.
 #[must_use]
 pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
-    debug_assert!(!matches!(
-        square.rank().relative(color),
-        Rank::Rank1 | Rank::Rank2
-    ));
-
     const KNIGHT_ATTACKS: SidedAttacks = generate_sided_attacks!(|color, square| {
         if matches!(square.rank().relative(color), Rank::Rank1 | Rank::Rank2) {
             Bitboard::empty()
@@ -143,21 +158,21 @@ pub const fn knight_attacks(color: Color, square: Square) -> Bitboard {
         }
     });
 
-    KNIGHT_ATTACKS[color.as_usize()][square.as_usize()]
+    KNIGHT_ATTACKS[color][square]
 }
 
 /// Returns knight attacks for all squares set in `knights_bb` for the given color.
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// Panics if any square lies on relative ranks 1 or 2 for the given color.
+/// In debug builds, panics if any square lies on relative ranks 1 or 2 for the given color.
 #[must_use]
 pub const fn multi_knight_attacks(color: Color, knights_bb: Bitboard) -> Bitboard {
     debug_assert!((knights_bb
         & (Rank::Rank1.relative(color).bit() | Rank::Rank2.relative(color).bit()))
     .is_empty());
 
-    if color.is_black() {
+    if color == Color::Black {
         knights_bb.shr(11) | knights_bb.shl(7)
     } else {
         knights_bb.shl(11) | knights_bb.shr(7)
@@ -170,7 +185,7 @@ pub const fn silver_attacks(color: Color, square: Square) -> Bitboard {
     const SILVER_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_silver_attacks(color, square.bit()));
 
-    SILVER_ATTACKS[color.as_usize()][square.as_usize()]
+    SILVER_ATTACKS[color][square]
 }
 
 /// Returns silver attacks for all squares set in `silvers_bb` for the given color.
@@ -179,7 +194,7 @@ pub const fn multi_silver_attacks(color: Color, silvers_bb: Bitboard) -> Bitboar
     let without_rank1 = silvers_bb & !Rank::Rank1.bit();
     let without_rank9 = silvers_bb & !Rank::Rank9.bit();
 
-    if color.is_black() {
+    if color == Color::Black {
         without_rank1.shr(10)
             | without_rank1.shr(1)
             | without_rank1.shl(8)
@@ -200,7 +215,7 @@ pub const fn gold_attacks(color: Color, square: Square) -> Bitboard {
     const GOLD_ATTACKS: SidedAttacks =
         generate_sided_attacks!(|color, square| multi_gold_attacks(color, square.bit()));
 
-    GOLD_ATTACKS[color.as_usize()][square.as_usize()]
+    GOLD_ATTACKS[color][square]
 }
 
 /// Returns gold attacks for all squares set in `golds_bb` for the given color.
@@ -209,7 +224,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
     let without_rank1 = golds_bb & !Rank::Rank1.bit();
     let without_rank9 = golds_bb & !Rank::Rank9.bit();
 
-    if color.is_black() {
+    if color == Color::Black {
         without_rank1.shr(10)
             | without_rank1.shr(1)
             | without_rank1.shl(8)
@@ -232,7 +247,7 @@ pub const fn multi_gold_attacks(color: Color, golds_bb: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
-    BISHOP_MASKS[square.as_usize()].4
+    BISHOP_MASKS[square].all
 }
 
 /// Returns bishop attacks from the given square.
@@ -240,12 +255,12 @@ pub const fn bishop_pseudo_attacks(square: Square) -> Bitboard {
 /// The `occupied` bitboard may include or exclude the given square.
 #[must_use]
 pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    let masks = BISHOP_MASKS[square.as_usize()];
+    let masks = BISHOP_MASKS[square];
 
-    sliding_backward(occupied, masks.0)
-        | sliding_backward(occupied, masks.1)
-        | sliding_forward(occupied, masks.2)
-        | sliding_forward(occupied, masks.3)
+    sliding_backward(occupied, masks.backwards[0])
+        | sliding_backward(occupied, masks.backwards[1])
+        | sliding_forward(occupied, masks.forwards[0])
+        | sliding_forward(occupied, masks.forwards[1])
 }
 
 /// Returns the precomputed pseudo rook attacks for the given square.
@@ -254,7 +269,7 @@ pub const fn bishop_attacks(square: Square, occupied: Bitboard) -> Bitboard {
 /// i.e., it ignores all pieces and assumes an empty board.
 #[must_use]
 pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
-    ROOK_MASKS[square.as_usize()].4
+    ROOK_MASKS[square].all
 }
 
 /// Returns rook attacks from the given square.
@@ -262,12 +277,12 @@ pub const fn rook_pseudo_attacks(square: Square) -> Bitboard {
 /// The `occupied` bitboard may include or exclude the given square.
 #[must_use]
 pub const fn rook_attacks(square: Square, occupied: Bitboard) -> Bitboard {
-    let masks = ROOK_MASKS[square.as_usize()];
+    let masks = ROOK_MASKS[square];
 
-    sliding_backward(occupied, masks.0)
-        | sliding_backward(occupied, masks.1)
-        | sliding_forward(occupied, masks.2)
-        | sliding_forward(occupied, masks.3)
+    sliding_backward(occupied, masks.backwards[0])
+        | sliding_backward(occupied, masks.backwards[1])
+        | sliding_forward(occupied, masks.forwards[0])
+        | sliding_forward(occupied, masks.forwards[1])
 }
 
 /// Returns the precomputed pseudo horse attacks for the given square.
@@ -311,16 +326,10 @@ pub const fn king_attacks(square: Square) -> Bitboard {
         |square| silver_attacks(Color::Black, square) | gold_attacks(Color::Black, square)
     );
 
-    KING_ATTACKS[square.as_usize()]
+    KING_ATTACKS[square]
 }
 
 /// Returns the pseudo attacks of the given piece type from the square.
-///
-/// # Panics
-///
-/// Panics if the square is invalid for the piece type:
-/// - A pawn or lance on the relative rank 1 for its color.
-/// - A knight on the last two ranks relative to its color.
 #[must_use]
 pub const fn piece_pseudo_attacks(piece: Piece, square: Square) -> Bitboard {
     match piece.piece_type() {
@@ -344,12 +353,6 @@ pub const fn piece_pseudo_attacks(piece: Piece, square: Square) -> Bitboard {
 /// Returns the attacks of the given piece type from the square.
 ///
 /// The `occupied` bitboard may include or exclude the given square.
-///
-/// # Panics
-///
-/// Panics if the square is invalid for the piece type:
-/// - A pawn or lance on the relative rank 1 for its color.
-/// - A knight on the last two ranks relative to its color.
 #[must_use]
 pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> Bitboard {
     match piece.piece_type() {
@@ -370,13 +373,39 @@ pub const fn piece_attacks(piece: Piece, square: Square, occupied: Bitboard) -> 
     }
 }
 
+/// Returns the ray of squares strictly between two squares.
+///
+/// If `from` and `to` are aligned on the same rank, file, or diagonal,
+/// this returns all squares between them, excluding both endpoints.
+///
+/// Otherwise, this returns an empty bitboard.
 #[must_use]
-const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
-    let tz = (occupied & mask | Square::S99.bit())
-        .as_u128()
-        .trailing_zeros();
+pub const fn ray_between(from: Square, to: Square) -> Bitboard {
+    #[allow(clippy::large_const_arrays)]
+    const TABLE: [[Bitboard; Square::COUNT]; Square::COUNT] = {
+        let mut table = [[Bitboard::empty(); Square::COUNT]; Square::COUNT];
 
-    Bitboard::new(mask.as_u128() & ((1 << (tz + 1)) - 1))
+        const_for!(i in 0..Square::COUNT => {
+            const_for!(j in 0..Square::COUNT => {
+                if i == j {
+                    continue;
+                }
+
+                let from = Square::from(i);
+                let to = Square::from(j);
+
+                if rook_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= rook_attacks(from, to.bit()) & rook_attacks(to, from.bit());
+                } else if bishop_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= bishop_attacks(from, to.bit()) & bishop_attacks(to, from.bit());
+                }
+            });
+        });
+
+        table
+    };
+
+    TABLE[from][to]
 }
 
 #[must_use]
@@ -388,92 +417,81 @@ const fn sliding_backward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     Bitboard::new(mask.as_u128() & !((1 << (127 - lz)) - 1))
 }
 
-const LANCE_PSEUDO_ATTACKS: SidedAttacks = generate_sided_attacks! { |color, square| {
+#[must_use]
+const fn sliding_forward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
+    let tz = (occupied & mask | Square::S99.bit())
+        .as_u128()
+        .trailing_zeros();
+
+    Bitboard::new(mask.as_u128() & ((1 << (tz + 1)) - 1))
+}
+
+const BISHOP_MASKS: [SlidingMasks; Square::COUNT] = generate_masks!(|square| {
     let mut bb = square.bit();
-    let mut res = Bitboard::empty();
-
-    while (bb & Rank::Rank1.relative(color).bit()).is_empty() {
-        bb = if color.is_black() { bb.shr(1) } else { bb.shl(1) };
-        res |= bb;
-    }
-
-    res
-}};
-
-const BISHOP_MASKS: Masks = generate_masks!(|square| {
-    let mut bb = square.bit();
-    let mut right_up = Bitboard::empty();
-    let mut right_down = Bitboard::empty();
-    let mut left_up = Bitboard::empty();
-    let mut left_down = Bitboard::empty();
+    let mut masks = SlidingMasks::default();
 
     while (bb & (File::File1.bit() | Rank::Rank1.bit())).is_empty() {
         bb = bb.shr(10);
-        right_up |= bb;
+        masks.backwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File1.bit() | Rank::Rank9.bit())).is_empty() {
         bb = bb.shr(8);
-        right_down |= bb;
+        masks.backwards[1] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File9.bit() | Rank::Rank1.bit())).is_empty() {
         bb = bb.shl(8);
-        left_up |= bb;
+        masks.forwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & (File::File9.bit() | Rank::Rank9.bit())).is_empty() {
         bb = bb.shl(10);
-        left_down |= bb;
+        masks.forwards[1] |= bb;
     }
 
-    (
-        right_up,
-        right_down,
-        left_up,
-        left_down,
-        right_up | right_down | left_up | left_down,
-    )
+    masks.all = masks.backwards[0] | masks.backwards[1] | masks.forwards[0] | masks.forwards[1];
+
+    masks
 });
 
-const ROOK_MASKS: Masks = generate_masks!(|square| {
+const ROOK_MASKS: [SlidingMasks; Square::COUNT] = generate_masks!(|square| {
     let mut bb = square.bit();
-    let mut right = Bitboard::empty();
-    let mut up = Bitboard::empty();
-    let mut left = Bitboard::empty();
-    let mut down = Bitboard::empty();
+    let mut masks = SlidingMasks::default();
 
     while (bb & File::File1.bit()).is_empty() {
         bb = bb.shr(9);
-        right |= bb;
+        masks.backwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & Rank::Rank1.bit()).is_empty() {
         bb = bb.shr(1);
-        up |= bb;
+        masks.backwards[1] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & File::File9.bit()).is_empty() {
         bb = bb.shl(9);
-        left |= bb;
+        masks.forwards[0] |= bb;
     }
 
     bb = square.bit();
 
     while (bb & Rank::Rank9.bit()).is_empty() {
         bb = bb.shl(1);
-        down |= bb;
+        masks.forwards[1] |= bb;
     }
 
-    (right, up, left, down, right | up | left | down)
+    masks.all = masks.backwards[0] | masks.backwards[1] | masks.forwards[0] | masks.forwards[1];
+
+    masks
 });

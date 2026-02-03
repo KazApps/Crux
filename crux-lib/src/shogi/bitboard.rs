@@ -1,8 +1,9 @@
-use const_for::const_for;
 use std::{
     fmt::{Display, Formatter, Result},
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not},
 };
+
+use const_for::const_for;
 
 use crate::shogi::core::{Color, File, Rank, Square};
 
@@ -58,7 +59,7 @@ impl Bitboard {
 
     /// Returns `true` if any bit in the bitboard is set.
     #[must_use]
-    pub const fn is_any(self) -> bool {
+    pub const fn has_any(self) -> bool {
         self.0 != 0
     }
 
@@ -71,7 +72,7 @@ impl Bitboard {
     /// Returns `true` if exactly one bit in the bitboard is set.
     #[must_use]
     pub const fn is_single(self) -> bool {
-        self.is_any() && !self.is_multiple()
+        self.has_any() && !self.is_multiple()
     }
 
     /// Returns `true` if more than one bit in the bitboard is set.
@@ -86,38 +87,44 @@ impl Bitboard {
         self.0.count_ones()
     }
 
+    /// Returns if the bitboard contains the given square.
+    #[must_use]
+    pub const fn contains(self, square: Square) -> bool {
+        (self & square.bit()).has_any()
+    }
+
     /// Returns the least significant bit (LSB) as a `Square`.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn lsb(self) -> Square {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         Square::from(self.0.trailing_zeros() as u8)
     }
 
     /// Returns a bitboard with only the least significant bit set.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn isolate_lsb(self) -> Self {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         Self(self.0 & self.0.wrapping_neg())
     }
 
     /// Returns the least significant bit (LSB) as a `Square` and clears it from the bitboard.
     ///
-    /// # Panics
+    /// # Debug assertions
     ///
-    /// Panics if the bitboard has no bits set.
+    /// In debug builds, panics if the bitboard has no bits set.
     #[must_use]
     pub const fn pop_lsb(&mut self) -> Square {
-        debug_assert!(self.is_any());
+        debug_assert!(self.has_any());
 
         let lsb = self.lsb();
         self.0 &= self.0.wrapping_sub(1);
@@ -154,6 +161,13 @@ impl Bitboard {
     /// Mask for keeping bitboards within the valid board range
     /// (lower `Square::COUNT` bits set).
     const MASK: u128 = (1u128 << Square::COUNT) - 1;
+}
+
+impl const Default for Bitboard {
+    /// Creates an empty `Bitboard`.
+    fn default() -> Self {
+        Self::empty()
+    }
 }
 
 impl const BitAnd for Bitboard {
@@ -225,14 +239,14 @@ impl const From<File> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[file.as_usize()] |= Bitboard::from(square);
+                    table[file] |= Bitboard::from(square);
                 });
             });
 
             table
         };
 
-        TABLE[value.as_usize()]
+        TABLE[value]
     }
 }
 
@@ -248,14 +262,14 @@ impl const From<Rank> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[rank.as_usize()] |= Bitboard::from(square);
+                    table[rank] |= Bitboard::from(square);
                 });
             });
 
             table
         };
 
-        TABLE[value.as_usize()]
+        TABLE[value]
     }
 }
 
@@ -275,7 +289,7 @@ pub const fn promotion_area(color: Color) -> Bitboard {
     [
         Rank::Rank1.bit() | Rank::Rank2.bit() | Rank::Rank3.bit(),
         Rank::Rank7.bit() | Rank::Rank8.bit() | Rank::Rank9.bit(),
-    ][color.as_usize()]
+    ][color]
 }
 
 /// Returns a `Bitboard` representing squares where a pawn can be dropped for the given color.
@@ -289,9 +303,10 @@ pub const fn promotion_area(color: Color) -> Bitboard {
 /// This implementation is inspired by the approach described in:
 /// https://www.apply.computer-shogi.org/wcsc31/appeal/Qugiy/appeal.pdf
 ///
-/// # Panics
+/// # Debug assertions
 ///
-/// If `pawns_bb` contains a state that would result in doubled pawns, this function may panic.
+/// In debug builds, this function may panic if `pawns_bb` contains a state
+/// that would result in doubled pawns.
 #[must_use]
 pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
     debug_assert!(pawns_bb.count_ones() <= 9);
@@ -304,7 +319,7 @@ pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
     // If a file has a pawn, no bits are set in `bb` for that file.
     let bb = RANK9.sub(pawns_bb) & RANK9;
 
-    if color.is_black() {
+    if color == Color::Black {
         // If a file has no pawn:
         //     `RANK9.sub(bb.shr(7))` sets bits on ranks 2–8 for that file.
         // If a file has a pawn:
@@ -360,28 +375,20 @@ impl Display for Bitboard {
         const RANK_SEPARATOR: &str = "+---+---+---+---+---+---+---+---+---+";
 
         writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
-        writeln!(f, "{}", RANK_SEPARATOR)?;
+        writeln!(f, "{RANK_SEPARATOR}")?;
 
-        for rank in 0..Rank::COUNT {
+        for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
             let rank = Rank::from(rank);
 
             for file in (0..File::COUNT).rev() {
                 let file = File::from(file);
                 let square = Square::new(file, rank);
 
-                write!(
-                    f,
-                    "| {} ",
-                    if (*self & Bitboard::from(square)).is_any() {
-                        'X'
-                    } else {
-                        ' '
-                    }
-                )?;
+                write!(f, "| {} ", if self.contains(square) { 'X' } else { ' ' })?;
             }
 
-            writeln!(f, "| {}", RANK_TO_CHAR[rank.as_usize()])?;
-            write!(f, "{}", RANK_SEPARATOR)?;
+            writeln!(f, "| {rank_char}")?;
+            write!(f, "{RANK_SEPARATOR}")?;
 
             if rank != Rank::Rank9 {
                 writeln!(f)?;
