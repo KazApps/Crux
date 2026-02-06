@@ -1,1 +1,2 @@
+mod notation;
 mod shogi;
