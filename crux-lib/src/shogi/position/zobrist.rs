@@ -1,10 +1,12 @@
 use const_for::const_for;
 
-use crate::shogi::{
-    core::{Color, Piece, PieceType, Square, MAX_ROOK},
-    position::{hand::Hand, key::Key},
+use crate::{
+    shogi::{
+        core::{Color, Piece, PieceType, Square, MAX_ROOK},
+        position::{hand::Hand, key::Key},
+    },
+    utils::rng::Prng,
 };
-use crate::utils::rng::Prng;
 
 type SideKey = Key;
 type PieceSquareKey = [[Key; Square::COUNT]; Piece::COUNT];

@@ -549,11 +549,8 @@ impl Display for Position {
         writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
         writeln!(f, "{RANK_SEPARATOR}")?;
 
-        for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
-            for file in (0..File::COUNT).rev() {
-                let file = File::from(file);
-                let rank = Rank::from(rank);
-
+        for (&rank, rank_char) in Rank::ALL.iter().zip(RANK_TO_CHAR) {
+            for &file in File::ALL.iter().rev() {
                 let square = Square::new(file, rank);
 
                 if let Some(piece) = self.piece_at(square) {
@@ -578,9 +575,7 @@ impl Display for Position {
         writeln!(f)?;
         writeln!(f, "Side to Move : {}", COLOR_TO_STR[self.side_to_move()])?;
 
-        for (color, color_str) in COLOR_TO_STR.iter().enumerate() {
-            let color = Color::from(color);
-
+        for (&color, color_str) in Color::ALL.iter().zip(COLOR_TO_STR) {
             write!(f, "Hand ({color_str}) : ")?;
 
             let hand = self.hand(color);
@@ -592,13 +587,12 @@ impl Display for Position {
 
             let mut parts = Vec::new();
 
-            for (piece_type, piece_type_char) in PIECE_TYPE_TO_CHAR
+            for (&piece_type, piece_type_char) in PieceType::ALL
                 .iter()
+                .zip(PIECE_TYPE_TO_CHAR)
                 .take(Hand::HAND_PIECE_TYPES)
-                .enumerate()
                 .rev()
             {
-                let piece_type = PieceType::from(piece_type);
                 let count = hand.count(piece_type);
 
                 if count != 0 {
@@ -671,6 +665,12 @@ impl PositionBuilder {
         piece_type: PieceType,
     ) -> &mut Self {
         self.0.decrement_hand_piece_count(color, piece_type);
+        self
+    }
+
+    /// Set the ply.
+    pub const fn set_ply(&mut self, ply: u32) -> &mut Self {
+        self.0.ply = ply;
         self
     }
 

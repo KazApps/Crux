@@ -9,20 +9,20 @@ fn default() {
 
 #[test]
 fn has_any() {
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
         let mut hand = Hand::default();
         assert!(!hand.has_any());
-        hand.increment(PieceType::from(piece_type));
+        hand.increment(piece_type);
         assert!(hand.has_any());
     }
 }
 
 #[test]
 fn is_empty() {
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
         let mut hand = Hand::default();
         assert!(hand.is_empty());
-        hand.increment(PieceType::from(piece_type));
+        hand.increment(piece_type);
         assert!(!hand.is_empty());
     }
 }
@@ -31,8 +31,8 @@ fn is_empty() {
 fn count() {
     let mut hand = Hand::default();
 
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        assert_eq!(hand.count(PieceType::from(piece_type)), 0);
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
+        assert_eq!(hand.count(piece_type), 0);
     }
 
     hand.increment(PieceType::Pawn);
@@ -51,8 +51,7 @@ fn count() {
 fn set() {
     let mut hand = Hand::default();
 
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        let piece_type = PieceType::from(piece_type);
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
         let max_count = Hand::max_piece_counts(piece_type);
 
         hand.set(piece_type, max_count);
@@ -72,9 +71,9 @@ fn set_panics_if_count_is_greater_than_max() {
 fn increment() {
     let mut hand = Hand::default();
 
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        hand.increment(PieceType::from(piece_type));
-        assert_eq!(hand.count(PieceType::from(piece_type)), 1);
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
+        hand.increment(piece_type);
+        assert_eq!(hand.count(piece_type), 1);
     }
 }
 
@@ -82,8 +81,7 @@ fn increment() {
 fn decrement() {
     let mut hand = Hand::default();
 
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        let piece_type = PieceType::from(piece_type);
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
         let max_count = Hand::max_piece_counts(piece_type);
 
         hand.set(piece_type, max_count);

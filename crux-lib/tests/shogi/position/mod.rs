@@ -916,9 +916,7 @@ fn empty() {
     assert_eq!(pos.side_to_move(), Color::Black);
     assert_eq!(pos.occupancy(), Bitboard::empty());
 
-    for piece in 0..Piece::COUNT {
-        let piece = Piece::from(piece);
-
+    for piece in Piece::ALL {
         assert_eq!(pos.piece_bb(piece), Bitboard::empty());
     }
 
@@ -982,9 +980,9 @@ fn builder() {
         let mut builder = Position::default().builder();
 
         fn place(builder: &mut PositionBuilder, squares: &[Square], piece_type: PieceType) {
-            for square in squares {
+            for &square in squares {
                 builder
-                    .place(*square, piece_type.with_color(Color::Black))
+                    .place(square, piece_type.with_color(Color::Black))
                     .place(square.rotate180(), piece_type.with_color(Color::White));
             }
         }

@@ -91,11 +91,8 @@ fn lance_pseudo_attacks() {
 
 #[test]
 fn lance_attacks() {
-    for color in 0..Color::COUNT {
-        for square in 0..Square::COUNT {
-            let color = Color::from(color);
-            let square = Square::from(square);
-
+    for color in Color::ALL {
+        for square in Square::ALL {
             if square.rank().relative(color) == Rank::Rank1 {
                 continue;
             }
@@ -523,9 +520,7 @@ fn bishop_pseudo_attacks() {
 
 #[test]
 fn bishop_attacks() {
-    for square in 0..Square::COUNT {
-        let square = Square::from(square);
-
+    for square in Square::ALL {
         assert_eq!(
             attacks::bishop_attacks(square, Bitboard::empty()),
             attacks::bishop_pseudo_attacks(square)
@@ -621,9 +616,7 @@ fn bishop_attacks() {
 
 #[test]
 fn rook_pseudo_attacks() {
-    for square in 0..Square::COUNT {
-        let square = Square::from(square);
-
+    for square in Square::ALL {
         assert_eq!(attacks::rook_pseudo_attacks(square).count_ones(), 16);
     }
 
@@ -673,9 +666,7 @@ fn rook_pseudo_attacks() {
 
 #[test]
 fn rook_attacks() {
-    for square in 0..Square::COUNT {
-        let square = Square::from(square);
-
+    for square in Square::ALL {
         assert_eq!(
             attacks::rook_attacks(square, Bitboard::empty()),
             attacks::rook_pseudo_attacks(square)
@@ -804,9 +795,7 @@ fn rook_attacks() {
 
 #[test]
 fn king_attacks() {
-    for square in 0..Square::COUNT {
-        let square = Square::from(square);
-
+    for square in Square::ALL {
         assert_eq!(
             attacks::king_attacks(square),
             attacks::silver_attacks(Color::Black, square)
