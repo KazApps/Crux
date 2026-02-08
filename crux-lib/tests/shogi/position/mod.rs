@@ -1,11 +1,13 @@
-use crux_lib::shogi::{
-    bitboard::Bitboard,
-    core::{Color, Piece, PieceType, Square},
-    position::{
-        key::Key,
-        mv::Move,
-        zobrist::{hand_key, piece_square_key, side_key},
-        Position, PositionBuilder,
+use crux_lib::{
+    notation::{usi::Usi, Notation},
+    shogi::{
+        bitboard::Bitboard,
+        core::{Color, Piece, PieceType, Square},
+        position::{
+            key::Key,
+            zobrist::{hand_key, piece_square_key, side_key},
+            Position, PositionBuilder,
+        },
     },
 };
 
@@ -14,752 +16,200 @@ mod key;
 mod mv;
 mod zobrist;
 
-const MAKE_MOVE_TEST_CASES: &[(Position, Move, Position, Option<Piece>)] = &[
+const MAKE_MOVE_TEST_CASES: &[(&str, &str, &str, Option<Piece>)] = &[
     // Normal move
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.place(Square::S55, Piece::BlackRook);
-
-            builder.build()
-        },
-        Move::normal(Square::S55, Square::S51),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::BlackRook)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/9/9/9/4R4/9/9/9/9 b - 1",
+        "5e5a",
+        "4R4/9/9/9/9/9/9/9/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S55, Piece::WhiteRook)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S55, Square::S59),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.place(Square::S59, Piece::WhiteRook);
-
-            builder.build()
-        },
+        "9/9/9/9/4r4/9/9/9/9 w - 1",
+        "5e5i",
+        "9/9/9/9/9/9/9/9/4r4 b - 1",
         None,
     ),
     // Promotion move
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.place(Square::S55, Piece::BlackRook);
-
-            builder.build()
-        },
-        Move::promote(Square::S55, Square::S51),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::BlackDragon)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/9/9/9/4R4/9/9/9/9 b - 1",
+        "5e5a+",
+        "4+R4/9/9/9/9/9/9/9/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S55, Piece::WhiteRook)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::promote(Square::S55, Square::S59),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.place(Square::S59, Piece::WhiteDragon);
-
-            builder.build()
-        },
+        "9/9/9/9/4r4/9/9/9/9 w - 1",
+        "5e5i+",
+        "9/9/9/9/9/9/9/9/4+r4 b - 1",
         None,
     ),
     // Drop move
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.increment_hand_piece_count(Color::Black, PieceType::Pawn);
-
-            builder.build()
-        },
-        Move::drop(PieceType::Pawn, Square::S55),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S55, Piece::BlackPawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/9/9/9/9/9/9/9/9 b P 1",
+        "P*5e",
+        "9/9/9/9/4P4/9/9/9/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .increment_hand_piece_count(Color::White, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::drop(PieceType::Pawn, Square::S55),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder.place(Square::S55, Piece::WhitePawn);
-
-            builder.build()
-        },
+        "9/9/9/9/9/9/9/9/9 w p 1",
+        "P*5e",
+        "9/9/9/9/4p4/9/9/9/9 b - 1",
         None,
     ),
     // Normal move with capture
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::WhitePawn)
-                .place(Square::S55, Piece::BlackRook);
-
-            builder.build()
-        },
-        Move::normal(Square::S55, Square::S51),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::BlackRook)
-                .increment_hand_piece_count(Color::Black, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "4p4/9/9/9/4R4/9/9/9/9 b - 1",
+        "5e5a",
+        "4R4/9/9/9/9/9/9/9/9 w P 1",
         Some(Piece::WhitePawn),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S59, Piece::BlackPawn)
-                .place(Square::S55, Piece::WhiteRook)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S55, Square::S59),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S59, Piece::WhiteRook)
-                .increment_hand_piece_count(Color::White, PieceType::Pawn);
-
-            builder.build()
-        },
+        "9/9/9/9/4r4/9/9/9/4P4 w - 1",
+        "5e5i",
+        "9/9/9/9/9/9/9/9/4r4 b p 1",
         Some(Piece::BlackPawn),
     ),
     // Promotion move with capture
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::WhitePawn)
-                .place(Square::S55, Piece::BlackRook);
-
-            builder.build()
-        },
-        Move::promote(Square::S55, Square::S51),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S51, Piece::BlackDragon)
-                .increment_hand_piece_count(Color::Black, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "4p4/9/9/9/4R4/9/9/9/9 b - 1",
+        "5e5a+",
+        "4+R4/9/9/9/9/9/9/9/9 w P 1",
         Some(Piece::WhitePawn),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S59, Piece::BlackPawn)
-                .place(Square::S55, Piece::WhiteRook)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::promote(Square::S55, Square::S59),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S59, Piece::WhiteDragon)
-                .increment_hand_piece_count(Color::White, PieceType::Pawn);
-
-            builder.build()
-        },
+        "9/9/9/9/4r4/9/9/9/4P4 w - 1",
+        "5e5i+",
+        "9/9/9/9/9/9/9/9/4+r4 b p 1",
         Some(Piece::BlackPawn),
     ),
     // Normal move gives check
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S15, Piece::BlackKnight);
-
-            builder.build()
-        },
-        Move::normal(Square::S15, Square::S23),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "8k/9/9/9/8N/9/9/9/8L b - 1",
+        "1e2c",
+        "8k/9/7N1/9/9/9/9/9/8L w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S95, Piece::WhiteKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S95, Square::S87),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteKnight);
-
-            builder.build()
-        },
+        "l8/9/9/9/n8/9/9/9/K8 w - 1",
+        "9e8g",
+        "l8/9/9/9/9/9/1n7/9/K8 b - 1",
         None,
     ),
     // Promotion move gives check
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S12, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S15, Piece::BlackKnight);
-
-            builder.build()
-        },
-        Move::promote(Square::S15, Square::S23),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S12, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackProKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/8k/9/9/8N/9/9/9/8L b - 1",
+        "1e2c+",
+        "9/8k/7+N1/9/9/9/9/9/8L w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S98, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S95, Piece::WhiteKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::promote(Square::S95, Square::S87),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S98, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteProKnight);
-
-            builder.build()
-        },
+        "l8/9/9/9/n8/9/9/K8/9 w - 1",
+        "9e8g+",
+        "l8/9/9/9/9/9/1+n7/K8/9 b - 1",
         None,
     ),
     // Drop move gives check
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S54, Piece::WhiteKing)
-                .increment_hand_piece_count(Color::Black, PieceType::Pawn);
-
-            builder.build()
-        },
-        Move::drop(PieceType::Pawn, Square::S55),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S54, Piece::WhiteKing)
-                .place(Square::S55, Piece::BlackPawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/9/9/4k4/9/9/9/9/9 b P 1",
+        "P*5e",
+        "9/9/9/4k4/4P4/9/9/9/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S56, Piece::BlackKing)
-                .increment_hand_piece_count(Color::White, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::drop(PieceType::Pawn, Square::S55),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S56, Piece::BlackKing)
-                .place(Square::S55, Piece::WhitePawn);
-
-            builder.build()
-        },
+        "9/9/9/9/9/4K4/9/9/9 w p 1",
+        "P*5e",
+        "9/9/9/9/4p4/4K4/9/9/9 b - 1",
         None,
     ),
     // Normal move with capture gives check
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S15, Piece::BlackKnight)
-                .place(Square::S23, Piece::WhitePawn);
-
-            builder.build()
-        },
-        Move::normal(Square::S15, Square::S23),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackKnight)
-                .increment_hand_piece_count(Color::Black, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "8k/9/7p1/9/8N/9/9/9/8L b - 1",
+        "1e2c",
+        "8k/9/7N1/9/9/9/9/9/8L w P 1",
         Some(Piece::WhitePawn),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S95, Piece::WhiteKnight)
-                .place(Square::S87, Piece::BlackPawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S95, Square::S87),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteKnight)
-                .increment_hand_piece_count(Color::White, PieceType::Pawn);
-
-            builder.build()
-        },
+        "l8/9/9/9/n8/9/1P7/9/K8 w - 1",
+        "9e8g",
+        "l8/9/9/9/9/9/1n7/9/K8 b p 1",
         Some(Piece::BlackPawn),
     ),
     // Promotion move with capture gives check
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S12, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S15, Piece::BlackKnight)
-                .place(Square::S23, Piece::WhitePawn);
-
-            builder.build()
-        },
-        Move::promote(Square::S15, Square::S23),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S12, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackProKnight)
-                .increment_hand_piece_count(Color::Black, PieceType::Pawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "9/8k/7p1/9/8N/9/9/9/8L b - 1",
+        "1e2c+",
+        "9/8k/7+N1/9/9/9/9/9/8L w P 1",
         Some(Piece::WhitePawn),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S98, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S95, Piece::WhiteKnight)
-                .place(Square::S87, Piece::BlackPawn)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::promote(Square::S95, Square::S87),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S98, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteProKnight)
-                .increment_hand_piece_count(Color::White, PieceType::Pawn);
-
-            builder.build()
-        },
+        "l8/9/9/9/n8/9/1P7/K8/9 w - 1",
+        "9e8g+",
+        "l8/9/9/9/9/9/1+n7/K8/9 b p 1",
         Some(Piece::BlackPawn),
     ),
     // Evade check by moving the king
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteKnight);
-
-            builder.build()
-        },
-        Move::normal(Square::S99, Square::S88),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S88, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "l8/9/9/9/9/9/1n7/9/K8 b - 1",
+        "9i8h",
+        "l8/9/9/9/9/9/1n7/1K7/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S11, Square::S22),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S22, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackKnight);
-
-            builder.build()
-        },
+        "8k/9/7N1/9/9/9/9/9/8L w - 1",
+        "1a2b",
+        "9/7k1/7N1/9/9/9/9/9/8L b - 1",
         None,
     ),
     // Evade check by moving the king with capture
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S98, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteProKnight);
-
-            builder.build()
-        },
-        Move::normal(Square::S98, Square::S87),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S87, Piece::BlackKing)
-                .place(Square::S91, Piece::WhiteLance)
-                .increment_hand_piece_count(Color::Black, PieceType::Knight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "l8/9/9/9/9/9/1+n7/K8/9 b - 1",
+        "9h8g",
+        "l8/9/9/9/9/9/1K7/9/9 w N 1",
         Some(Piece::WhiteProKnight),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S12, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackProKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S12, Square::S23),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S23, Piece::WhiteKing)
-                .place(Square::S19, Piece::BlackLance)
-                .increment_hand_piece_count(Color::White, PieceType::Knight);
-
-            builder.build()
-        },
+        "9/8k/7+N1/9/9/9/9/9/8L w - 1",
+        "1b2c",
+        "9/9/7k1/9/9/9/9/9/8L b n 1",
         Some(Piece::BlackProKnight),
     ),
     // Evade check by capturing
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S81, Piece::BlackRook)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteProKnight);
-
-            builder.build()
-        },
-        Move::normal(Square::S81, Square::S91),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::BlackRook)
-                .place(Square::S87, Piece::WhiteProKnight)
-                .increment_hand_piece_count(Color::Black, PieceType::Lance)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "lR7/9/9/9/9/9/1+n7/9/K8 b - 1",
+        "8a9a",
+        "R8/9/9/9/9/9/1+n7/9/K8 w L 1",
         Some(Piece::WhiteLance),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S29, Piece::WhiteRook)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackProKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S29, Square::S19),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::WhiteRook)
-                .place(Square::S23, Piece::BlackProKnight)
-                .increment_hand_piece_count(Color::White, PieceType::Lance);
-
-            builder.build()
-        },
+        "8k/9/7+N1/9/9/9/9/9/7rL w - 1",
+        "2i1i",
+        "8k/9/7+N1/9/9/9/9/9/8r b l 1",
         Some(Piece::BlackLance),
     ),
     // Evade check by capturing promotion
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S81, Piece::BlackRook)
-                .place(Square::S91, Piece::WhiteLance)
-                .place(Square::S87, Piece::WhiteProKnight);
-
-            builder.build()
-        },
-        Move::promote(Square::S81, Square::S91),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S91, Piece::BlackDragon)
-                .place(Square::S87, Piece::WhiteProKnight)
-                .increment_hand_piece_count(Color::Black, PieceType::Lance)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "lR7/9/9/9/9/9/1+n7/9/K8 b - 1",
+        "8a9a+",
+        "+R8/9/9/9/9/9/1+n7/9/K8 w L 1",
         Some(Piece::WhiteLance),
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S29, Piece::WhiteRook)
-                .place(Square::S19, Piece::BlackLance)
-                .place(Square::S23, Piece::BlackProKnight)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::promote(Square::S29, Square::S19),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S19, Piece::WhiteDragon)
-                .place(Square::S23, Piece::BlackProKnight)
-                .increment_hand_piece_count(Color::White, PieceType::Lance);
-
-            builder.build()
-        },
+        "8k/9/7+N1/9/9/9/9/9/7rL w - 1",
+        "2i1i+",
+        "8k/9/7+N1/9/9/9/9/9/8+r b l 1",
         Some(Piece::BlackLance),
     ),
     // Checkers and pins test
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S12, Piece::WhitePawn)
-                .place(Square::S22, Piece::WhitePawn)
-                .place(Square::S33, Piece::BlackRook)
-                .place(Square::S44, Piece::BlackBishop);
-
-            builder.build()
-        },
-        Move::normal(Square::S33, Square::S13),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S11, Piece::WhiteKing)
-                .place(Square::S12, Piece::WhitePawn)
-                .place(Square::S22, Piece::WhitePawn)
-                .place(Square::S13, Piece::BlackRook)
-                .place(Square::S44, Piece::BlackBishop)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
+        "8k/7pp/6R2/5B3/9/9/9/9/9 b - 1",
+        "3c1c",
+        "8k/7pp/8R/5B3/9/9/9/9/9 w - 1",
         None,
     ),
     (
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S98, Piece::BlackPawn)
-                .place(Square::S88, Piece::BlackPawn)
-                .place(Square::S77, Piece::WhiteRook)
-                .place(Square::S66, Piece::WhiteBishop)
-                .set_side_to_move(Color::White);
-
-            builder.build()
-        },
-        Move::normal(Square::S77, Square::S97),
-        {
-            let mut builder = Position::empty().builder();
-
-            builder
-                .place(Square::S99, Piece::BlackKing)
-                .place(Square::S98, Piece::BlackPawn)
-                .place(Square::S88, Piece::BlackPawn)
-                .place(Square::S97, Piece::WhiteRook)
-                .place(Square::S66, Piece::WhiteBishop);
-
-            builder.build()
-        },
+        "9/9/9/9/9/3b5/2r6/PP7/K8 w - 1",
+        "7g9g",
+        "9/9/9/9/9/3b5/r8/PP7/K8 b - 1",
         None,
     ),
 ];
@@ -1026,10 +476,11 @@ fn builder() {
 #[test]
 fn make_move() {
     for (pos, mv, expected, expected_captured) in MAKE_MOVE_TEST_CASES {
-        let mut new_pos = pos.clone();
-        let captured = new_pos.make_move(*mv);
+        let mut pos = Usi::parse_position(pos).unwrap();
+        let expected = Usi::parse_position(expected).unwrap();
+        let captured = pos.make_move(Usi::parse_move(mv).unwrap());
 
-        assert!(same_position(&new_pos, expected));
+        assert!(same_position(&pos, &expected));
         assert_eq!(captured, *expected_captured);
     }
 }
@@ -1037,11 +488,13 @@ fn make_move() {
 #[test]
 fn unmake_move() {
     for (pos, mv, _, _) in MAKE_MOVE_TEST_CASES {
-        let mut new_pos = pos.clone();
-        let captured = new_pos.make_move(*mv);
-        new_pos.unmake_move(*mv, captured);
+        let expected = Usi::parse_position(pos).unwrap();
+        let mut pos = expected.clone();
+        let mv = Usi::parse_move(mv).unwrap();
+        let captured = pos.make_move(mv);
+        pos.unmake_move(mv, captured);
 
-        assert!(same_position(&new_pos, pos));
+        assert!(same_position(&pos, &expected));
     }
 }
 
