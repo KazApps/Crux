@@ -43,7 +43,7 @@ fn parse_moves() {
 }
 
 #[test]
-fn position_parse_and_fprmat() {
+fn position_parse_and_format() {
     const SFENS: [&str; 20] = [
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
         "8l/1l+R2P3/p2pBG1pp/kps1p4/Nn1P2G2/P1P1P2PP/1PS6/1KSG3+r1/LN2+p3L w Sbgn3p 124",
