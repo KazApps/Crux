@@ -38,11 +38,22 @@ pub enum ParsePositionError {
 
 pub struct Usi;
 
+/// Implements parsing and formatting according to the
+/// USI (Universal Shogi Interface) specification.
+///
+/// Base on the reference:
+/// https://shogidokoro2.stars.ne.jp/usi.html
 impl Notation for Usi {
     type ParseSquareError = ParseSquareError;
     type ParseMoveError = ParseMoveError;
     type ParsePositionError = ParsePositionError;
 
+    /// Parses a square from its USI textual representation.
+    ///
+    /// The expected format is `<file><rank>`, such as:
+    /// - "1a"
+    /// - "5e"
+    /// - "9i"
     fn parse_square(s: &str) -> Result<Square, Self::ParseSquareError> {
         let bytes = s.as_bytes();
 
@@ -69,6 +80,20 @@ impl Notation for Usi {
         Ok(Square::new(File::from(file), Rank::from(rank)))
     }
 
+    /// Parses a move from its USI textual representation.
+    ///
+    /// The expected formats are:
+    /// - Normal move: "2g2f"
+    /// - Promotion  : "2d2c+"
+    /// - Drop       : "B*5e"
+    ///
+    /// The format is:
+    /// - `<from><to>` for normal moves
+    /// - `<from><to>+` for promotions
+    /// - `<piece>*<to>` for drops
+    ///
+    /// For drops, `<piece>` is a single upper letter
+    /// representing the piece type (e.g. "P" for pawn).
     fn parse_move(s: &str) -> Result<Move, Self::ParseMoveError> {
         let bytes = s.as_bytes();
 
@@ -97,6 +122,7 @@ impl Notation for Usi {
             if bytes.len() == 4 {
                 Ok(Move::normal(from, to))
             } else {
+                // Promotion is illegal if both squares are outside promotion zone.
                 if matches!(from.rank(), Rank::Rank4 | Rank::Rank5 | Rank::Rank6)
                     && matches!(to.rank(), Rank::Rank4 | Rank::Rank5 | Rank::Rank6)
                 {
@@ -108,6 +134,7 @@ impl Notation for Usi {
         }
     }
 
+    /// Parses a position from an SFEN string for USI.
     fn parse_position(s: &str) -> Result<Position, Self::ParsePositionError> {
         let mut builder = Position::empty().builder();
 
@@ -250,6 +277,7 @@ impl Notation for Usi {
         Ok(builder.build())
     }
 
+    /// Formats a square into its USI textual representation.
     fn format_square(square: Square) -> String {
         let file_char = (b'1' + square.file().as_u8()) as char;
         let rank_char = (b'a' + square.rank().as_u8()) as char;
@@ -257,6 +285,7 @@ impl Notation for Usi {
         format!("{}{}", file_char, rank_char)
     }
 
+    /// Formats a move into its USI textual representation.
     fn format_move(mv: Move) -> String {
         if mv.is_drop() {
             format!(
@@ -274,6 +303,7 @@ impl Notation for Usi {
         }
     }
 
+    /// Formats a position into an SFEN string for USI.
     fn format_position(position: &Position) -> String {
         let mut result = String::with_capacity(128);
 
