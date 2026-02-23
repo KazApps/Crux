@@ -298,9 +298,7 @@ fn pawn_drop_mask() {
     let seed = 42;
     let mut rng = StdRng::seed_from_u64(seed);
 
-    for color in 0..Color::COUNT {
-        let color = Color::from(color);
-
+    for color in Color::ALL {
         for _ in 0..sample_count {
             let ranks: [u8; 9] = [
                 rng.random_range(0..9),
@@ -317,11 +315,9 @@ fn pawn_drop_mask() {
             let mut bb = Bitboard::empty();
             let mut expected = Bitboard::empty();
 
-            for (i, rank) in ranks.iter().enumerate() {
-                let file = File::from(i);
-
-                if Rank::from(*rank) != Rank::Rank1.relative(color) {
-                    bb |= Square::new(file, Rank::from(*rank)).bit();
+            for (&file, rank) in File::ALL.iter().zip(ranks) {
+                if Rank::from(rank) != Rank::Rank1.relative(color) {
+                    bb |= Square::new(file, Rank::from(rank)).bit();
                 } else {
                     expected |= file.bit();
                 }
@@ -342,12 +338,9 @@ fn pawn_drop_mask_all() {
             let mut bb = Bitboard::empty();
             let mut expected = Bitboard::empty();
 
-            for (i, rank) in current.iter().enumerate() {
-                let file = File::from(i);
-                let rank = Rank::from(*rank);
-
-                if rank != first_rank {
-                    bb |= Square::new(file, rank).bit();
+            for (&file, rank) in File::ALL.iter().zip(current) {
+                if Rank::from(*rank) != first_rank {
+                    bb |= Square::new(file, Rank::from(*rank)).bit();
                 } else {
                     expected |= file.bit();
                 }

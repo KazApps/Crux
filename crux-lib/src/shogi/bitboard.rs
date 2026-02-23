@@ -239,7 +239,7 @@ impl const From<File> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[file] |= Bitboard::from(square);
+                    table[file] |= square.bit();
                 });
             });
 
@@ -262,7 +262,7 @@ impl const From<Rank> for Bitboard {
                     let rank = Rank::from(rank);
                     let square = Square::new(file, rank);
 
-                    table[rank] |= Bitboard::from(square);
+                    table[rank] |= square.bit();
                 });
             });
 
@@ -324,13 +324,13 @@ pub const fn pawn_drop_mask(color: Color, pawns_bb: Bitboard) -> Bitboard {
         //     `RANK9.sub(bb.shr(7))` sets bits on ranks 2–8 for that file.
         // If a file has a pawn:
         //     `RANK9.sub(bb.shr(7))` sets the bit on the 9th rank for that file.
-        RANK9 ^ RANK9.sub(bb.shr(7))
+        RANK9.sub(bb.shr(7)) ^ RANK9
     } else {
         // If a file has no pawn:
         //     `RANK9.sub(bb.shr(8))` sets bits on ranks 1–8 for that file.
         // If a file has a pawn:
         //     `RANK9.sub(bb.shr(8))` sets the bit on the 9th rank for that file.
-        !RANK9 & RANK9.sub(bb.shr(8))
+        RANK9.sub(bb.shr(8)) & !RANK9
     }
 }
 
@@ -377,11 +377,8 @@ impl Display for Bitboard {
         writeln!(f, "  9   8   7   6   5   4   3   2   1")?;
         writeln!(f, "{RANK_SEPARATOR}")?;
 
-        for (rank, rank_char) in RANK_TO_CHAR.iter().enumerate() {
-            let rank = Rank::from(rank);
-
-            for file in (0..File::COUNT).rev() {
-                let file = File::from(file);
+        for (&rank, rank_char) in Rank::ALL.iter().zip(RANK_TO_CHAR) {
+            for &file in File::ALL.iter().rev() {
                 let square = Square::new(file, rank);
 
                 write!(f, "| {} ", if self.contains(square) { 'X' } else { ' ' })?;

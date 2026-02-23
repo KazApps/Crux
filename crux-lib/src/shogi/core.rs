@@ -3,6 +3,8 @@ use std::{
     ops::{Index, IndexMut},
 };
 
+use const_for::const_for;
+
 /// Maximum number of pawns that can exist in total,
 /// including pieces on the board and in hand.
 pub const MAX_PAWN: u32 = 18;
@@ -45,6 +47,17 @@ pub enum Color {
 impl Color {
     /// The number of colors.
     pub const COUNT: usize = 2;
+
+    /// An array containing all colors.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
 
     /// Returns the opposite color.
     #[must_use]
@@ -142,6 +155,17 @@ pub enum PieceType {
 impl PieceType {
     /// The number of piece types.
     pub const COUNT: usize = 14;
+
+    /// An array containing all piece types.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
 
     /// Returns a `Piece` of this type with the specified color.
     #[must_use]
@@ -297,6 +321,17 @@ impl Piece {
     /// The total number of distinct `Piece` variants.
     pub const COUNT: usize = Color::COUNT * PieceType::COUNT;
 
+    /// An array containing all pieces.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
+
     /// Returns `Piece` with the given color and type.
     #[must_use]
     pub const fn new(color: Color, piece_type: PieceType) -> Self {
@@ -419,6 +454,17 @@ pub enum File {
 impl File {
     /// The number of files.
     pub const COUNT: usize = 9;
+
+    /// An array containing all files.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
 
     /// Returns the file to the right of this file.
     ///
@@ -578,6 +624,17 @@ pub enum Rank {
 impl Rank {
     /// The number of ranks.
     pub const COUNT: usize = 9;
+
+    /// An array containing all ranks.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
 
     /// Returns the rank above this rank.
     ///
@@ -772,6 +829,17 @@ pub enum Square {
 impl Square {
     /// The number of squares on the board.
     pub const COUNT: usize = File::COUNT * Rank::COUNT;
+
+    /// An array containing all squares.
+    pub const ALL: [Self; Self::COUNT] = {
+        let mut table = [Self::from(0u8); Self::COUNT];
+
+        const_for!(i in 0..Self::COUNT => {
+            table[i] = Self::from(i);
+        });
+
+        table
+    };
 
     /// Returns a `Square` from the given `File` and `Rank`.
     #[must_use]

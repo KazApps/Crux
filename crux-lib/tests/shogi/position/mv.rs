@@ -5,11 +5,8 @@ use crux_lib::shogi::{
 
 #[test]
 fn normal() {
-    for from in 0..Square::COUNT {
-        for to in 0..Square::COUNT {
-            let from = Square::from(from);
-            let to = Square::from(to);
-
+    for from in Square::ALL {
+        for to in Square::ALL {
             if from == to {
                 continue;
             }
@@ -26,11 +23,8 @@ fn normal() {
 
 #[test]
 fn promote() {
-    for from in 0..Square::COUNT {
-        for to in 0..Square::COUNT {
-            let from = Square::from(from);
-            let to = Square::from(to);
-
+    for from in Square::ALL {
+        for to in Square::ALL {
             if from == to {
                 continue;
             }
@@ -47,11 +41,8 @@ fn promote() {
 
 #[test]
 fn drop() {
-    for piece_type in 0..Hand::HAND_PIECE_TYPES {
-        for to in 0..Square::COUNT {
-            let piece_type = PieceType::from(piece_type);
-            let to = Square::from(to);
-
+    for &piece_type in PieceType::ALL.iter().take(Hand::HAND_PIECE_TYPES) {
+        for to in Square::ALL {
             let mv = Move::drop(piece_type, to);
 
             assert_eq!(mv.to(), to);
