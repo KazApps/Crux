@@ -8,6 +8,7 @@ repository = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
+arrayvec = { workspace = true }
 const_for = "0.1.5"
 
 [dev-dependencies]

@@ -127,14 +127,13 @@ impl Position {
         PositionBuilder(self)
     }
 
-    /// Applies a non-special move to the position.
+    /// Applies a move to the position.
     ///
     /// Updates the board state, hands, side to move, ply, and checker-related state.
     /// /// Returns `Some(piece)` if a piece was captured, or `None` otherwise.
     ///
     /// # Debug assertions
-    /// In debug builds, panics if the move is special or
-    /// inconsistent with the current position.
+    /// In debug builds, panics if the move is inconsistent with the current position.
     pub const fn make_move(&mut self, mv: Move) -> Option<Piece> {
         let stm = self.side_to_move();
         let nstm = stm.opposite();
@@ -180,14 +179,13 @@ impl Position {
         to_piece
     }
 
-    /// Reverts a previously applied non-special move.
+    /// Reverts a previously applied move.
     ///
     /// Restores the board state, hands, side to move, ply, and checker-related state.
     /// The `captured` piece must be the value returned by [`Position::make_move`].
     ///
     /// # Debug assertions
-    /// In debug builds, panics if the move is special or
-    /// inconsistent with the current position.
+    /// In debug builds, panics if the move is inconsistent with the current position.
     pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
         debug_assert!(self.ply > 0);
 

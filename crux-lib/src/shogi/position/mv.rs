@@ -30,6 +30,8 @@ use crate::shogi::{
 #[derive(Debug, Copy, Clone)]
 pub struct Move(NonZeroU16);
 
+const _NICHE_OPTIMIZED: () = assert!(size_of::<Option<Move>>() == size_of::<Move>());
+
 impl Move {
     /// Creates a normal move from `from` square to `to` square.
     ///
