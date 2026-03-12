@@ -1,11 +1,10 @@
 use arrayvec::ArrayVec;
 
-use crate::shogi::attacks::piece_attacks;
 use crate::shogi::{
     attacks::{
         bishop_attacks, dragon_attacks, gold_attacks, horse_attacks, king_attacks, knight_attacks,
-        lance_attacks, multi_pawn_attacks, pawn_attacks, ray_between, ray_intersecting,
-        rook_attacks, silver_attacks,
+        lance_attacks, multi_pawn_attacks, pawn_attacks, piece_attacks, ray_between,
+        ray_intersecting, rook_attacks, silver_attacks,
     },
     bitboard::{pawn_drop_mask, promotion_area, Bitboard},
     core::{Color, PieceType, Rank, Square},
