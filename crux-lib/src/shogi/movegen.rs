@@ -1,5 +1,6 @@
 use arrayvec::ArrayVec;
 
+use crate::shogi::attacks::piece_attacks;
 use crate::shogi::{
     attacks::{
         bishop_attacks, dragon_attacks, gold_attacks, horse_attacks, king_attacks, knight_attacks,
@@ -268,6 +269,12 @@ pub const fn is_pseudo_legal(pos: &Position, mv: Move) -> bool {
         if !check_ray.contains(to) {
             return false;
         }
+    }
+
+    let attacks = piece_attacks(moving_piece, from, pos.occupancy());
+
+    if !attacks.contains(to) {
+        return false;
     }
 
     true
