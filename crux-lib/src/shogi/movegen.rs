@@ -242,6 +242,12 @@ pub const fn is_pseudo_legal(pos: &Position, mv: Move) -> bool {
         return false;
     }
 
+    if let Some(captured) = pos.piece_at(to)
+        && captured.color() == stm
+    {
+        return false;
+    }
+
     if mv.is_promotion() {
         if !moving_piece.can_promote()
             || (!from.rank().can_promote(stm) && !to.rank().can_promote(stm))
