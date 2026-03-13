@@ -408,7 +408,13 @@ pub const fn ray_between(from: Square, to: Square) -> Bitboard {
     TABLE[from][to]
 }
 
-// TODO: コメント書く
+/// Returns the ray of squares shared by two aligned squares.
+///
+/// If `from` and `to` are aligned on the same rank, file, or diagonal,
+/// this returns all squares on that line that pass through both squares,
+/// including `from` and `to`.
+///
+/// Otherwise, this returns an empty bitboard.
 #[must_use]
 pub const fn ray_intersecting(from: Square, to: Square) -> Bitboard {
     #[allow(clippy::large_const_arrays)]

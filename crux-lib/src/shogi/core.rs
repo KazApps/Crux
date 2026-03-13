@@ -173,7 +173,7 @@ impl PieceType {
         Piece::new(color, self)
     }
 
-    // TODO: コメント, test書く
+    /// Returns `true` if this piece type can be promoted.
     #[must_use]
     pub const fn can_promote(self) -> bool {
         self != self.promoted()
@@ -360,7 +360,7 @@ impl Piece {
         unsafe { transmute(self.as_u8() >> 1) }
     }
 
-    // TODO: コメント, test書く
+    /// Returns `true` if this piece can be promoted.
     #[must_use]
     pub const fn can_promote(self) -> bool {
         self.piece_type().can_promote()
