@@ -158,7 +158,7 @@ impl Position {
             self.remove(mv.from());
 
             if let Some(captured) = to_piece {
-                debug_assert!(captured.color() == nstm);
+                debug_assert!(captured.color() == nstm && captured.piece_type() != PieceType::King);
 
                 self.increment_hand_piece_count(stm, captured.piece_type().unpromoted());
                 self.remove(mv.to());
@@ -446,11 +446,15 @@ impl Position {
                 | self.piece_type_bb(PieceType::ProLance)
                 | self.piece_type_bb(PieceType::ProKnight)
                 | self.piece_type_bb(PieceType::ProSilver);
+            let kings = self.piece_type_bb(PieceType::King)
+                | self.piece_type_bb(PieceType::Horse)
+                | self.piece_type_bb(PieceType::Dragon);
 
             self.checkers |= ((pawns & pawn_attacks(stm, king_square))
                 | (knights & knight_attacks(stm, king_square))
                 | (silvers & silver_attacks(stm, king_square))
-                | (golds & gold_attacks(stm, king_square)))
+                | (golds & gold_attacks(stm, king_square))
+                | (kings & king_attacks(king_square)))
                 & self.color_bb(stm.opposite());
         }
     }
@@ -469,7 +473,7 @@ impl Position {
                 | (rooks & rook_pseudo_attacks(king_square)))
                 & self.color_bb(stm.opposite());
 
-            let occ = self.occupancy() ^ snipers;
+            let occ = self.occupancy();
 
             while snipers.has_any() {
                 let square = snipers.pop_lsb();

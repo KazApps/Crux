@@ -82,13 +82,17 @@ pub fn is_legal(pos: &mut Position, mv: Move) -> bool {
             && let Some(king_square) = pos.king_square(nstm)
             && pawn_attacks(stm, to).contains(king_square)
         {
-            let captured = pos.make_move(mv);
+            let mut legal = false;
 
-            if generate(pos).is_empty() {
-                return false;
+            pos.make_move(mv);
+
+            if generate(pos).iter().any(|&mv| is_legal(pos, mv)) {
+                legal = true;
             }
 
-            pos.unmake_move(mv, captured);
+            pos.unmake_move(mv, None);
+
+            return legal;
         }
 
         return true;
@@ -402,7 +406,7 @@ fn generate_dragons(dst: &mut MoveList, pos: &Position, dst_mask: Bitboard) {
 
 fn generate_kings(dst: &mut MoveList, pos: &Position, dst_mask: Bitboard) {
     let kings = pos.piece_bb(PieceType::King.with_color(pos.side_to_move()));
-    generate_precalculated::<true, _>(dst, pos, kings, king_attacks, dst_mask, Bitboard::all());
+    generate_precalculated::<false, _>(dst, pos, kings, king_attacks, dst_mask, Bitboard::all());
 }
 
 fn generate_drops(dst: &mut MoveList, pos: &Position, dst_mask: Bitboard) {
