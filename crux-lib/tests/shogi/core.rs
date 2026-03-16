@@ -22,6 +22,30 @@ fn piece_type_with_color() {
 }
 
 #[test]
+fn piece_type_can_promote() {
+    let cases = [
+        (PieceType::Pawn, true),
+        (PieceType::Lance, true),
+        (PieceType::Knight, true),
+        (PieceType::Silver, true),
+        (PieceType::Gold, false),
+        (PieceType::Bishop, true),
+        (PieceType::Rook, true),
+        (PieceType::ProPawn, false),
+        (PieceType::ProLance, false),
+        (PieceType::ProKnight, false),
+        (PieceType::ProSilver, false),
+        (PieceType::Horse, false),
+        (PieceType::Dragon, false),
+        (PieceType::King, false),
+    ];
+
+    for (piece_type, can_promote) in cases {
+        assert_eq!(piece_type.can_promote(), can_promote);
+    }
+}
+
+#[test]
 fn piece_type_promoted() {
     let cases = [
         (PieceType::Pawn, PieceType::ProPawn),

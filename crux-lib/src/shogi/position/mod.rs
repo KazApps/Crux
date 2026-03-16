@@ -127,14 +127,13 @@ impl Position {
         PositionBuilder(self)
     }
 
-    /// Applies a non-special move to the position.
+    /// Applies a move to the position.
     ///
     /// Updates the board state, hands, side to move, ply, and checker-related state.
     /// /// Returns `Some(piece)` if a piece was captured, or `None` otherwise.
     ///
     /// # Debug assertions
-    /// In debug builds, panics if the move is special or
-    /// inconsistent with the current position.
+    /// In debug builds, panics if the move is inconsistent with the current position.
     pub const fn make_move(&mut self, mv: Move) -> Option<Piece> {
         let stm = self.side_to_move();
         let nstm = stm.opposite();
@@ -159,7 +158,7 @@ impl Position {
             self.remove(mv.from());
 
             if let Some(captured) = to_piece {
-                debug_assert!(captured.color() == nstm);
+                debug_assert!(captured.color() == nstm && captured.piece_type() != PieceType::King);
 
                 self.increment_hand_piece_count(stm, captured.piece_type().unpromoted());
                 self.remove(mv.to());
@@ -180,14 +179,13 @@ impl Position {
         to_piece
     }
 
-    /// Reverts a previously applied non-special move.
+    /// Reverts a previously applied move.
     ///
     /// Restores the board state, hands, side to move, ply, and checker-related state.
     /// The `captured` piece must be the value returned by [`Position::make_move`].
     ///
     /// # Debug assertions
-    /// In debug builds, panics if the move is special or
-    /// inconsistent with the current position.
+    /// In debug builds, panics if the move is inconsistent with the current position.
     pub const fn unmake_move(&mut self, mv: Move, captured: Option<Piece>) {
         debug_assert!(self.ply > 0);
 
@@ -448,11 +446,15 @@ impl Position {
                 | self.piece_type_bb(PieceType::ProLance)
                 | self.piece_type_bb(PieceType::ProKnight)
                 | self.piece_type_bb(PieceType::ProSilver);
+            let kings = self.piece_type_bb(PieceType::King)
+                | self.piece_type_bb(PieceType::Horse)
+                | self.piece_type_bb(PieceType::Dragon);
 
             self.checkers |= ((pawns & pawn_attacks(stm, king_square))
                 | (knights & knight_attacks(stm, king_square))
                 | (silvers & silver_attacks(stm, king_square))
-                | (golds & gold_attacks(stm, king_square)))
+                | (golds & gold_attacks(stm, king_square))
+                | (kings & king_attacks(king_square)))
                 & self.color_bb(stm.opposite());
         }
     }
@@ -471,7 +473,7 @@ impl Position {
                 | (rooks & rook_pseudo_attacks(king_square)))
                 & self.color_bb(stm.opposite());
 
-            let occ = self.occupancy() ^ snipers;
+            let occ = self.occupancy();
 
             while snipers.has_any() {
                 let square = snipers.pop_lsb();

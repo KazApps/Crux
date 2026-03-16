@@ -408,6 +408,42 @@ pub const fn ray_between(from: Square, to: Square) -> Bitboard {
     TABLE[from][to]
 }
 
+/// Returns the ray of squares shared by two aligned squares.
+///
+/// If `from` and `to` are aligned on the same rank, file, or diagonal,
+/// this returns all squares on that line that pass through both squares,
+/// including `from` and `to`.
+///
+/// Otherwise, this returns an empty bitboard.
+#[must_use]
+pub const fn ray_intersecting(from: Square, to: Square) -> Bitboard {
+    #[allow(clippy::large_const_arrays)]
+    const TABLE: [[Bitboard; Square::COUNT]; Square::COUNT] = {
+        let mut table = [[Bitboard::empty(); Square::COUNT]; Square::COUNT];
+
+        const_for!(i in 0..Square::COUNT => {
+            const_for!(j in 0..Square::COUNT => {
+                if i == j {
+                    continue;
+                }
+
+                let from = Square::from(i);
+                let to = Square::from(j);
+
+                if rook_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= (rook_pseudo_attacks(from) | from.bit()) & (rook_pseudo_attacks(to) | to.bit());
+                } else if bishop_pseudo_attacks(from).contains(to) {
+                    table[i][j] |= (bishop_pseudo_attacks(from) | from.bit()) & (bishop_pseudo_attacks(to) | to.bit());
+                }
+            });
+        });
+
+        table
+    };
+
+    TABLE[from][to]
+}
+
 #[must_use]
 const fn sliding_backward(occupied: Bitboard, mask: Bitboard) -> Bitboard {
     let lz = (occupied & mask | Square::S11.bit())

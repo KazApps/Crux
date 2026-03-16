@@ -330,8 +330,8 @@ fn pawn_drop_mask() {
     }
 }
 
-#[cfg_attr(debug_assertions, ignore)]
 #[test]
+#[cfg_attr(debug_assertions, ignore)]
 fn pawn_drop_mask_all() {
     fn recurse(color: Color, first_rank: Rank, depth: usize, current: &mut [u8; 9]) {
         if depth == 9 {

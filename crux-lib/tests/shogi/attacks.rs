@@ -847,3 +847,31 @@ fn ray_between() {
         assert_eq!(attacks::ray_between(from, to), ray);
     }
 }
+
+#[test]
+fn ray_intersecting() {
+    let cases = [
+        (Square::S11, Square::S19, File::File1.bit()),
+        (Square::S11, Square::S91, Rank::Rank1.bit()),
+        (Square::S19, Square::S99, Rank::Rank9.bit()),
+        (Square::S91, Square::S99, File::File9.bit()),
+        (
+            Square::S11,
+            Square::S99,
+            attacks::bishop_pseudo_attacks(Square::S11) | Square::S11.bit(),
+        ),
+        (
+            Square::S19,
+            Square::S91,
+            attacks::bishop_pseudo_attacks(Square::S19) | Square::S19.bit(),
+        ),
+        (Square::S11, Square::S52, Bitboard::empty()),
+        (Square::S19, Square::S58, Bitboard::empty()),
+        (Square::S91, Square::S52, Bitboard::empty()),
+        (Square::S99, Square::S58, Bitboard::empty()),
+    ];
+
+    for (from, to, ray) in cases {
+        assert_eq!(attacks::ray_intersecting(from, to), ray);
+    }
+}
