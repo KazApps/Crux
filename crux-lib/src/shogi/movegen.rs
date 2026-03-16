@@ -11,6 +11,10 @@ use crate::shogi::{
     position::{mv::Move, Position},
 };
 
+/// Fixed-capacity buffer for pseudo-legal moves.
+///
+/// The capacity (600) exceeds the theoretical maximum number of legal
+/// moves in shogi (593), ensuring it never overflows.
 pub type MoveList = ArrayVec<Move, 600>;
 
 /// Generates pseudo-legal moves for the given position.
