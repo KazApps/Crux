@@ -6,5 +6,6 @@
 #![feature(const_trait_impl)]
 
 pub mod notation;
+pub mod protocol;
 pub mod shogi;
 pub(crate) mod utils;
