@@ -37,18 +37,6 @@ impl Protocol for Usi {
 
             while !args.is_empty() {
                 match args {
-                    ["searchmoves", rest @ ..] => {
-                        limits.moves = Some(vec![]);
-
-                        for token in rest {
-                            match usi::Usi::parse_move(token) {
-                                Ok(mv) => limits.moves.as_mut().unwrap().push(mv),
-                                Err(_) => break,
-                            }
-                        }
-
-                        args = &args[limits.moves.as_mut().unwrap().len() + 1..];
-                    }
                     ["ponder", ..] => unimplemented!(), // args = &args[1..],
                     ["btime" | "wtime" | "binc" | "winc" | "movetime" | "byoyomi", ms, ..] => {
                         let ms = ms
@@ -76,13 +64,25 @@ impl Protocol for Usi {
 
                         args = &args[2..];
                     }
-                    ["depth", d] => {
+                    ["depth", d, ..] => {
                         limits.depth = Some(d.parse().map_err(|_| ParseGoArgsError::InvalidValue)?);
                         args = &args[2..];
                     }
-                    ["nodes", n] => {
+                    ["nodes", n, ..] => {
                         limits.nodes = Some(n.parse().map_err(|_| ParseGoArgsError::InvalidValue)?);
                         args = &args[2..];
+                    }
+                    ["searchmoves", rest @ ..] => {
+                        let moves = limits.moves.insert(vec![]);
+
+                        for token in rest {
+                            match usi::Usi::parse_move(token) {
+                                Ok(mv) => moves.push(mv),
+                                Err(_) => break,
+                            }
+                        }
+
+                        args = &args[moves.len() + 1..];
                     }
                     _ => return Err(ParseGoArgsError::UnknownArgumentOrMissingValue),
                 }
@@ -132,6 +132,12 @@ impl Protocol for Usi {
                     .iter()
                     .map(|mv| usi::Usi::parse_move(mv).map_err(ParseError::InvalidMove))
                     .collect::<Result<_, _>>()?,
+            }]),
+            ["go", "mate", "infinite", args @ ..] => Ok(vec![StartMateSearching {
+                limits: SearchLimits {
+                    moves: parse_limits(args).map_err(ParseError::InvalidGoArgs)?.moves,
+                    ..Default::default()
+                },
             }]),
             ["go", "mate", n, args @ ..] => {
                 Ok(vec![StartMateSearching {

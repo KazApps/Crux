@@ -35,7 +35,7 @@ pub enum EngineCommand {
 /// Represents search constraints.
 ///
 /// All fields are optional and be combined.
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct SearchLimits {
     /// Time control information
     pub time: Option<TimeControl>,
@@ -54,7 +54,7 @@ pub struct SearchLimits {
 ///
 /// Used in search commands to specify remaining time
 /// and increment/byoyomi settings.
-#[derive(Default, Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct TimeControl {
     pub black: PlayerTime,
     pub white: PlayerTime,
@@ -64,7 +64,7 @@ pub struct TimeControl {
 ///
 /// - `base` is the remaining main time
 /// - `overtime` defines how extra time is handled
-#[derive(Default, Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct PlayerTime {
     pub base: Duration,
     pub overtime: Overtime,
@@ -74,7 +74,7 @@ pub struct PlayerTime {
 ///
 /// - `Increment`: Fischer-style increment per move
 /// - `Byoyomi`: fixed time per move after main time runs out
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Overtime {
     Increment(Duration),
     Byoyomi(Duration),
@@ -88,7 +88,7 @@ impl Default for Overtime {
 }
 
 /// Basic engine identification information.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EngineInfo {
     pub name: String,
     pub author: String,
@@ -97,7 +97,7 @@ pub struct EngineInfo {
 /// A configurable engine option exposed to the GUI.
 ///
 /// Combines a name with its type and current value.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EngineOption {
     Bool {
         name: String,
