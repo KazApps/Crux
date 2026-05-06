@@ -6,17 +6,29 @@ use crate::{
         Notation,
     },
     protocol::{
-        types::{EngineCommand, EngineInfo, EngineOption, OptionKind, Overtime, SearchLimits},
+        types::{EngineCommand, EngineInfo, EngineOption, Overtime, SearchLimits},
         Protocol,
     },
     shogi::position::Position,
 };
 
+/// USI (Universal Shogi Interface) protocol implementation.
+///
+/// Handles parsing of USI commands into `EngineCommand`s
+/// and formatting engine responses.
+///
+/// Reference:
+/// https://shogidokoro2.stars.ne.jp/usi.html
+/// https://gist.github.com/DOBRO/2592c6dad754ba67e6dcaec8c90165bf (UCI)
 pub struct Usi;
 
 impl Protocol for Usi {
     type ParseError = ParseError;
 
+    /// Parses a single line of USI input into one or more `EngineCommand`s.
+    ///
+    /// Some commands expand into multiple engine actions
+    /// (e.g. `usi` => print info + print options + print "usiok").
     fn parse_line(line: &str) -> Result<Vec<EngineCommand>, Self::ParseError> {
         use EngineCommand::*;
 
@@ -153,16 +165,23 @@ impl Protocol for Usi {
     fn format_options(options: &[EngineOption]) -> String {
         options
             .iter()
-            .map(|option| match option.kind {
-                OptionKind::Check { default, .. } => {
-                    format!("option name {} type check default {}", option.name, default)
+            .map(|option| match option {
+                EngineOption::Bool { default, .. } => {
+                    format!(
+                        "option name {} type check default {}",
+                        option.name(),
+                        default
+                    )
                 }
-                OptionKind::Spin {
+                EngineOption::IntRange {
                     min, max, default, ..
                 } => {
                     format!(
                         "option name {} type spin default {} min {} max {}",
-                        option.name, default, min, max
+                        option.name(),
+                        default,
+                        min,
+                        max
                     )
                 }
             })

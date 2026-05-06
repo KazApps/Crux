@@ -13,7 +13,7 @@ pub struct Usi;
 /// Implements parsing and formatting according to the
 /// USI (Universal Shogi Interface) specification.
 ///
-/// Base on the reference:
+/// Reference:
 /// https://shogidokoro2.stars.ne.jp/usi.html
 impl Notation for Usi {
     type ParseSquareError = ParseSquareError;
