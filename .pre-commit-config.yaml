@@ -5,21 +5,21 @@ repos:
     hooks:
       # 1. Check code formatting
       - id: cargo-fmt-check
-        name: 📝 Check Rust formatting
+        name: Check Rust formatting
         entry: cargo fmt --all -- --check
         language: system
         pass_filenames: false
 
       # 2. Run Clippy linter (treat warnings as errors)
       - id: cargo-clippy-debug
-        name: 🧹 Run Clippy lints for debug build
+        name: Run Clippy lints for debug build
         entry: |
           cargo clippy --workspace --all-targets -- -D warnings
         language: system
         pass_filenames: false
 
       - id: cargo-clippy-release
-        name: 🧹 Run Clippy lints for release build
+        name: Run Clippy lints for release build
         entry: |
           cargo clippy --workspace --all-targets --release -- -D warnings
         language: system
