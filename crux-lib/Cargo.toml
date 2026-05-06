@@ -12,4 +12,4 @@ arrayvec = { workspace = true }
 const_for = "0.1.5"
 
 [dev-dependencies]
-rand = "0.10.0"
+rand = "0.10.1"
