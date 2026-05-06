@@ -8,40 +8,12 @@ use crate::{
     },
 };
 
-#[derive(Debug, Copy, Clone)]
-pub enum ParseSquareError {
-    InvalidLength,
-    InvalidFile,
-    InvalidRank,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum ParseMoveError {
-    InvalidFormat,
-    InvalidFromSquare(ParseSquareError),
-    InvalidToSquare(ParseSquareError),
-    InvalidDropPieceType,
-    InvalidPromotion,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum ParsePositionError {
-    InvalidFormat,
-    InvalidBoardRankCount,
-    InvalidBoardFormat,
-    InvalidBoardPiece,
-    InvalidSideToMove,
-    InvalidHandFormat,
-    InvalidHandPieceType,
-    InvalidPly,
-}
-
 pub struct Usi;
 
 /// Implements parsing and formatting according to the
 /// USI (Universal Shogi Interface) specification.
 ///
-/// Base on the reference:
+/// Reference:
 /// https://shogidokoro2.stars.ne.jp/usi.html
 impl Notation for Usi {
     type ParseSquareError = ParseSquareError;
@@ -366,6 +338,34 @@ impl Notation for Usi {
 
         result
     }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ParseSquareError {
+    InvalidLength,
+    InvalidFile,
+    InvalidRank,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ParseMoveError {
+    InvalidFormat,
+    InvalidFromSquare(ParseSquareError),
+    InvalidToSquare(ParseSquareError),
+    InvalidDropPieceType,
+    InvalidPromotion,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ParsePositionError {
+    InvalidFormat,
+    InvalidBoardRankCount,
+    InvalidBoardFormat,
+    InvalidBoardPiece,
+    InvalidSideToMove,
+    InvalidHandFormat,
+    InvalidHandPieceType,
+    InvalidPly,
 }
 
 const PIECE_TYPE_TO_STR: [&str; PieceType::COUNT] = [

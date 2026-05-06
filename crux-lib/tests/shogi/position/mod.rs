@@ -11,6 +11,8 @@ use crux_lib::{
     },
 };
 
+use super::super::MATSURI_SFEN;
+
 mod hand;
 mod key;
 mod mv;
@@ -241,8 +243,6 @@ const PIN_TEST_CASES: &[(&str, Bitboard, Bitboard)] = &[
         Square::S12.bit() | Square::S21.bit(),
     ),
 ];
-
-const MATSURI_SFEN: &str = "l6nl/5+P1gk/2np1S3/p1p4Pp/3P2Sp1/1PPb2P1P/P5GS1/R8/LN4bKL b RGgsn5p 1";
 
 fn same_position(lhs: &Position, rhs: &Position) -> bool {
     lhs.side_to_move() == rhs.side_to_move()
@@ -481,14 +481,15 @@ fn key() {
         ^ hand_key(Color::White, PieceType::Gold, 1)
         ^ hand_key(Color::White, PieceType::Silver, 1)
         ^ hand_key(Color::White, PieceType::Knight, 1)
-        ^ hand_key(Color::White, PieceType::Pawn, 5);
+        ^ hand_key(Color::White, PieceType::Pawn, 5)
+        ^ side_key();
 
     assert_eq!(matsuri_pos.key(), matsuri_key);
     assert_eq!(
         {
             let mut builder = matsuri_pos.builder();
 
-            builder.set_side_to_move(Color::White);
+            builder.set_side_to_move(Color::Black);
 
             builder.build()
         }
@@ -588,11 +589,11 @@ fn display_matsuri_pos() {
 |b香|b桂|   |   |   |   |w角|b玉|b香| 九
 +---+---+---+---+---+---+---+---+---+
 
-Side to Move : Black
+Side to Move : White
 Hand (Black) : 飛, 金
 Hand (White) : 金, 銀, 桂, 歩x5
 Moves        : 0
-Key          : 5ed2639a48bb4076";
+Key          : 8dce64b9330e7a39";
 
     assert_eq!(
         Usi::parse_position(MATSURI_SFEN).unwrap().to_string(),
