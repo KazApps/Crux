@@ -3,7 +3,10 @@ use std::time::Duration;
 use crux_lib::{
     notation::{self, Notation},
     protocol::{
-        types::{EngineCommand::*, Overtime, PlayerTime, SearchLimits, TimeControl},
+        types::{
+            EngineCommand::*, EngineInfo, EngineOption, Overtime, PlayerTime, SearchLimits,
+            TimeControl,
+        },
         usi::Usi,
         Protocol,
     },
@@ -13,7 +16,7 @@ use crux_lib::{
     },
 };
 
-use super::super::MATSURI_SFEN;
+use crate::MATSURI_SFEN;
 
 #[test]
 fn parse_usi() {
@@ -560,4 +563,36 @@ fn parse_quit() {
     let commands = Usi::parse_line("quit").unwrap();
 
     assert!(matches!(commands.as_slice(), [Quit]));
+}
+
+#[test]
+fn format_engine_info() {
+    let engine_info = EngineInfo::new("Crux", "Kazuki Yamashita and m5t0");
+
+    assert_eq!(
+        Usi::format_engine_info(&engine_info),
+        "id name Crux
+id author Kazuki Yamashita and m5t0"
+    );
+}
+
+#[test]
+fn format_options() {
+    let options = [
+        ("USI_Hash", EngineOption::int_range(64, 1, 131072)),
+        ("Threads", EngineOption::int_range(1, 1, 2048)),
+        ("USI_MultiPV", EngineOption::int_range(1, 1, 600)),
+        ("Minimal", EngineOption::bool(false)),
+    ];
+
+    let expected = [
+        "option name USI_Hash type spin default 64 min 1 max 131072",
+        "option name Threads type spin default 1 min 1 max 2048",
+        "option name USI_MultiPV type spin default 1 min 1 max 600",
+        "option name Minimal type check default false",
+    ];
+
+    for ((name, option), expected) in options.iter().zip(expected.iter()) {
+        assert_eq!(Usi::format_option(name, option), *expected);
+    }
 }

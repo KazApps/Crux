@@ -94,18 +94,25 @@ pub struct EngineInfo {
     pub author: String,
 }
 
+impl EngineInfo {
+    pub fn new(name: impl Into<String>, author: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            author: author.into(),
+        }
+    }
+}
+
 /// A configurable engine option exposed to the GUI.
 ///
 /// Combines a name with its type and current value.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EngineOption {
     Bool {
-        name: String,
         default: bool,
         value: bool,
     },
     IntRange {
-        name: String,
         default: i64,
         value: i64,
         min: i64,
@@ -115,18 +122,16 @@ pub enum EngineOption {
 
 impl EngineOption {
     /// Creates a boolean option.
-    pub fn bool(name: impl Into<String>, default: bool) -> Self {
+    pub fn bool(default: bool) -> Self {
         Self::Bool {
-            name: name.into(),
             default,
             value: default,
         }
     }
 
     /// Creates an integer option with bounds.
-    pub fn int_range(name: impl Into<String>, default: i64, min: i64, max: i64) -> Self {
+    pub fn int_range(default: i64, min: i64, max: i64) -> Self {
         Self::IntRange {
-            name: name.into(),
             default,
             value: default,
             min,
@@ -134,23 +139,13 @@ impl EngineOption {
         }
     }
 
-    /// Returns the name of this option.
-    pub fn name(&self) -> &str {
-        match self {
-            Self::Bool { name, .. } => name,
-            Self::IntRange { name, .. } => name,
-        }
-    }
-
     /// Updates the option value from a string representation.
     ///
     /// Returns an error if parsing fails or the value is out of range.
-    pub fn set_from_str(&mut self, s: &str) -> Result<(), String> {
+    pub fn set_from_str(&mut self, s: &str) -> Result<(), SetOptionError> {
         match self {
             Self::Bool { value, .. } => {
-                let v = s
-                    .parse::<bool>()
-                    .map_err(|e| format!("Invalid boolean value: {e}"))?;
+                let v = s.parse::<bool>().map_err(|_| SetOptionError::InvalidBool)?;
                 *value = v;
             }
             Self::IntRange {
@@ -158,12 +153,10 @@ impl EngineOption {
             } => {
                 let v = s
                     .parse::<i64>()
-                    .map_err(|e| format!("Invalid integer value: {e}"))?;
+                    .map_err(|_| SetOptionError::InvalidIntRange)?;
 
                 if !(*min..=*max).contains(&v) {
-                    return Err(format!(
-                        "Invalid integer value: {v} is out of range ({min}..={max})"
-                    ));
+                    return Err(SetOptionError::OutOfRange);
                 }
 
                 *value = v;
@@ -172,4 +165,11 @@ impl EngineOption {
 
         Ok(())
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SetOptionError {
+    InvalidBool,
+    InvalidIntRange,
+    OutOfRange,
 }

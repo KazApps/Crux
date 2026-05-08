@@ -11,7 +11,7 @@ use crux_lib::{
     },
 };
 
-use super::super::MATSURI_SFEN;
+use crate::MATSURI_SFEN;
 
 mod hand;
 mod key;

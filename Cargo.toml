@@ -15,6 +15,7 @@ members = [
 
 [workspace.dependencies]
 arrayvec = "0.7.6"
+crux-lib = { path = "crux-lib" }
 
 [profile.release]
 opt-level = 3

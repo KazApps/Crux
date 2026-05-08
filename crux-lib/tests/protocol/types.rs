@@ -2,7 +2,7 @@ use crux_lib::protocol::types::{EngineOption, Overtime, SearchLimits, TimeContro
 
 #[test]
 fn bool_option_set_from_str() {
-    let mut opt = EngineOption::bool("test", false);
+    let mut opt = EngineOption::bool(false);
 
     opt.set_from_str("true").unwrap();
     match opt {
@@ -19,14 +19,14 @@ fn bool_option_set_from_str() {
 
 #[test]
 fn bool_option_invalid_value() {
-    let mut opt = EngineOption::bool("test", false);
+    let mut opt = EngineOption::bool(false);
 
     assert!(opt.set_from_str("not_bool").is_err());
 }
 
 #[test]
 fn int_option_set_from_str() {
-    let mut opt = EngineOption::int_range("test", 1, 1, 1024);
+    let mut opt = EngineOption::int_range(1, 1, 1024);
 
     opt.set_from_str("16").unwrap();
 
@@ -38,14 +38,14 @@ fn int_option_set_from_str() {
 
 #[test]
 fn int_option_invalid_value() {
-    let mut opt = EngineOption::int_range("test", 1, 1, 1024);
+    let mut opt = EngineOption::int_range(1, 1, 1024);
 
     assert!(opt.set_from_str("abc").is_err());
 }
 
 #[test]
 fn int_option_out_of_range() {
-    let mut opt = EngineOption::int_range("test", 1, 1, 1024);
+    let mut opt = EngineOption::int_range(1, 1, 1024);
 
     assert!(opt.set_from_str("2048").is_err());
 }
