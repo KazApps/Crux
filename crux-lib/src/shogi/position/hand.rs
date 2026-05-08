@@ -16,7 +16,7 @@ use crate::shogi::core::{
 /// bits 14..=16 : Gold   count (max  4, 3 bits)
 /// bits 17..=18 : Bishop count (max  2, 2 bits)
 /// bits 19..=20 : Rook   count (max  2, 2 bits)
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone)]
 pub struct Hand(u32);
 
 impl Hand {
@@ -148,6 +148,15 @@ impl const Default for Hand {
         Self(0)
     }
 }
+
+impl const PartialEq for Hand {
+    /// Compares two `Hand`s for equality.
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl const Eq for Hand {}
 
 const fn bit_width(max: u32) -> u32 {
     (max + 1).ilog2() + 1

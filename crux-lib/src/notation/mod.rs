@@ -1,9 +1,9 @@
+pub mod usi;
+
 use crate::shogi::{
     core::Square,
     position::{mv::Move, Position},
 };
-
-pub mod usi;
 
 /// A trait for parsing and formatting textual game notations.
 ///

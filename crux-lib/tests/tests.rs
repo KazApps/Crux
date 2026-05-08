@@ -1,6 +1,7 @@
 #![feature(const_ops)]
 #![feature(const_trait_impl)]
 
+mod engine;
 mod notation;
 mod protocol;
 mod shogi;

@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use crate::{
+    engine::event::EngineEvent,
     notation::{
         usi::{self, ParseMoveError, ParsePositionError},
         Notation,
@@ -23,6 +24,7 @@ use crate::{
 pub struct Usi;
 
 impl Protocol for Usi {
+    type Notation = usi::Usi;
     type ParseError = ParseError;
 
     /// Parses a single line of USI input into one or more `EngineCommand`s.
@@ -76,7 +78,7 @@ impl Protocol for Usi {
                         let moves = limits.moves.insert(vec![]);
 
                         for token in rest {
-                            match usi::Usi::parse_move(token) {
+                            match Self::Notation::parse_move(token) {
                                 Ok(mv) => moves.push(mv),
                                 Err(_) => break,
                             }
@@ -109,16 +111,16 @@ impl Protocol for Usi {
                 let moves = &rest[moves_idx + 1..];
 
                 Ok(vec![SetPosition {
-                    startpos: usi::Usi::parse_position(sfen)
+                    startpos: Self::Notation::parse_position(sfen)
                         .map_err(ParseError::InvalidPosition)?,
                     moves: moves
                         .iter()
-                        .map(|mv| usi::Usi::parse_move(mv).map_err(ParseError::InvalidMove))
+                        .map(|mv| Self::Notation::parse_move(mv).map_err(ParseError::InvalidMove))
                         .collect::<Result<_, _>>()?,
                 }])
             }
             ["position", "sfen", sfen @ ..] => Ok(vec![SetPosition {
-                startpos: usi::Usi::parse_position(sfen.join(" ").as_str())
+                startpos: Self::Notation::parse_position(sfen.join(" ").as_str())
                     .map_err(ParseError::InvalidPosition)?,
                 moves: vec![],
             }]),
@@ -130,7 +132,7 @@ impl Protocol for Usi {
                 startpos: Position::startpos(),
                 moves: moves
                     .iter()
-                    .map(|mv| usi::Usi::parse_move(mv).map_err(ParseError::InvalidMove))
+                    .map(|mv| Self::Notation::parse_move(mv).map_err(ParseError::InvalidMove))
                     .collect::<Result<_, _>>()?,
             }]),
             ["go", "mate", "infinite", args @ ..] => Ok(vec![StartMateSearching {
@@ -168,35 +170,32 @@ impl Protocol for Usi {
         format!("id name {}\nid author {}", info.name, info.author)
     }
 
-    fn format_options(options: &[EngineOption]) -> String {
-        options
-            .iter()
-            .map(|option| match option {
-                EngineOption::Bool { default, .. } => {
-                    format!(
-                        "option name {} type check default {}",
-                        option.name(),
-                        default
-                    )
-                }
-                EngineOption::IntRange {
-                    min, max, default, ..
-                } => {
-                    format!(
-                        "option name {} type spin default {} min {} max {}",
-                        option.name(),
-                        default,
-                        min,
-                        max
-                    )
-                }
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
+    fn format_option(name: &str, option: &EngineOption) -> String {
+        match option {
+            EngineOption::Bool { default, .. } => {
+                format!("option name {name} type check default {default}")
+            }
+            EngineOption::IntRange {
+                min, max, default, ..
+            } => {
+                format!("option name {name} type spin default {default} min {min} max {max}",)
+            }
+        }
+    }
+
+    fn format_event(event: &EngineEvent) -> String {
+        match event {
+            EngineEvent::BestMove(mv) => format!("bestmove {}", Self::Notation::format_move(*mv)),
+            EngineEvent::Resign => "bestmove resign".into(),
+            EngineEvent::Info(s) => format!("info string {s}"),
+            EngineEvent::Raw(s) => s.clone(),
+            EngineEvent::Warning(w) => format!("info string warning {w}"),
+            EngineEvent::Error(e) => format!("info string error {e}"),
+        }
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
     InvalidPosition(ParsePositionError),
     InvalidMove(ParseMoveError),
@@ -204,7 +203,7 @@ pub enum ParseError {
     UnknownCommand,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseGoArgsError {
     InvalidValue,
     UnknownArgumentOrMissingValue,

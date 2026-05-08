@@ -8,3 +8,4 @@ repository = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
+crux-lib = { workspace = true }

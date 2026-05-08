@@ -340,14 +340,14 @@ impl Notation for Usi {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseSquareError {
     InvalidLength,
     InvalidFile,
     InvalidRank,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseMoveError {
     InvalidFormat,
     InvalidFromSquare(ParseSquareError),
@@ -356,7 +356,7 @@ pub enum ParseMoveError {
     InvalidPromotion,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParsePositionError {
     InvalidFormat,
     InvalidBoardRankCount,

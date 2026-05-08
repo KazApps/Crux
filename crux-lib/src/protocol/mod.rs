@@ -1,7 +1,11 @@
-use crate::protocol::types::{EngineCommand, EngineInfo, EngineOption};
-
 pub mod types;
 pub mod usi;
+
+use crate::{
+    engine::event::EngineEvent,
+    notation::Notation,
+    protocol::types::{EngineCommand, EngineInfo, EngineOption},
+};
 
 /// Defines an interface for engine communication protocols.
 ///
@@ -12,6 +16,7 @@ pub mod usi;
 /// This abstraction allows supporting multiple protocols
 /// without coupling them to the engine core.
 pub trait Protocol {
+    type Notation: Notation;
     type ParseError;
 
     /// Parses a single line of protocol input into one or more `EngineCommand`s.
@@ -25,6 +30,9 @@ pub trait Protocol {
     /// Formats engine identification information according to the protocol.
     fn format_engine_info(info: &EngineInfo) -> String;
 
-    /// Formats all available engine options into protocol-compliant output.
-    fn format_options(options: &[EngineOption]) -> String;
+    /// Formats an engine option into protocol-compliant output.
+    fn format_option(name: &str, option: &EngineOption) -> String;
+
+    /// Formats an engine event into protocol-compliant output.
+    fn format_event(event: &EngineEvent) -> String;
 }
