@@ -28,11 +28,14 @@ pub trait Protocol {
     fn parse_line(line: &str) -> Result<Vec<EngineCommand>, Self::ParseError>;
 
     /// Formats engine identification information according to the protocol.
+    #[must_use]
     fn format_engine_info(info: &EngineInfo) -> String;
 
     /// Formats an engine option into protocol-compliant output.
+    #[must_use]
     fn format_option(name: &str, option: &EngineOption) -> String;
 
     /// Formats an engine event into protocol-compliant output.
+    #[must_use]
     fn format_event(event: &EngineEvent) -> String;
 }

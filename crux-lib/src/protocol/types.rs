@@ -95,6 +95,7 @@ pub struct EngineInfo {
 }
 
 impl EngineInfo {
+    #[must_use]
     pub fn new(name: impl Into<String>, author: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -122,6 +123,7 @@ pub enum EngineOption {
 
 impl EngineOption {
     /// Creates a boolean option.
+    #[must_use]
     pub fn bool(default: bool) -> Self {
         Self::Bool {
             default,
@@ -130,6 +132,7 @@ impl EngineOption {
     }
 
     /// Creates an integer option with bounds.
+    #[must_use]
     pub fn int_range(default: i64, min: i64, max: i64) -> Self {
         Self::IntRange {
             default,
