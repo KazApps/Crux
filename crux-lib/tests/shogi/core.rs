@@ -58,17 +58,7 @@ fn piece_type_promoted() {
 
     for (piece_type, promoted) in cases {
         assert_eq!(piece_type.promoted(), promoted);
-    }
-
-    for piece_type in [
-        PieceType::ProPawn,
-        PieceType::ProLance,
-        PieceType::ProKnight,
-        PieceType::ProSilver,
-        PieceType::Horse,
-        PieceType::Dragon,
-    ] {
-        assert_eq!(piece_type.promoted(), piece_type);
+        assert_eq!(promoted.promoted(), promoted);
     }
 }
 
@@ -85,19 +75,7 @@ fn piece_type_unpromoted() {
 
     for (piece_type, unpromoted) in cases {
         assert_eq!(piece_type.unpromoted(), unpromoted);
-    }
-
-    for piece_type in [
-        PieceType::Pawn,
-        PieceType::Lance,
-        PieceType::Knight,
-        PieceType::Silver,
-        PieceType::Gold,
-        PieceType::Bishop,
-        PieceType::Rook,
-        PieceType::King,
-    ] {
-        assert_eq!(piece_type.unpromoted(), piece_type);
+        assert_eq!(unpromoted.unpromoted(), unpromoted);
     }
 }
 

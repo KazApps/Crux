@@ -697,7 +697,7 @@ impl PositionBuilder {
 
             let mut total = self.0.piece_type_bb(piece_type).count_ones() + black_hand.count(piece_type) + white_hand.count(piece_type);
 
-            if piece_type != piece_type.promoted() {
+            if piece_type.can_promote() {
                 total += self.0.piece_type_bb(piece_type.promoted()).count_ones();
             }
 

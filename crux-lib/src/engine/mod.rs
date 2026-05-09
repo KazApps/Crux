@@ -15,9 +15,11 @@ pub trait Engine {
     /// Returns static information about the engine.
     ///
     /// This includes the engine name and author.
+    #[must_use]
     fn engine_info(&self) -> EngineInfo;
 
     /// Returns all available engine options.
+    #[must_use]
     fn engine_options(&self) -> &[(String, EngineOption)];
 
     /// Updates an engine option from its string representation.
